@@ -10,12 +10,11 @@ class Event extends Model
     protected $table = 'events';
 
     public $incrementing = false;
-
     protected $keyType = 'string';
-
     public $timestamps = false;
 
     protected $fillable = [
+        'id',
         'name',
         'monogram',
         'typography',
@@ -27,29 +26,22 @@ class Event extends Model
         'id_user',
     ];
 
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'id_user');
-    }
-
-    // public function photos()
-    // {
-    //     return $this->hasMany(Photo::class, 'id_event');
-    // }
+    protected $casts = [
+        'date' => 'date',
+    ];
 
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
-            if (!$model->id) {
-                $model->id = hex2bin(str_replace('-', '', Str::uuid()));
+            if (! $model->id) {
+                $model->id = hex2bin(str_replace('-', '', (string) Str::uuid()));
             }
         });
     }
 
-    public function getIdHexAttribute()
+    public function getIdHexAttribute(): string
     {
         return bin2hex($this->id);
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EventShareController;
 use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -21,5 +22,22 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
+
+Route::get('/event/{id_evento}', function (string $id_evento) 
+{
+    if (! ctype_xdigit($id_evento) || strlen($id_evento) !== 32) {
+        abort(404);
+    }
+
+    $event = Event::where('id', hex2bin($id_evento))->firstOrFail();
+
+    return view('events.show', compact('event'));
+})->name('events.show');
+
+Route::get('/event/{id_evento}/compartir', [EventShareController::class, 'create'])
+    ->name('events.share.create');
+
+Route::post('/event/{id_evento}/compartir', [EventShareController::class, 'store'])
+    ->name('events.share.store');
 
 require __DIR__.'/auth.php';
