@@ -4,7 +4,9 @@ use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Route::redirect('/', '/login');
+Route::middleware('guest')->group(function () {
+    Volt::route('/', 'auth.login')->name('home');
+});
 
 Route::get('/dashboard', function () {
     $events = Event::all();
