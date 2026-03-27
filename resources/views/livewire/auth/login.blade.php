@@ -39,7 +39,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(default: route('dashboard'), navigate: true);
     }
 
     /**
@@ -83,7 +83,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <flux:input wire:model="email" label="Correo electrónico" type="email" name="email" required autofocus autocomplete="email" placeholder="email@example.com" />
 
         <!-- Password -->
-        <div class="relative">
+       <div class="relative">
             <flux:input
                 wire:model="password"
                 label="Contraseña"
@@ -92,6 +92,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 required
                 autocomplete="current-password"
                 placeholder="Contraseña"
+                viewable
             />
 
             @if (Route::has('password.request'))
@@ -99,7 +100,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     Olvidaste tu contraseña?
                 </x-text-link>
             @endif
-        </div>
+    </div>
 
         <!-- Remember Me -->
         <flux:checkbox wire:model="remember" label="Recordarme" />
