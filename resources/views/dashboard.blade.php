@@ -5,10 +5,10 @@
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-semibold">Eventos</h1>
 
-            <button
-                class="rounded-lg bg-black px-4 py-2 text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200">
+            <flux:button href="{{ route('events.create') }}"
+                class="rounded-lg bg-black px-4 py-2 text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200" icon="plus">
                 Agregar evento
-            </button>
+            </flux:button>
         </div>
 
         <!-- Tabla -->

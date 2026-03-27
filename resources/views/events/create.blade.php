@@ -1,0 +1,105 @@
+<x-layouts.app>
+    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
+        
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-semibold">Crear un nuevo evento</h1>
+            
+            <flux:button href="{{ route('dashboard') }}" variant="subtle" icon="arrow-left">
+                Volver a eventos
+            </flux:button>
+        </div>
+
+        <div class="overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 md:p-8">
+            
+            @if(session('success'))
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-900/20">
+                    <div class="flex items-center gap-3">
+                        <flux:icon.check-circle class="text-green-600 dark:text-green-400" />
+                        <span class="font-medium text-green-800 dark:text-green-300">{{ session('success') }}</span>
+                    </div>
+
+                    @if(session('url_evento'))
+                        <div class="mt-4 border-t border-green-200/50 pt-4 dark:border-green-800/50">
+                            <p class="mb-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Enlaces del evento:</p>
+                            <ul class="space-y-2 text-sm">
+                                <li>
+                                    <span class="font-medium text-neutral-600 dark:text-neutral-400">Página del evento:</span>
+                                    <a href="{{ session('url_evento') }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
+                                        {{ session('url_evento') }}
+                                    </a>
+                                </li>
+                                <li>
+                                    <span class="font-medium text-neutral-600 dark:text-neutral-400">Galería / Álbum:</span>
+                                    <a href="{{ session('url_album') }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
+                                        {{ session('url_album') }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            <form action="{{ route('events.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                @csrf
+
+                <flux:field>
+                    <flux:label>Nombre del Evento (Opcional si usas monograma)</flux:label>
+                    <flux:input type="text" name="name" value="{{ old('name') }}" placeholder="Ej. Boda de Ana y Juan" maxlength="80" />
+                    <flux:error name="name" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>Monograma</flux:label>
+                    <flux:input type="text" name="monogram" value="{{ old('monogram') }}" placeholder="Ej. A & J" maxlength="40" />
+                    <flux:error name="monogram" />
+                </flux:field>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <flux:field>
+                        <flux:label>Tipografía</flux:label>
+                        <flux:select name="typography" placeholder="Elige una tipografía">
+                            <flux:select.option value="Arial">Arial</flux:select.option>
+                            <flux:select.option value="Times New Roman">Times New Roman</flux:select.option>
+                            <flux:select.option value="Cursive">Cursiva Elegante</flux:select.option>
+                        </flux:select>
+                        <flux:error name="typography" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Plantilla</flux:label>
+                        <flux:select name="template">
+                            <flux:select.option value="0">Plantilla Base (Pendiente)</flux:select.option>
+                        </flux:select>
+                        <flux:error name="template" />
+                    </flux:field>
+                </div>
+
+                <flux:field>
+                    <flux:label>Fecha del evento</flux:label>
+                    <flux:input type="date" name="date" value="{{ old('date') }}" required />
+                    <flux:error name="date" />
+                </flux:field>
+
+                <flux:separator variant="subtle" />
+
+                <flux:field>
+                    <flux:label>Canción de fondo (MP3, WAV)</flux:label>
+                    <flux:input type="file" name="song" accept="audio/mp3,audio/wav" />
+                    <flux:error name="song" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>Imagen para Marca de Agua (PNG, JPG)</flux:label>
+                    <flux:input type="file" name="watermark" accept="image/jpeg,image/png" />
+                    <flux:error name="watermark" />
+                </flux:field>
+
+                <div class="flex justify-end pt-4">
+                    <flux:button type="submit" variant="primary">Guardar Evento</flux:button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</x-layouts.app>

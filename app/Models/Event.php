@@ -38,11 +38,20 @@ class Event extends Model
             if (! $model->id) {
                 $model->id = hex2bin(str_replace('-', '', (string) Str::uuid()));
             }
+            
+            if (! $model->album) {
+                $model->album = hex2bin(str_replace('-', '', (string) Str::uuid()));
+            }
         });
     }
 
     public function getIdHexAttribute(): string
     {
         return bin2hex($this->id);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
     }
 }
