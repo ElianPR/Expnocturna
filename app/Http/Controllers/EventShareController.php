@@ -46,13 +46,10 @@ class EventShareController extends Controller
             'files.*.max' => 'Cada archivo debe ser menor o igual a 25 MB.',
         ]);
 
-        $eventFolder = 'events/' . $id_evento;
-
-        if (! Storage::disk('local')->exists($eventFolder)) {
-            Storage::disk('local')->makeDirectory($eventFolder);
-        }
+        $eventFolder = 'events/' . $event->album_hex;
 
         foreach ($request->file('files') as $file) {
+
             $extension = strtolower($file->getClientOriginalExtension());
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
@@ -64,13 +61,12 @@ class EventShareController extends Controller
 
             $filename = now()->format('Ymd_His') . '_' . uniqid() . '_' . $safeOriginalName . '.' . $extension;
 
-            Storage::disk('local')->putFileAs(
+            Storage::disk('s3')->putFileAs(
                 $eventFolder,
                 $file,
                 $filename
             );
         }
-
         return back()->with('status', 'Archivos subidos correctamente.');
     }
 }
