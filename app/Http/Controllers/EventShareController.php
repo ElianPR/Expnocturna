@@ -28,45 +28,68 @@ class EventShareController extends Controller
     {
         $event = $this->findEvent($id_evento);
 
-        $request->validate([
-            'files' => ['required', 'array', 'min:1'],
-            'files.*' => [
-                'required',
-                'file',
-                'mimes:jpg,jpeg,png,webp,heic,heif,mp4,mov,avi,mkv,webm',
-                'max:25600',
-            ],
-        ], [
-            'files.required' => 'Debes seleccionar al menos un archivo.',
-            'files.array' => 'El formato de archivos no es válido.',
-            'files.min' => 'Debes seleccionar al menos un archivo.',
-            'files.*.required' => 'Uno de los archivos no es válido.',
-            'files.*.file' => 'Uno de los elementos seleccionados no es un archivo válido.',
-            'files.*.mimes' => 'Solo se permiten imágenes o videos válidos.',
-            'files.*.max' => 'Cada archivo debe ser menor o igual a 25 MB.',
-        ]);
+        if (!$request->hasFile('files')) {
+            return back()->withErrors(['Debes seleccionar al menos un archivo.']);
+        }
+
+        $allowedMimes = [
+            'image/jpeg', 'image/png', 'image/webp',
+            'image/heic', 'image/heif',
+            'video/mp4', 'video/quicktime', 'video/x-msvideo',
+            'video/x-matroska', 'video/webm'
+        ];
 
         $eventFolder = 'events/' . $event->album_hex;
 
+        $uploaded = 0;
+        $errors = [];
+
         foreach ($request->file('files') as $file) {
 
-            $extension = strtolower($file->getClientOriginalExtension());
-            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            if (!$file->isValid()) {
+                $errors[] = $file->getClientOriginalName() . ' está corrupto.';
+                continue;
+            }
 
-            $safeOriginalName = str($originalName)
-                ->ascii()
-                ->slug('_')
-                ->limit(60, '')
-                ->toString();
+            // 🔥 VALIDACIÓN MANUAL
+            if (!in_array($file->getMimeType(), $allowedMimes)) {
+                $errors[] = $file->getClientOriginalName() . ' no es compatible.';
+                continue;
+            }
 
-            $filename = now()->format('Ymd_His') . '_' . uniqid() . '_' . $safeOriginalName . '.' . $extension;
+            if ($file->getSize() > 25 * 1024 * 1024) {
+                $errors[] = $file->getClientOriginalName() . ' supera 25MB.';
+                continue;
+            }
 
-            Storage::disk('s3')->putFileAs(
-                $eventFolder,
-                $file,
-                $filename
-            );
+            try {
+                $extension = strtolower($file->getClientOriginalExtension());
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+                $safeOriginalName = str($originalName)
+                    ->ascii()
+                    ->slug('_')
+                    ->limit(60, '')
+                    ->toString();
+
+                $filename = now()->format('Ymd_His') . '' . uniqid() . '' . $safeOriginalName . '.' . $extension;
+
+                Storage::disk('s3')->putFileAs(
+                    $eventFolder,
+                    $file,
+                    $filename
+                );
+
+                $uploaded++;
+
+            } catch (\Exception $e) {
+                $errors[] = $file->getClientOriginalName() . ' falló al subir.';
+            }
         }
-        return back()->with('status', 'Archivos subidos correctamente.');
+
+        return back()->with([
+            'status' => "$uploaded archivo(s) subido(s).",
+            'upload_errors' => $errors
+        ]);
     }
 }
