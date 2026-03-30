@@ -61,7 +61,7 @@ class EventController extends Controller
 
         $baseUrl = rtrim(config('app.url'), '/'); 
 
-        $urlEvento = $baseUrl . "/events/{$folderName}";
+        $urlEvento = $baseUrl . "/event/{$folderName}";
         $urlAlbum  = $baseUrl . "/{$albumHex}/album";
 
         return redirect()->back()->with([
