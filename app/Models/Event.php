@@ -54,4 +54,9 @@ class Event extends Model
     {
         return $this->belongsTo(User::class, 'id_user');
     }
+
+    public function getAlbumHexAttribute(): string
+    {
+        return bin2hex($this->album);
+    }
 }
