@@ -39,7 +39,7 @@ class EventShareController extends Controller
             'video/x-matroska', 'video/webm'
         ];
 
-        $eventFolder = 'events/' . $event->album_hex;
+        $eventFolder = 'events/' . bin2hex($event->album); 
 
         $uploaded = 0;
         $errors = [];
@@ -51,7 +51,6 @@ class EventShareController extends Controller
                 continue;
             }
 
-            // 🔥 VALIDACIÓN MANUAL
             if (!in_array($file->getMimeType(), $allowedMimes)) {
                 $errors[] = $file->getClientOriginalName() . ' no es compatible.';
                 continue;
@@ -72,9 +71,9 @@ class EventShareController extends Controller
                     ->limit(60, '')
                     ->toString();
 
-                $filename = now()->format('Ymd_His') . '' . uniqid() . '' . $safeOriginalName . '.' . $extension;
+                $filename = now()->format('Ymd_His') . '_' . uniqid() . '_' . $safeOriginalName . '.' . $extension;
 
-                Storage::disk('s3')->putFileAs(
+                Storage::disk('local')->putFileAs(
                     $eventFolder,
                     $file,
                     $filename
@@ -91,5 +90,47 @@ class EventShareController extends Controller
             'status' => "$uploaded archivo(s) subido(s).",
             'upload_errors' => $errors
         ]);
+    }
+
+    public function showAlbum(string $id_album)
+    {
+        if (! ctype_xdigit($id_album) || strlen($id_album) !== 32) {
+            abort(404);
+        }
+
+        $event = Event::where('album', hex2bin($id_album))->firstOrFail();
+
+        $eventFolder = 'events/' . $id_album;
+        $files = Storage::disk('local')->files($eventFolder);
+
+        $media = [];
+        foreach ($files as $file) {
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $isVideo = in_array($extension, ['mp4', 'mov', 'avi', 'mkv', 'webm']);
+
+            $url = route('album.file', [
+                'id_album' => $id_album, 
+                'filename' => basename($file)
+            ]);
+
+            $media[] = [
+                'url' => $url,
+                'is_video' => $isVideo,
+            ];
+        }
+        return view('events.album', compact('event', 'media'));
+    }
+
+    public function serveFile(string $id_album, string $filename)
+    {
+        $path = 'events/' . $id_album . '/' . $filename;
+
+        if (!Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        $rutaFisica = Storage::disk('local')->path($path);
+
+        return response()->file($rutaFisica);
     }
 }
