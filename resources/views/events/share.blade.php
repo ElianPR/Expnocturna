@@ -70,10 +70,9 @@
                         Subir archivos
                     </flux:button>
 
-                    <a href="{{ route('events.show', $event->id_hex) }}"
-                        class="inline-flex w-full items-center justify-center rounded-full border border-neutral-300 bg-white px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50">
+                    <flux:button href="{{ route('events.show', $event->id_hex) }}" variant="outline" class="w-full">
                         Volver
-                    </a>
+                    </flux:button>
 
                 </form>
             </div>

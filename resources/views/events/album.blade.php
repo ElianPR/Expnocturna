@@ -1,17 +1,134 @@
 <!DOCTYPE html>
-<html lang="es" class="antialiased">
+<html lang="es" class="antialiased" 
+      x-data="{ darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches }" 
+      x-init="window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => darkMode = e.matches)" 
+      :class="{ 'dark': darkMode }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Álbum - {{ $event->name ?? $event->monogram }}</title>
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* Oculta la barra de abajo hasta que Alpine esté 100% listo */
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <script>
+        function updateTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        updateTheme();
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+    </script>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('albumGallery', () => ({
+                // Cargamos las URLs de forma segura con PHP
+                allUrls: @json(collect($media)->pluck('url')), 
+                selected: [],
+                isDownloading: false,
+                pressTimer: null,
+                justLongPressed: false,
+                
+                get allSelected() {
+                    return this.allUrls.length > 0 && this.selected.length === this.allUrls.length;
+                },
+                
+                toggleSelectAll() {
+                    if (this.allSelected) {
+                        this.selected = [];
+                    } else {
+                        // Reactividad forzada
+                        this.selected = [...this.allUrls];
+                    }
+                },
+                
+                toggleSelection(url) {
+                    if (this.selected.includes(url)) {
+                        this.selected = this.selected.filter(i => i !== url);
+                    } else {
+                        this.selected.push(url);
+                    }
+                },
+
+                startPress(url) {
+                    this.justLongPressed = false;
+                    // Solo activar long-press si no hay fotos ya seleccionadas
+                    if (this.selected.length === 0) {
+                        this.pressTimer = setTimeout(() => {
+                            this.justLongPressed = true;
+                            this.toggleSelection(url);
+                            if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(50);
+                        }, 500); 
+                    }
+                },
+                
+                cancelPress() {
+                    clearTimeout(this.pressTimer);
+                },
+
+                handleLinkClick(event, url) {
+                    // Si acabas de soltar la pantalla después de dejar presionado, bloqueamos el enlace
+                    if (this.justLongPressed) {
+                        event.preventDefault();
+                        this.justLongPressed = false;
+                        return;
+                    }
+                    
+                    // Si la galería ya está en "Modo Selección", un click solo selecciona (no abre)
+                    if (this.selected.length > 0) {
+                        event.preventDefault();
+                        this.toggleSelection(url);
+                    }
+                },
+
+                async downloadSelected() {
+                    if (this.selected.length === 0) return;
+                    this.isDownloading = true;
+                    
+                    for (const url of this.selected) {
+                        try {
+                            const response = await fetch(url);
+                            const blob = await response.blob();
+                            const blobUrl = window.URL.createObjectURL(blob);
+                            
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = blobUrl;
+                            a.download = url.split('/').pop().split('?')[0] || 'recuerdo';
+                            
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(blobUrl);
+                            document.body.removeChild(a);
+                            
+                            await new Promise(r => setTimeout(r, 400));
+                        } catch (error) {
+                            console.error('Error descargando: ', url);
+                        }
+                    }
+                    this.isDownloading = false;
+                    this.selected = [];
+                }
+            }));
+        });
+    </script>
 </head>
-<body class="bg-neutral-50 min-h-screen text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+
+<body class="min-h-screen pb-24 text-neutral-900 bg-neutral-50 dark:bg-neutral-950 dark:text-neutral-100 transition-colors duration-300" 
+      x-data="albumGallery">
     
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         
-        <div class="text-center mb-12">
-            <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-2">
                 {{ $event->name ?? $event->monogram ?? 'Nuestro Evento' }}
             </h1>
             <p class="text-neutral-500 dark:text-neutral-400 text-lg">
@@ -24,35 +141,79 @@
             @endif
         </div>
 
+        @if(count($media) > 0)
+        <div class="flex justify-end mb-6">
+            <flux:button variant="subtle" size="sm" @click="toggleSelectAll()">
+                <span x-text="allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'">Seleccionar todo</span>
+            </flux:button>
+        </div>
+        @endif
+
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             @forelse ($media as $item)
-                <div class="group relative aspect-square overflow-hidden rounded-xl bg-neutral-200 dark:bg-neutral-800 shadow-sm transition-all hover:shadow-md border border-neutral-200/50 dark:border-neutral-800">
-                    
+                
+                <div class="group relative aspect-square overflow-hidden bg-neutral-200 dark:bg-neutral-800 shadow-sm rounded-xl transition-all duration-300 border border-neutral-200/50 dark:border-neutral-700"
+                     :class="selected.includes('{{ $item['url'] }}') ? 'ring-4 ring-blue-500 scale-95 shadow-lg' : 'hover:shadow-md'"
+                     @touchstart="startPress('{{ $item['url'] }}')"
+                     @touchend="cancelPress()"
+                     @touchmove="cancelPress()"
+                     @mousedown="startPress('{{ $item['url'] }}')"
+                     @mouseup="cancelPress()"
+                     @mouseleave="cancelPress()">
+
+                    <button type="button" 
+                            @click.stop.prevent="toggleSelection('{{ $item['url'] }}')" 
+                            class="absolute top-3 right-3 z-20 flex items-center justify-center size-8 rounded-full border-2 shadow-sm transition-all cursor-pointer outline-none"
+                            :class="selected.includes('{{ $item['url'] }}') 
+                                ? 'bg-blue-500 border-blue-500 text-white' 
+                                : 'bg-black/30 border-white text-transparent hover:bg-black/50 hover:text-white'">
+                        
+                        <flux:icon.check class="size-5" stroke-width="3" />
+                    </button>
+
                     @if($item['is_video'])
-                        <video controls class="h-full w-full object-cover" preload="metadata">
+                        <video class="h-full w-full object-cover" preload="metadata" controls @click="handleLinkClick($event, '{{ $item['url'] }}')">
                             <source src="{{ $item['url'] }}" type="video/mp4">
-                            Tu navegador no soporta la reproducción de video.
                         </video>
                     @else
-                        <a href="{{ $item['url'] }}" target="_blank" class="block h-full w-full">
-                            <img src="{{ $item['url'] }}" loading="lazy" alt="Recuerdo del evento" 
-                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <a href="{{ $item['url'] }}" target="_blank" @click="handleLinkClick($event, '{{ $item['url'] }}')" class="block h-full w-full select-none" style="-webkit-touch-callout: none;">
+                            <img src="{{ $item['url'] }}" loading="lazy" alt="Recuerdo" 
+                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 select-none pointer-events-none">
                         </a>
                     @endif
-
                 </div>
             @empty
                 <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
-                    <svg class="size-16 text-neutral-300 dark:text-neutral-700 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                    </svg>
-                    <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-200">Aún no hay recuerdos</h3>
-                    <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Las fotos y videos subidos aparecerán aquí.</p>
+                    <flux:icon.photo class="size-20 text-neutral-300 dark:text-neutral-700 mb-6" />
+                    <h3 class="text-xl font-semibold text-neutral-900 dark:text-neutral-200">Aún no hay recuerdos</h3>
                 </div>
             @endforelse
         </div>
-
     </main>
 
+    <div x-show="selected.length > 0" 
+         x-transition.translate.y.100%
+         class="fixed bottom-0 left-0 w-full z-50 p-4 sm:p-6" x-cloak>
+        
+        <div class="max-w-3xl mx-auto bg-white dark:bg-neutral-800 shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-neutral-200 dark:border-neutral-700">
+            
+            <div class="flex items-center gap-4 w-full justify-between sm:justify-start sm:w-auto">
+                <flux:button variant="subtle" icon="x-mark" @click="selected = []" class="!rounded-full" />
+                <span class="font-bold text-lg"><span x-text="selected.length"></span> seleccionados</span>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <flux:button variant="subtle" @click="toggleSelectAll()" class="hidden sm:flex">
+                    <span x-text="allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'"></span>
+                </flux:button>
+                
+                <flux:button variant="primary" icon="arrow-down-tray" @click="downloadSelected()" x-bind:disabled="isDownloading" class="flex-1 sm:flex-none">
+                    <span x-text="isDownloading ? 'Descargando...' : 'Descargar'"></span>
+                </flux:button>
+            </div>
+        </div>
+    </div>
+
+    @fluxScripts
 </body>
 </html>
