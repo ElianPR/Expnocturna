@@ -37,6 +37,10 @@ Route::get('/event/{id_evento}', function (string $id_evento)
     return view('events.show', compact('event'));
 })->name('events.show');
 
+Route::get('/album/{id_album}', [EventShareController::class, 'showAlbum'])->name('album.show');
+
+Route::get('/album/{id_album}/file/{filename}', [EventShareController::class, 'serveFile'])->name('album.file');
+
 Route::get('/event/{id_evento}/compartir', [EventShareController::class, 'create'])
     ->name('events.share.create');
 

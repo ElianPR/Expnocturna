@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
-
     public function create()
     {
         return view('events.create');
@@ -42,7 +41,8 @@ class EventController extends Controller
             $songFile = $request->file('song');
             $songName = substr($songFile->getClientOriginalName(), -50); 
             
-            $songFile->storeAs($folderName, $songName, 'public');
+            // 🔥 CAMBIO AQUÍ: 'public' a 'local'
+            $songFile->storeAs($folderName, $songName, 'local');
             
             $eventData['song'] = $songName;
         }
@@ -51,18 +51,18 @@ class EventController extends Controller
             $watermarkFile = $request->file('watermark');
             $watermarkName = substr($watermarkFile->getClientOriginalName(), -50);
             
-            $watermarkFile->storeAs($folderName, $watermarkName, 'public');
+            // 🔥 CAMBIO AQUÍ: 'public' a 'local'
+            $watermarkFile->storeAs($folderName, $watermarkName, 'local');
             
             $eventData['watermark'] = $watermarkName;
         }
-
 
         Event::create($eventData);
 
         $baseUrl = rtrim(config('app.url'), '/'); 
 
-        $urlEvento = $baseUrl . "/events/{$folderName}";
-        $urlAlbum  = $baseUrl . "/{$albumHex}/album";
+        $urlEvento = $baseUrl . "/event/{$folderName}";
+        $urlAlbum  = $baseUrl . "/album/{$albumHex}";
 
         return redirect()->back()->with([
             'success'    => 'Evento y archivos guardados correctamente.',
@@ -70,5 +70,4 @@ class EventController extends Controller
             'url_album'  => $urlAlbum
         ]);
     }
-    
 }

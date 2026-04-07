@@ -9,7 +9,7 @@
             </flux:button>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 md:p-8">
+        <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 md:p-8 dark:border-neutral-700 dark:bg-neutral-800">
             
             @if(session('success'))
                 <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-900/20">
@@ -21,19 +21,30 @@
                     @if(session('url_evento'))
                         <div class="mt-4 border-t border-green-200/50 pt-4 dark:border-green-800/50">
                             <p class="mb-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Enlaces del evento:</p>
-                            <ul class="space-y-2 text-sm">
-                                <li>
-                                    <span class="font-medium text-neutral-600 dark:text-neutral-400">Página del evento:</span>
-                                    <a href="{{ session('url_evento') }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
+                            <ul class="space-y-3 text-sm">
+                                
+                                <li x-data="{ copied: false }" class="flex items-center gap-3">
+                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Página del evento:</span>
+                                    <a href="{{ session('url_evento') }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400 truncate w-48 md:w-auto">
                                         {{ session('url_evento') }}
                                     </a>
+                                    <button @click="forzarCopiado('{{ session('url_evento') }}'); copied = true; setTimeout(() => copied = false, 2000)" class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200" title="Copiar enlace">
+                                        <flux:icon.document-duplicate x-show="!copied" class="size-4" />
+                                        <flux:icon.check x-show="copied" class="size-4 text-green-500" x-cloak />
+                                    </button>
                                 </li>
-                                <li>
-                                    <span class="font-medium text-neutral-600 dark:text-neutral-400">Galería / Álbum:</span>
-                                    <a href="{{ session('url_album') }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
+
+                                <li x-data="{ copied: false }" class="flex items-center gap-3">
+                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Galería / Álbum:</span>
+                                    <a href="{{ session('url_album') }}" target="_blank" class="text-purple-600 hover:underline dark:text-purple-400 truncate w-48 md:w-auto">
                                         {{ session('url_album') }}
                                     </a>
+                                    <button @click="forzarCopiado('{{ session('url_album') }}'); copied = true; setTimeout(() => copied = false, 2000)" class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200" title="Copiar enlace">
+                                        <flux:icon.document-duplicate x-show="!copied" class="size-4" />
+                                        <flux:icon.check x-show="copied" class="size-4 text-green-500" x-cloak />
+                                    </button>
                                 </li>
+
                             </ul>
                         </div>
                     @endif
@@ -102,4 +113,23 @@
             
         </div>
     </div>
+
+    <script>
+        function forzarCopiado(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text);
+                return;
+            }
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "-999999px";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try { document.execCommand('copy'); } catch (err) { console.error('Error', err); }
+            document.body.removeChild(textArea);
+        }
+    </script>
 </x-layouts.app>
