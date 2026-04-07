@@ -14,7 +14,7 @@ class EventController extends Controller
         return view('events.create');
     }
 
-    public function store (Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'name'       => 'nullable|required_without:monogram|max:80',
@@ -32,42 +32,47 @@ class EventController extends Controller
         $albumHex = str_replace('-', '', $albumUuid->toString());
 
         $eventData = $validated;
-        $eventData['id'] = $uuid->getBytes(); 
+        $eventData['id'] = $uuid->getBytes();
         $eventData['album'] = hex2bin($albumHex);
         $eventData['id_user'] = Auth::id();
         $eventData['template'] = $request->input('template', 0);
 
         if ($request->hasFile('song')) {
             $songFile = $request->file('song');
-            $songName = substr($songFile->getClientOriginalName(), -50); 
-            
+            $songName = substr($songFile->getClientOriginalName(), -50);
+
             // 🔥 CAMBIO AQUÍ: 'public' a 'local'
             $songFile->storeAs($folderName, $songName, 'local');
-            
+
             $eventData['song'] = $songName;
         }
 
         if ($request->hasFile('watermark')) {
             $watermarkFile = $request->file('watermark');
             $watermarkName = substr($watermarkFile->getClientOriginalName(), -50);
-            
+
             // 🔥 CAMBIO AQUÍ: 'public' a 'local'
             $watermarkFile->storeAs($folderName, $watermarkName, 'local');
-            
+
             $eventData['watermark'] = $watermarkName;
         }
 
-        Event::create($eventData);
+        $event = Event::create($eventData);
+        return redirect()->route('events.qr', $event->id_hex);
+    }
 
-        $baseUrl = rtrim(config('app.url'), '/'); 
+    public function qr($id)
+    {
+        if (!ctype_xdigit($id) || strlen($id) !== 32) 
+        {
+            abort(404);
+        }
 
-        $urlEvento = $baseUrl . "/event/{$folderName}";
-        $urlAlbum  = $baseUrl . "/album/{$albumHex}";
+        $event = Event::where('id', hex2bin($id))->firstOrFail();
 
-        return redirect()->back()->with([
-            'success'    => 'Evento y archivos guardados correctamente.',
-            'url_evento' => $urlEvento,
-            'url_album'  => $urlAlbum
-        ]);
+        $url_evento = route('events.show', $event->id_hex);
+        $url_album  = route('album.show', $event->album_hex);
+
+        return view('events.qr', compact('url_evento', 'url_album'));
     }
 }

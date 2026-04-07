@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\EventShareController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventShareController;
 use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -36,6 +36,9 @@ Route::get('/event/{id_evento}', function (string $id_evento)
 
     return view('events.show', compact('event'));
 })->name('events.show');
+
+Route::get('/event/{id}/qr', [EventController::class, 'qr'])
+    ->name('events.qr');
 
 Route::get('/album/{id_album}', [EventShareController::class, 'showAlbum'])->name('album.show');
 
