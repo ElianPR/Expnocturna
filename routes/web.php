@@ -50,4 +50,6 @@ Route::get('/event/{id_evento}/compartir', [EventShareController::class, 'create
 Route::post('/event/{id_evento}/compartir', [EventShareController::class, 'store'])
     ->name('events.share.store');
 
+Route::get('/event/{id_evento}/camara', [EventController::class, 'camera'])
+    ->name('events.camera');
 require __DIR__.'/auth.php';
