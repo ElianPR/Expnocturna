@@ -26,21 +26,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
 });
 
-Route::get('/event/{id_evento}', function (string $id_evento) 
-{
-    if (! ctype_xdigit($id_evento) || strlen($id_evento) !== 32) {
-        abort(404);
-    }
+Route::get('/event/{id_evento}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
 
-    $event = Event::where('id', hex2bin($id_evento))->firstOrFail();
-
-    return view('events.show', compact('event'));
-})->name('events.show');
-
+Route::get('/event/{id_evento}/file/{filename}', [EventController::class, 'serveFile'])->name('file.show');
 Route::get('/album/{id_album}', [EventShareController::class, 'showAlbum'])->name('album.show');
 
 Route::get('/album/{id_album}/file/{filename}', [EventShareController::class, 'serveFile'])->name('album.file');
-
 Route::get('/event/{id_evento}/compartir', [EventShareController::class, 'create'])
     ->name('events.share.create');
 
