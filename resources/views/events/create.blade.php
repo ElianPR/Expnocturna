@@ -32,13 +32,16 @@
                         <span class="font-medium text-green-800 dark:text-green-300">{{ session('success') }}</span>
                     </div>
 
-                    @if(session('url_evento'))
+                    @if (session('url_evento'))
                         <div class="mt-4 border-t border-green-200/50 pt-4 dark:border-green-800/50">
-                            <p class="mb-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Enlaces del evento:</p>
+                            <p class="mb-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Enlaces del
+                                evento:</p>
                             <ul class="space-y-3 text-sm">
                                 <li x-data="{ copied: false }" class="flex items-center gap-3">
-                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Página del evento:</span>
-                                    <a href="{{ session('url_evento') }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400 truncate w-48 md:w-auto">
+                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Página del
+                                        evento:</span>
+                                    <a href="{{ session('url_evento') }}" target="_blank"
+                                        class="text-blue-600 hover:underline dark:text-blue-400 truncate w-48 md:w-auto">
                                         {{ session('url_evento') }}
                                     </a>
                                     <button type="button" @click="forzarCopiado('{{ session('url_evento') }}'); copied = true; setTimeout(() => copied = false, 2000)" class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200">
@@ -47,8 +50,10 @@
                                     </button>
                                 </li>
                                 <li x-data="{ copied: false }" class="flex items-center gap-3">
-                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Galería / Álbum:</span>
-                                    <a href="{{ session('url_album') }}" target="_blank" class="text-purple-600 hover:underline dark:text-purple-400 truncate w-48 md:w-auto">
+                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Galería /
+                                        Álbum:</span>
+                                    <a href="{{ session('url_album') }}" target="_blank"
+                                        class="text-purple-600 hover:underline dark:text-purple-400 truncate w-48 md:w-auto">
                                         {{ session('url_album') }}
                                     </a>
                                     <button type="button" @click="forzarCopiado('{{ session('url_album') }}'); copied = true; setTimeout(() => copied = false, 2000)" class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200">
@@ -207,8 +212,27 @@
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            try { document.execCommand('copy'); } catch (err) { console.error('Error', err); }
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Error', err);
+            }
             document.body.removeChild(textArea);
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (session('swal_error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Algo salió mal!',
+                    text: '{{ session('swal_error') }}',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#000',
+                });
+            });
+        </script>
+    @endif
 </x-layouts.app>

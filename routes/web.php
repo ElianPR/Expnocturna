@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\EventShareController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventShareController;
 use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -28,6 +28,9 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/event/{id_evento}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
 
+Route::get('/event/{id}/qr', [EventController::class, 'qr'])
+    ->name('events.qr');
+
 Route::get('/event/{id_evento}/file/{filename}', [EventController::class, 'serveFile'])->name('file.show');
 Route::get('/album/{id_album}', [EventShareController::class, 'showAlbum'])->name('album.show');
 
@@ -38,4 +41,6 @@ Route::get('/event/{id_evento}/compartir', [EventShareController::class, 'create
 Route::post('/event/{id_evento}/compartir', [EventShareController::class, 'store'])
     ->name('events.share.store');
 
+Route::get('/event/{id_evento}/camara', [EventController::class, 'camera'])
+    ->name('events.camera');
 require __DIR__.'/auth.php';

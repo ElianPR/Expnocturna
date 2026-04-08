@@ -29,70 +29,85 @@ class EventController extends Controller
             'watermark'  => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-        $uuid = Str::uuid();
-        $folderName = str_replace('-', '', $uuid->toString());
-        $albumUuid = Str::uuid();
-        $albumHex = str_replace('-', '', $albumUuid->toString());
+        try {
+            $uuid = Str::uuid();
+            $folderName = str_replace('-', '', $uuid->toString());
+            $albumUuid = Str::uuid();
+            $albumHex = str_replace('-', '', $albumUuid->toString());
 
-        // Preparamos los datos SOLAMENTE para la tabla events
-        $eventData = [
-            'id'         => $uuid->getBytes(),
-            'album'      => hex2bin($albumHex),
-            'id_user'    => Auth::id(),
-            'name'       => $validated['name'] ?? null,
-            'monogram'   => $validated['monogram'] ?? null,
-            'typography' => $validated['typography'] ?? null,
-            'template'   => $request->input('template', 0),
-            'date'       => $validated['date'],
-        ];
+            // Preparamos los datos SOLAMENTE para la tabla events
+            $eventData = [
+                'id'         => $uuid->getBytes(),
+                'album'      => hex2bin($albumHex),
+                'id_user'    => Auth::id(),
+                'name'       => $validated['name'] ?? null,
+                'monogram'   => $validated['monogram'] ?? null,
+                'typography' => $validated['typography'] ?? null,
+                'template'   => $request->input('template', 0),
+                'date'       => $validated['date'],
+            ];
 
-        // Guardar Canción
-        if ($request->hasFile('song')) {
-            $songFile = $request->file('song');
-            $songName = substr($songFile->getClientOriginalName(), -50); 
-            $songFile->storeAs($folderName, $songName, 'local');
-            $eventData['song'] = $songName;
+            // Guardar Canción
+            if ($request->hasFile('song')) {
+                $songFile = $request->file('song');
+                $songName = substr($songFile->getClientOriginalName(), -50);
+                $songFile->storeAs($folderName, $songName, 'local');
+                $eventData['song'] = $songName;
+            }
+
+            // Guardar Marca de Agua
+            if ($request->hasFile('watermark')) {
+                $watermarkFile = $request->file('watermark');
+                $watermarkName = substr($watermarkFile->getClientOriginalName(), -50);
+                $watermarkFile->storeAs($folderName, $watermarkName, 'local');
+                $eventData['watermark'] = $watermarkName;
+            }
+
+            // 1. PRIMERO CREAMOS EL EVENTO
+            $event = Event::create($eventData);
+
+            // 2. GUARDAMOS LA FOTO PRINCIPAL
+            if ($request->hasFile('main_image')) {
+                $mainImageFile = $request->file('main_image');
+                $mainImageName = substr($mainImageFile->getClientOriginalName(), -50);
+
+                $mainImageFile->storeAs($folderName, $mainImageName, 'local');
+
+                DB::table('photos')->insert([
+                    'id'       => Str::uuid()->getBytes(),
+                    'url'      => $mainImageName,
+                    'id_event' => $event->id,
+                ]);
+            }
+
+            return redirect()->route('events.qr', $event->id_hex);
+        } catch (\Exception $e) {
+        }
+    }
+
+    public function qr($id)
+    {
+        if (!ctype_xdigit($id) || strlen($id) !== 32) {
+            abort(404);
         }
 
-        // Guardar Marca de Agua
-        if ($request->hasFile('watermark')) {
-            $watermarkFile = $request->file('watermark');
-            $watermarkName = substr($watermarkFile->getClientOriginalName(), -50);
-            $watermarkFile->storeAs($folderName, $watermarkName, 'local');
-            $eventData['watermark'] = $watermarkName;
+        $event = Event::where('id', hex2bin($id))->firstOrFail();
+
+        $url_evento = route('events.show', $event->id_hex);
+        $url_album  = route('album.show', $event->album_hex);
+
+        return view('events.qr', compact('url_evento', 'url_album'));
+    }
+
+    public function camera($id_evento)
+    {
+        if (!ctype_xdigit($id_evento) || strlen($id_evento) !== 32) {
+            abort(404);
         }
 
-        // 1. PRIMERO CREAMOS EL EVENTO
-        Event::create($eventData);
+        $event = Event::where('id', hex2bin($id_evento))->firstOrFail();
 
-        // 2. GUARDAMOS LA FOTO PRINCIPAL EN LA TABLA 'photos'
-        if ($request->hasFile('main_image')) {
-            $mainImageFile = $request->file('main_image');
-            
-            // Aseguramos que el nombre no pase de 50 caracteres (por tu columna varchar 50)
-            $mainImageName = substr($mainImageFile->getClientOriginalName(), -50); 
-            
-            // Físicamente la guardamos en la carpeta local del evento
-            $mainImageFile->storeAs($folderName, $mainImageName, 'local');
-            
-            // La registramos en la base de datos
-            DB::table('photos')->insert([
-                'id'       => Str::uuid()->getBytes(), // Nuevo UUID para la foto (varbinary 16)
-                'url'      => $mainImageName,          // Nombre del archivo (varchar 50)
-                'id_event' => $uuid->getBytes(),       // ID del evento al que pertenece (varbinary 16)
-            ]);
-        }
-
-        // Generamos las URLs para la sesión
-        $baseUrl = rtrim(config('app.url'), '/'); 
-        $urlEvento = $baseUrl . "/event/{$folderName}";
-        $urlAlbum  = $baseUrl . "/album/{$albumHex}";
-
-        return redirect()->back()->with([
-            'success'    => 'Evento y archivos guardados correctamente.',
-            'url_evento' => $urlEvento,
-            'url_album'  => $urlAlbum
-        ]);
+        return view('events.camera', compact('event'));
     }
 
     public function show($folder)
@@ -104,8 +119,8 @@ class EventController extends Controller
         $photo = DB::table('photos')->where('id_event', $eventId)->first();
 
         // Generamos la URL usando el nombre de la ruta que definiste
-        $imageUrl = $photo 
-            ? route('file.show', ['id_evento' => $folder, 'filename' => $photo->url]) 
+        $imageUrl = $photo
+            ? route('file.show', ['id_evento' => $folder, 'filename' => $photo->url])
             : asset('images/fondo-papel.jpg');
 
         return view('events.show', compact('event', 'imageUrl'));
@@ -122,7 +137,7 @@ class EventController extends Controller
 
         // Sacamos la ruta absoluta del servidor y la enviamos al navegador
         $rutaFisica = Storage::disk('local')->path($path);
-        
+
         return response()->file($rutaFisica);
     }
 }

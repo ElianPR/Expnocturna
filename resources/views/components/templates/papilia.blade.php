@@ -42,7 +42,10 @@
 
     <div class="w-full px-6 mt-3 {{ $isPreview ? 'pointer-events-none' : '' }}">
         
-        <x-papilia.button icon="video-camera">
+        <x-papilia.button 
+            icon="video-camera"
+            href="{{ $isPreview ? '#' : route('events.camera', $event->id_hex ?? bin2hex($event->id)) }}"
+        >
             Toma foto y video <br> con mariposas
         </x-papilia.button>
 

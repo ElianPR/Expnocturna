@@ -25,7 +25,7 @@
                     @forelse ($events as $event)
                         <tr class="border-t border-neutral-200 dark:border-neutral-700">
                             <td class="px-4 py-3">
-                                <a href="#" class="font-semibold text-neutral-800 hover:text-blue-600 hover:underline dark:text-neutral-200 dark:hover:text-blue-400 transition-colors">
+                                <a href="{{ route('events.qr', $event->id_hex) }}" class="font-semibold text-neutral-800 hover:text-blue-600 hover:underline dark:text-neutral-200 dark:hover:text-blue-400 transition-colors">
                                     {{ $event->name ?? $event->monogram ?? '—' }}
                                 </a>
                             </td>
