@@ -17,8 +17,9 @@
         <div class="grid md:grid-cols-2 gap-8 justify-center">
 
             <!-- QR EVENTO -->
-            <div class="bg-white rounded-3xl p-6 shadow space-y-4 flex flex-col items-center">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow space-y-4 flex flex-col items-center">
                 <canvas id="canvasEvento" class="rounded-xl w-full max-w-[260px] h-auto"></canvas>
+
                 <flux:button icon="arrow-down-tray" variant="filled"
                     onclick="downloadCanvas('canvasEvento','evento.png')" class="w-full">
                     Descargar QR Evento
@@ -26,10 +27,11 @@
             </div>
 
             <!-- QR ALBUM -->
-            <div class="bg-white rounded-3xl p-6 shadow space-y-4 flex flex-col items-center">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow space-y-4 flex flex-col items-center">
                 <canvas id="canvasAlbum" class="rounded-xl w-full max-w-[260px] h-auto"></canvas>
+
                 <flux:button icon="arrow-down-tray" variant="filled" onclick="downloadCanvas('canvasAlbum','album.png')"
-                    class="w-full ">
+                    class="w-full">
                     Descargar QR Álbum
                 </flux:button>
             </div>
@@ -77,9 +79,9 @@
             canvas.width = size;
             canvas.height = size + topPad + bottomPad;
 
-            const bg = await loadImage('/images/papel.jpg');
+            const bg = await loadImage("{{ asset('images/papel.jpg') }}");
             const qrImg = await loadImage("data:image/svg+xml;base64," + btoa(svgData));
-            const logo = await loadImage('/images/logoP.png');
+            const logo = await loadImage("{{ asset('images/logoP.png') }}");
 
             // fondo papel
             ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
