@@ -93,6 +93,7 @@
                         <flux:label>Plantilla</flux:label>
                         <flux:select name="template" x-model="template">
                             <flux:select.option value="1">Papilia (Bordes rasgados)</flux:select.option>
+                            <flux:select.option value="2">Acuarela (Hojas y Pincelada)</flux:select.option>
                             <flux:select.option value="0">Plantilla Base</flux:select.option>
                         </flux:select>
                         <flux:error name="template" />
@@ -142,6 +143,9 @@
                     
                     <div x-show="template == '1'" class="h-full w-full" x-cloak>
                         <x-templates.papilia :preview="true" />
+                    </div>
+                    <div x-show="template == '2'" class="h-full w-full" x-cloak>
+                        <x-templates.dos :preview="true" />
                     </div>
 
                     <div x-show="template == '0'" class="relative z-10 px-6 py-16 flex flex-col items-center justify-center min-h-full" x-cloak>

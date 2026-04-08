@@ -1,4 +1,4 @@
-@props(['preview' => false, 'title' => 'Experiencia Papilia', 'fontFamily' => 'Cinzel'])
+@props(['preview' => false, 'title' => 'Experiencia Papilia', 'fontFamily' => 'Cinzel', 'bgStyle' => "background-color: #f7f5f0; background-image: url('/images/fondo-papel.jpg');"])
 
 @php
     $isPreview = filter_var($preview, FILTER_VALIDATE_BOOLEAN);
@@ -26,8 +26,8 @@
 <body class="font-base text-neutral-800 min-h-screen bg-neutral-900 flex justify-center w-full relative">
 @endif
 
-    <div class="{{ $isPreview ? 'w-full min-h-full' : 'w-full max-w-full sm:max-w-md md:max-w-2xl lg:max-w-4xl min-h-screen shadow-2xl' }} relative flex flex-col bg-[#f7f5f0] overflow-x-hidden mx-auto"
-         style="background-image: url('{{ asset('images/fondo-papel.jpg') }}'); background-size: cover; background-position: center;">
+    <div class="{{ $isPreview ? 'w-full min-h-full' : 'w-full max-w-full sm:max-w-md md:max-w-2xl lg:max-w-4xl min-h-screen shadow-2xl' }} relative flex flex-col overflow-x-hidden mx-auto" 
+         style="{{ $bgStyle }} background-size: cover; background-position: center;">
         
         <div class="absolute inset-0 bg-white/40 z-0 pointer-events-none"></div>
 
