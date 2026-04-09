@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="es" class="antialiased" 
-      x-data="{ darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches }" 
-      x-init="window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => darkMode = e.matches)" 
-      :class="{ 'dark': darkMode }">
+<html lang="es" class="antialiased" x-data="{ darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches }" x-init="window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => darkMode = e.matches)" :class="{ 'dark': darkMode }">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Álbum - {{ $event->name ?? $event->monogram }}</title>
-    
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         /* Oculta la barra de abajo hasta que Alpine esté 100% listo */
-        [x-cloak] { display: none !important; }
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 
     <script>
@@ -31,16 +31,16 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('albumGallery', () => ({
                 // Cargamos las URLs de forma segura con PHP
-                allUrls: @json(collect($media)->pluck('url')), 
+                allUrls: @json(collect($media)->pluck('url')),
                 selected: [],
                 isDownloading: false,
                 pressTimer: null,
                 justLongPressed: false,
-                
+
                 get allSelected() {
                     return this.allUrls.length > 0 && this.selected.length === this.allUrls.length;
                 },
-                
+
                 toggleSelectAll() {
                     if (this.allSelected) {
                         this.selected = [];
@@ -49,7 +49,7 @@
                         this.selected = [...this.allUrls];
                     }
                 },
-                
+
                 toggleSelection(url) {
                     if (this.selected.includes(url)) {
                         this.selected = this.selected.filter(i => i !== url);
@@ -65,11 +65,12 @@
                         this.pressTimer = setTimeout(() => {
                             this.justLongPressed = true;
                             this.toggleSelection(url);
-                            if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(50);
-                        }, 500); 
+                            if (window.navigator && window.navigator.vibrate) window.navigator
+                                .vibrate(50);
+                        }, 500);
                     }
                 },
-                
+
                 cancelPress() {
                     clearTimeout(this.pressTimer);
                 },
@@ -81,7 +82,7 @@
                         this.justLongPressed = false;
                         return;
                     }
-                    
+
                     // Si la galería ya está en "Modo Selección", un click solo selecciona (no abre)
                     if (this.selected.length > 0) {
                         event.preventDefault();
@@ -92,23 +93,23 @@
                 async downloadSelected() {
                     if (this.selected.length === 0) return;
                     this.isDownloading = true;
-                    
+
                     for (const url of this.selected) {
                         try {
                             const response = await fetch(url);
                             const blob = await response.blob();
                             const blobUrl = window.URL.createObjectURL(blob);
-                            
+
                             const a = document.createElement('a');
                             a.style.display = 'none';
                             a.href = blobUrl;
                             a.download = url.split('/').pop().split('?')[0] || 'recuerdo';
-                            
+
                             document.body.appendChild(a);
                             a.click();
                             window.URL.revokeObjectURL(blobUrl);
                             document.body.removeChild(a);
-                            
+
                             await new Promise(r => setTimeout(r, 400));
                         } catch (error) {
                             console.error('Error descargando: ', url);
@@ -122,63 +123,64 @@
     </script>
 </head>
 
-<body class="min-h-screen pb-24 text-neutral-900 bg-neutral-50 dark:bg-neutral-950 dark:text-neutral-100 transition-colors duration-300" 
-      x-data="albumGallery">
-    
+<body
+    class="min-h-screen pb-24 text-neutral-900 bg-neutral-50 dark:bg-neutral-950 dark:text-neutral-100 transition-colors duration-300"
+    x-data="albumGallery">
+
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-        
+
         <div class="text-center mb-10">
             <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-2">
-                {{ $event->name ?? $event->monogram ?? 'Nuestro Evento' }}
+                {{ $event->name ?? ($event->monogram ?? 'Nuestro Evento') }}
             </h1>
             <p class="text-neutral-500 dark:text-neutral-400 text-lg">
                 Galería de recuerdos
             </p>
-            @if($event->date)
+            @if ($event->date)
                 <p class="text-sm text-neutral-400 dark:text-neutral-500 mt-2">
                     {{ $event->date->format('d/m/Y') }}
                 </p>
             @endif
         </div>
 
-        @if(count($media) > 0)
-        <div class="flex justify-end mb-6">
-            <flux:button variant="subtle" size="sm" @click="toggleSelectAll()">
-                <span x-text="allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'">Seleccionar todo</span>
-            </flux:button>
-        </div>
+        @if (count($media) > 0)
+            <div class="flex justify-end mb-6">
+                <flux:button variant="subtle" size="sm" @click="toggleSelectAll()">
+                    <span x-text="allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'">Seleccionar todo</span>
+                </flux:button>
+            </div>
         @endif
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             @forelse ($media as $item)
-                
                 <div class="group relative aspect-square overflow-hidden bg-neutral-200 dark:bg-neutral-800 shadow-sm rounded-xl transition-all duration-300 border border-neutral-200/50 dark:border-neutral-700"
-                     :class="selected.includes('{{ $item['url'] }}') ? 'ring-4 ring-blue-500 scale-95 shadow-lg' : 'hover:shadow-md'"
-                     @touchstart="startPress('{{ $item['url'] }}')"
-                     @touchend="cancelPress()"
-                     @touchmove="cancelPress()"
-                     @mousedown="startPress('{{ $item['url'] }}')"
-                     @mouseup="cancelPress()"
-                     @mouseleave="cancelPress()">
+                    :class="selected.includes('{{ $item['url'] }}') ? 'ring-4 ring-blue-500 scale-95 shadow-lg' :
+                        'hover:shadow-md'"
+                    @touchstart="startPress('{{ $item['url'] }}')" @touchend="cancelPress()" @touchmove="cancelPress()"
+                    @mousedown="startPress('{{ $item['url'] }}')" @mouseup="cancelPress()" @mouseleave="cancelPress()">
 
-                    <button type="button" 
-                            @click.stop.prevent="toggleSelection('{{ $item['url'] }}')" 
-                            class="absolute top-3 right-3 z-20 flex items-center justify-center size-8 rounded-full border-2 shadow-sm transition-all cursor-pointer outline-none"
-                            :class="selected.includes('{{ $item['url'] }}') 
-                                ? 'bg-blue-500 border-blue-500 text-white' 
-                                : 'bg-black/30 border-white text-transparent hover:bg-black/50 hover:text-white'">
-                        
+                    <button type="button" @click.stop.prevent="toggleSelection('{{ $item['url'] }}')"
+                        class="absolute top-3 right-3 z-20 flex items-center justify-center size-8 rounded-full border-2 shadow-sm transition-all cursor-pointer outline-none"
+                        :class="selected.includes('{{ $item['url'] }}') ?
+                            'bg-blue-500 border-blue-500 text-white' :
+                            'bg-black/30 border-white text-transparent hover:bg-black/50 hover:text-white'">
+
                         <flux:icon.check class="size-5" stroke-width="3" />
                     </button>
 
-                    @if($item['is_video'])
-                        <video class="h-full w-full object-cover" preload="metadata" controls @click="handleLinkClick($event, '{{ $item['url'] }}')">
-                            <source src="{{ $item['url'] }}" type="video/mp4">
-                        </video>
+                    @if ($item['is_video'])
+                        <div class="relative h-full w-full bg-black">
+                            <video class="absolute inset-0 h-full w-full object-contain" preload="none" controls
+                                playsinline webkit-playsinline x-on:click.stop>
+                                <source src="{{ $item['url'] }}" type="video/mp4">
+                            </video>
+                        </div>
                     @else
-                        <a href="{{ $item['url'] }}" target="_blank" @click="handleLinkClick($event, '{{ $item['url'] }}')" class="block h-full w-full select-none" style="-webkit-touch-callout: none;">
-                            <img src="{{ $item['url'] }}" loading="lazy" alt="Recuerdo" 
-                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 select-none pointer-events-none">
+                        <a href="{{ $item['url'] }}" target="_blank"
+                            @click="handleLinkClick($event, '{{ $item['url'] }}')"
+                            class="block h-full w-full select-none" style="-webkit-touch-callout: none;">
+                            <img src="{{ $item['url'] }}" loading="lazy" alt="Recuerdo"
+                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 select-none pointer-events-none">
                         </a>
                     @endif
                 </div>
@@ -191,23 +193,24 @@
         </div>
     </main>
 
-    <div x-show="selected.length > 0" 
-         x-transition.translate.y.100%
-         class="fixed bottom-0 left-0 w-full z-50 p-4 sm:p-6" x-cloak>
-        
-        <div class="max-w-3xl mx-auto bg-white dark:bg-neutral-800 shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-neutral-200 dark:border-neutral-700">
-            
+    <div x-show="selected.length > 0" x-transition.translate.y.100% class="fixed bottom-0 left-0 w-full z-50 p-4 sm:p-6"
+        x-cloak>
+
+        <div
+            class="max-w-3xl mx-auto bg-white dark:bg-neutral-800 shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-neutral-200 dark:border-neutral-700">
+
             <div class="flex items-center gap-4 w-full justify-between sm:justify-start sm:w-auto">
                 <flux:button variant="subtle" icon="x-mark" @click="selected = []" class="!rounded-full" />
                 <span class="font-bold text-lg"><span x-text="selected.length"></span> seleccionados</span>
             </div>
-            
+
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <flux:button variant="subtle" @click="toggleSelectAll()" class="hidden sm:flex">
                     <span x-text="allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'"></span>
                 </flux:button>
-                
-                <flux:button variant="primary" icon="arrow-down-tray" @click="downloadSelected()" x-bind:disabled="isDownloading" class="flex-1 sm:flex-none">
+
+                <flux:button variant="primary" icon="arrow-down-tray" @click="downloadSelected()"
+                    x-bind:disabled="isDownloading" class="flex-1 sm:flex-none">
                     <span x-text="isDownloading ? 'Descargando...' : 'Descargar'"></span>
                 </flux:button>
             </div>
@@ -216,4 +219,5 @@
 
     @fluxScripts
 </body>
+
 </html>

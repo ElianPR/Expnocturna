@@ -1100,8 +1100,13 @@
         //  Video recording
         // ═══════════════════════════════════════════
         function bestMime() {
-            return ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4']
-                .find(t => MediaRecorder.isTypeSupported(t)) || '';
+            return [
+                'video/mp4;codecs=h264,aac',
+                'video/mp4',
+                'video/webm;codecs=vp9,opus',
+                'video/webm;codecs=vp8,opus',
+                'video/webm'
+            ].find(t => MediaRecorder.isTypeSupported(t)) || '';
         }
 
         function startRecording() {
@@ -1205,7 +1210,7 @@
 
                 if (response.ok) {
                     showToast('¡Guardado en el álbum del evento!');
-                    document.getElementById('previewOverlay').classList.remove('show');
+                    closePreview();
                 } else {
                     showToast('Error al subir. Intenta de nuevo.');
                 }
@@ -1234,11 +1239,17 @@
         document.getElementById('btnShare').addEventListener('click', shareMedia);
 
         document.getElementById('btnClose').addEventListener('click', () => {
+            closePreview();
+        });
+
+        function closePreview() {
             document.getElementById('previewOverlay').classList.remove('show');
             const v = document.getElementById('previewVid');
             v.pause();
-            v.src = '';
-        });
+            v.removeAttribute('src');
+            v.load(); // <- esto fuerza a WebKit a soltar el audio completamente
+            URL.revokeObjectURL(v.src); // liberar memoria del blob
+        }
 
         // ═══════════════════════════════════════════
         //  Orientation / resize handling
