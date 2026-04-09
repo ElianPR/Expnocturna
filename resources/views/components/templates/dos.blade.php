@@ -120,6 +120,7 @@
             icon="video-camera"
             bgColor="#e4e5ed"
             textColor="#738598"
+            href="{{ $isPreview ? '#' : route('events.camera', $event->id_hex ?? bin2hex($event->id)) }}"
             hoverColor="#d5d7e0"
         >
             Toma foto y video <br> con mariposas
@@ -136,7 +137,7 @@
 
         <x-papilia.button
             icon="share"
-            href="{{ $isPreview ? '#' : route('events.share.create', $event->id_hex ?? bin2hex($event->id ?? '')) }}"
+            href="{{ $isPreview ? '#' : route('events.share.create', $event->id_hex ?? bin2hex($event->id)) }}"
             bgColor="#e4e5ed"
             textColor="#738598"
             hoverColor="#d5d7e0"

@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Butterfly Lens</title>
+    <title>{{ $event->name }}</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300&display=swap"
         rel="stylesheet">
@@ -617,7 +616,8 @@
         <!-- ── Header (title + mode toggle) ── -->
         <div class="header">
             <div class="title">
-                {{ $event->name ?? 'Butterfly Lens' }}
+                Butterfly Lens
+                <span class="subtitle">Cámara AR · Foto &amp; Video</span>
             </div>
             <div class="mode-toggle" id="modeToggle">
                 <button class="mode-btn active" id="btnModePhoto" onclick="setMode('photo')">📷 Foto</button>
@@ -704,7 +704,7 @@
                     <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                 </svg>
-                Guardar en la nube
+                Compartir
             </button>
             <button class="btn-action btn-retake" id="btnClose">Retomar</button>
         </div>
@@ -715,6 +715,8 @@
 
     <script>
         const EVENT_ID = "{{ $event->id_hex }}";
+        const UPLOAD_URL = "{{ route('events.share.store', $event->id_hex) }}";
+        const CSRF_TOKEN = "{{ csrf_token() }}";
     </script>
 
     <script>
@@ -1098,8 +1100,13 @@
         //  Video recording
         // ═══════════════════════════════════════════
         function bestMime() {
-            return ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4']
-                .find(t => MediaRecorder.isTypeSupported(t)) || '';
+            return [
+                'video/mp4;codecs=h264,aac',
+                'video/mp4',
+                'video/webm;codecs=vp9,opus',
+                'video/webm;codecs=vp8,opus',
+                'video/webm'
+            ].find(t => MediaRecorder.isTypeSupported(t)) || '';
         }
 
         function startRecording() {
@@ -1186,34 +1193,29 @@
         }
 
         async function shareMedia() {
-            if (!currentShareBlob) {
-                showToast('No hay archivo para guardar');
-                return;
-            }
+            if (!currentShareBlob) return;
+
+            showToast('Subiendo al álbum...');
 
             const formData = new FormData();
-            formData.append('files[]', currentShareBlob, `capture.${currentShareExt}`);
+            const filename = `butterfly-lens-${Date.now()}.${currentShareExt}`;
+            formData.append('files[]', currentShareBlob, filename);
+            formData.append('_token', CSRF_TOKEN);
 
             try {
-                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                const response = await fetch(`/event/${EVENT_ID}/compartir`, {
+                const response = await fetch(UPLOAD_URL, {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': token
-                    }
                 });
 
-                if (!response.ok) throw new Error();
-
-                showToast('Guardado en el álbum 🦋');
-
-                // Opcional: cerrar preview
-                document.getElementById('previewOverlay').classList.remove('show');
-
-            } catch (error) {
-                showToast('Error al guardar');
+                if (response.ok) {
+                    showToast('¡Guardado en el álbum del evento!');
+                    closePreview();
+                } else {
+                    showToast('Error al subir. Intenta de nuevo.');
+                }
+            } catch (e) {
+                showToast('Error de conexión. Intenta de nuevo.');
             }
         }
 
@@ -1237,11 +1239,17 @@
         document.getElementById('btnShare').addEventListener('click', shareMedia);
 
         document.getElementById('btnClose').addEventListener('click', () => {
+            closePreview();
+        });
+
+        function closePreview() {
             document.getElementById('previewOverlay').classList.remove('show');
             const v = document.getElementById('previewVid');
             v.pause();
-            v.src = '';
-        });
+            v.removeAttribute('src');
+            v.load(); // <- esto fuerza a WebKit a soltar el audio completamente
+            URL.revokeObjectURL(v.src); // liberar memoria del blob
+        }
 
         // ═══════════════════════════════════════════
         //  Orientation / resize handling
