@@ -60,7 +60,7 @@
                 class="
                     {{ $isPreview
                         ? 'w-[92%] sm:w-[85%] md:w-[72%]'
-                        : 'w-[78%] sm:w-[68%] md:w-[62%] lg:w-[55%] xl:w-[48%]'
+                        : 'w-[63%] sm:w-[53%] md:w-[62%] lg:w-[55%] xl:w-[48%]'
                     }}
                     max-w-none
                     h-auto
@@ -82,14 +82,16 @@
             <h1
                 @if($isPreview)
                     x-text="displayTitle || '{{ $titleText }}'"
+                    :style="`color:#bfa472;font-family:${typography || '{{ $fontFam }}'};font-size:clamp(1.8rem,5vw,3.5rem);line-height:1;`"
+                @else
+                    style="
+                        color:#bfa472;
+                        font-family:{{ $fontFam }};
+                        font-size:clamp(2.2rem,7vw,5.5rem);
+                        line-height:1;
+                    "
                 @endif
                 class="text-center font-serif w-full break-words"
-                style="
-                    color: #bfa472;
-                    font-family: {{ $fontFam }};
-                    font-size: clamp(2.2rem, 7vw, 5.5rem);
-                    line-height: 1;
-                "
             >
                 @unless($isPreview)
                     {{ $titleText }}
