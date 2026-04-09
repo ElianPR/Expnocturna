@@ -1,7 +1,7 @@
 <x-layouts.app>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Great+Vibes&family=Montserrat:ital,wght@0,400;0,500;1,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Great+Vibes&family=Montserrat:ital,wght@0,400;0,500;1,500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
 
     <style>
         .borde-rasgado {
@@ -34,14 +34,11 @@
 
                     @if (session('url_evento'))
                         <div class="mt-4 border-t border-green-200/50 pt-4 dark:border-green-800/50">
-                            <p class="mb-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Enlaces del
-                                evento:</p>
+                            <p class="mb-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Enlaces del evento:</p>
                             <ul class="space-y-3 text-sm">
                                 <li x-data="{ copied: false }" class="flex items-center gap-3">
-                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Página del
-                                        evento:</span>
-                                    <a href="{{ session('url_evento') }}" target="_blank"
-                                        class="text-blue-600 hover:underline dark:text-blue-400 truncate w-48 md:w-auto">
+                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Página del evento:</span>
+                                    <a href="{{ session('url_evento') }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400 truncate w-48 md:w-auto">
                                         {{ session('url_evento') }}
                                     </a>
                                     <button type="button" @click="forzarCopiado('{{ session('url_evento') }}'); copied = true; setTimeout(() => copied = false, 2000)" class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200">
@@ -50,10 +47,8 @@
                                     </button>
                                 </li>
                                 <li x-data="{ copied: false }" class="flex items-center gap-3">
-                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Galería /
-                                        Álbum:</span>
-                                    <a href="{{ session('url_album') }}" target="_blank"
-                                        class="text-purple-600 hover:underline dark:text-purple-400 truncate w-48 md:w-auto">
+                                    <span class="font-medium text-neutral-600 dark:text-neutral-400 w-32">Galería / Álbum:</span>
+                                    <a href="{{ session('url_album') }}" target="_blank" class="text-purple-600 hover:underline dark:text-purple-400 truncate w-48 md:w-auto">
                                         {{ session('url_album') }}
                                     </a>
                                     <button type="button" @click="forzarCopiado('{{ session('url_album') }}'); copied = true; setTimeout(() => copied = false, 2000)" class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200">
@@ -90,6 +85,7 @@
                             <flux:select.option value="Times New Roman">Times New Roman</flux:select.option>
                             <flux:select.option value="'Cinzel', serif">Cinzel (Elegante)</flux:select.option>
                             <flux:select.option value="'Great Vibes', cursive">Great Vibes (Cursiva)</flux:select.option>
+                            <flux:select.option value="'Playfair Display', serif">Playfair Display (Romántica)</flux:select.option>
                         </flux:select>
                         <flux:error name="typography" />
                     </flux:field>
@@ -99,6 +95,7 @@
                         <flux:select name="template" x-model="template">
                             <flux:select.option value="1">Papilia (Bordes rasgados)</flux:select.option>
                             <flux:select.option value="2">Acuarela (Hojas y Pincelada)</flux:select.option>
+                            <flux:select.option value="3">Elegante (Flores Doradas)</flux:select.option>
                             <flux:select.option value="0">Plantilla Base</flux:select.option>
                         </flux:select>
                         <flux:error name="template" />
@@ -152,6 +149,9 @@
                     <div x-show="template == '2'" class="h-full w-full" x-cloak>
                         <x-templates.dos :preview="true" />
                     </div>
+                    <div x-show="template == '3'" class="h-full w-full" x-cloak>
+                        <x-templates.tres :preview="true" />
+                    </div>
 
                     <div x-show="template == '0'" class="relative z-10 px-6 py-16 flex flex-col items-center justify-center min-h-full" x-cloak>
                         <h2 class="text-lg font-bold text-neutral-800 mb-2">Plantilla Base</h2>
@@ -166,27 +166,22 @@
     <script>
         window.previewData = function() {
             return {
-                // Usamos json_encode, es el método más a prueba de balas en Laravel
                 name: {!! json_encode(old('name', '')) !!},
                 monogram: {!! json_encode(old('monogram', '')) !!},
                 date: {!! json_encode(old('date', '')) !!},
                 typography: "'Cinzel', serif",
-                
-                // Para el template, como es solo un número (0 o 1), esto es más que suficiente:
                 template: '{{ old("template", "1") }}',
-                
                 imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
                 
                 get displayTitle() {
-                    let text = this.name ? this.name : (this.monogram ? this.monogram : 'JUAN Y MARÍA');
-                    return text.toUpperCase();
+                    let text = this.monogram ? this.monogram : (this.name ? this.name : 'JUAN & MARÍA');
+                    return text; 
                 },
                 
                 get displayDate() {
                     if (!this.date) return 'FECHA POR DEFINIR';
-                    // Agregamos T12:00:00 para evitar desajustes por zona horaria
                     const d = new Date(this.date + 'T12:00:00');
-                    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+                    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
                 },
 
                 updateImage(event) {
@@ -198,7 +193,6 @@
             };
         }
 
-        // Script de copiado
         function forzarCopiado(text) {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text);

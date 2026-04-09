@@ -30,7 +30,6 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('albumGallery', () => ({
-                // Cargamos las URLs de forma segura con PHP
                 allUrls: @json(collect($media)->pluck('url')), 
                 selected: [],
                 isDownloading: false,
@@ -45,7 +44,6 @@
                     if (this.allSelected) {
                         this.selected = [];
                     } else {
-                        // Reactividad forzada
                         this.selected = [...this.allUrls];
                     }
                 },
@@ -60,7 +58,6 @@
 
                 startPress(url) {
                     this.justLongPressed = false;
-                    // Solo activar long-press si no hay fotos ya seleccionadas
                     if (this.selected.length === 0) {
                         this.pressTimer = setTimeout(() => {
                             this.justLongPressed = true;
@@ -75,14 +72,12 @@
                 },
 
                 handleLinkClick(event, url) {
-                    // Si acabas de soltar la pantalla después de dejar presionado, bloqueamos el enlace
                     if (this.justLongPressed) {
                         event.preventDefault();
                         this.justLongPressed = false;
                         return;
                     }
                     
-                    // Si la galería ya está en "Modo Selección", un click solo selecciona (no abre)
                     if (this.selected.length > 0) {
                         event.preventDefault();
                         this.toggleSelection(url);
@@ -95,23 +90,44 @@
                     
                     for (const url of this.selected) {
                         try {
+                            // INTENTO 1: Por Blob (Ideal para fotos y videos ligeros)
                             const response = await fetch(url);
+                            if (!response.ok) throw new Error('Fallo al obtener el archivo');
                             const blob = await response.blob();
                             const blobUrl = window.URL.createObjectURL(blob);
                             
                             const a = document.createElement('a');
                             a.style.display = 'none';
                             a.href = blobUrl;
-                            a.download = url.split('/').pop().split('?')[0] || 'recuerdo';
+                            
+                            // Asegurar extensión del archivo
+                            let filename = url.split('/').pop().split('?')[0] || 'recuerdo';
+                            if (!filename.includes('.')) {
+                                filename += url.includes('.mp4') ? '.mp4' : '.jpg';
+                            }
+                            a.download = filename;
                             
                             document.body.appendChild(a);
                             a.click();
-                            window.URL.revokeObjectURL(blobUrl);
+                            
+                            setTimeout(() => {
+                                window.URL.revokeObjectURL(blobUrl);
+                                document.body.removeChild(a);
+                            }, 1000);
+                            
+                            await new Promise(r => setTimeout(r, 600)); // Pausa entre descargas
+                        } catch (error) {
+                            console.warn('Fallback de descarga activado para:', url);
+                            // INTENTO 2: Fallback Nativo (Para videos pesados que crashean la RAM o bloqueos de CORS)
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = ''; 
+                            a.target = '_blank';
+                            document.body.appendChild(a);
+                            a.click();
                             document.body.removeChild(a);
                             
-                            await new Promise(r => setTimeout(r, 400));
-                        } catch (error) {
-                            console.error('Error descargando: ', url);
+                            await new Promise(r => setTimeout(r, 1000));
                         }
                     }
                     this.isDownloading = false;
@@ -163,20 +179,28 @@
 
                     <button type="button" 
                             @click.stop.prevent="toggleSelection('{{ $item['url'] }}')" 
-                            class="absolute top-3 right-3 z-20 flex items-center justify-center size-8 rounded-full border-2 shadow-sm transition-all cursor-pointer outline-none"
+                            @mousedown.stop @touchstart.stop
+                            class="absolute top-3 right-3 z-30 flex items-center justify-center size-8 rounded-full border-2 shadow-sm transition-all cursor-pointer outline-none"
                             :class="selected.includes('{{ $item['url'] }}') 
                                 ? 'bg-blue-500 border-blue-500 text-white' 
                                 : 'bg-black/30 border-white text-transparent hover:bg-black/50 hover:text-white'">
-                        
                         <flux:icon.check class="size-5" stroke-width="3" />
                     </button>
 
                     @if($item['is_video'])
-                        <video class="h-full w-full object-cover" preload="metadata" controls @click="handleLinkClick($event, '{{ $item['url'] }}')">
+                        <video class="h-full w-full object-cover relative z-20" 
+                               preload="metadata" 
+                               controls 
+                               playsinline 
+                               webkit-playsinline
+                               @click.stop
+                               @mousedown.stop 
+                               @touchstart.stop>
                             <source src="{{ $item['url'] }}" type="video/mp4">
+                            Tu navegador no soporta video.
                         </video>
                     @else
-                        <a href="{{ $item['url'] }}" target="_blank" @click="handleLinkClick($event, '{{ $item['url'] }}')" class="block h-full w-full select-none" style="-webkit-touch-callout: none;">
+                        <a href="{{ $item['url'] }}" target="_blank" @click="handleLinkClick($event, '{{ $item['url'] }}')" class="block h-full w-full select-none relative z-10" style="-webkit-touch-callout: none;">
                             <img src="{{ $item['url'] }}" loading="lazy" alt="Recuerdo" 
                                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 select-none pointer-events-none">
                         </a>

@@ -26,7 +26,10 @@
 <body class="font-base text-neutral-800 min-h-screen bg-neutral-900 flex justify-center w-full relative">
 @endif
 
-    <div class="{{ $isPreview ? 'w-full min-h-full' : 'w-full max-w-full sm:max-w-md md:max-w-2xl lg:max-w-4xl min-h-screen shadow-2xl' }} relative flex flex-col overflow-x-hidden mx-auto" 
+    <div class="{{ $isPreview
+    ? 'w-full min-h-full'
+    : 'w-full min-h-screen shadow-2xl sm:max-w-md md:max-w-[768px] lg:max-w-[1024px] xl:max-w-[1280px]' }}
+    relative flex flex-col overflow-x-hidden mx-auto" }} relative flex flex-col overflow-x-hidden mx-auto" 
          style="{{ $bgStyle }} background-size: cover; background-position: center;">
         
         <div class="absolute inset-0 bg-white/40 z-0 pointer-events-none"></div>
