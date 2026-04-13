@@ -44,4 +44,9 @@ Route::post('/event/{id_evento}/compartir', [EventShareController::class, 'store
 
 Route::get('/event/{id_evento}/camara', [EventController::class, 'camera'])
     ->name('events.camera');
+
+Route::get('/event/{id_evento}/musica', [EventController::class, 'music'])
+    ->name('events.music');
+
+Route::get('/events/{id_hex}/stream-song', [EventController::class, 'streamSong'])->name('events.stream-song');
 require __DIR__.'/auth.php';

@@ -150,6 +150,7 @@
                     bgColor="#fdf6eb"
                     textColor="#5c5e60"
                     hoverColor="#f5eadb"
+                    href="{{ $isPreview ? '#' : route('events.music', $event->id_hex ?? bin2hex($event->id ?? '')) }}"
                 >
                     <span class="font-bold">Escucha su canción</span>
                 </x-papilia.button>

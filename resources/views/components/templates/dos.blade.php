@@ -130,6 +130,7 @@
             icon="musical-note"
             bgColor="#e4e5ed"
             textColor="#738598"
+            href="{{ $isPreview ? '#' : route('events.music', $event->id_hex ?? bin2hex($event->id ?? '')) }}"
             hoverColor="#d5d7e0"
         >
             Escucha su canción

@@ -140,4 +140,62 @@ class EventController extends Controller
 
         return response()->file($rutaFisica);
     }
+
+    public function music($id_hex)
+    {
+        try {
+            $id = hex2bin($id_hex);
+            $event = Event::findOrFail($id);
+
+            // En lugar de una URL pública, le damos la ruta de nuestro "puente seguro"
+            $songUrl = $event->song ? route('events.stream-song', $id_hex) : null;
+
+            return view('events.music', compact('event', 'songUrl'));
+
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard')->with('swal_error', 'No se pudo cargar la música de este evento.');
+        }
+    }
+
+    /**
+     * Transmite el archivo de audio privado.
+     */
+    public function streamSong($id_hex)
+    {
+        // 1. Decodificamos a binario SOLO para buscar en la base de datos
+        $id = hex2bin($id_hex);
+        $event = \App\Models\Event::findOrFail($id);
+
+        if (!$event->song) {
+            abort(404);
+        }
+
+        // 2. EL TRUCO: Armamos la ruta usando $id_hex (letras y números limpios), 
+        // no el $id binario que rompe las carpetas de Windows.
+        $path = storage_path('app/private/' . $id_hex . '/' . $event->song);
+
+        // Por si acaso el sistema lo guardó usando el ID convertido a string en lugar de hex
+        $pathString = storage_path('app/private/' . ((string) $event->id) . '/' . $event->song);
+
+        // Determinamos cuál es la ruta correcta donde realmente vive el archivo
+        $finalPath = null;
+        if (file_exists($path)) {
+            $finalPath = $path;
+        } elseif (file_exists($pathString)) {
+            $finalPath = $pathString;
+        }
+
+        if (!$finalPath) {
+            // Si esto vuelve a salir, significa que la carpeta física en Windows 
+            // se llama distinto a $id_hex. 
+            dd("Sigo sin encontrarlo. Tu archivo se llama: {$event->song}. Busqué en la carpeta: {$id_hex}");
+        }
+
+        // 3. Enviamos el archivo con las cabeceras correctas para que el celular
+        // pueda reproducirlo y adelantar/atrasar sin problema.
+        return response()->file($finalPath, [
+            'Content-Type' => 'audio/mpeg',
+            'Accept-Ranges' => 'bytes'
+        ]);
+    }
 }

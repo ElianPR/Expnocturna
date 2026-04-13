@@ -49,7 +49,9 @@
             Toma foto y video <br> con mariposas
         </x-papilia.button>
 
-        <x-papilia.button icon="musical-note">
+        <x-papilia.button icon="musical-note"
+            href="{{ $isPreview ? '#' : route('events.music', $event->id_hex ?? bin2hex($event->id ?? '')) }}"
+        >
             Escucha su canción
         </x-papilia.button>
 
