@@ -30,12 +30,8 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('albumGallery', () => ({
-<<<<<<< HEAD
-                allUrls: @json(collect($media)->pluck('url')), 
-=======
                 // Cargamos las URLs de forma segura con PHP
                 allUrls: @json(collect($media)->pluck('url')),
->>>>>>> main
                 selected: [],
                 isDownloading: false,
                 pressTimer: null,
@@ -83,12 +79,7 @@
                         this.justLongPressed = false;
                         return;
                     }
-<<<<<<< HEAD
                     
-=======
-
-                    // Si la galería ya está en "Modo Selección", un click solo selecciona (no abre)
->>>>>>> main
                     if (this.selected.length > 0) {
                         event.preventDefault();
                         this.toggleSelection(url);
@@ -110,7 +101,6 @@
                             const a = document.createElement('a');
                             a.style.display = 'none';
                             a.href = blobUrl;
-<<<<<<< HEAD
                             
                             // Asegurar extensión del archivo
                             let filename = url.split('/').pop().split('?')[0] || 'recuerdo';
@@ -119,10 +109,6 @@
                             }
                             a.download = filename;
                             
-=======
-                            a.download = url.split('/').pop().split('?')[0] || 'recuerdo';
-
->>>>>>> main
                             document.body.appendChild(a);
                             a.click();
                             
@@ -142,15 +128,8 @@
                             document.body.appendChild(a);
                             a.click();
                             document.body.removeChild(a);
-<<<<<<< HEAD
                             
                             await new Promise(r => setTimeout(r, 1000));
-=======
-
-                            await new Promise(r => setTimeout(r, 400));
-                        } catch (error) {
-                            console.error('Error descargando: ', url);
->>>>>>> main
                         }
                     }
                     this.isDownloading = false;
@@ -203,7 +182,6 @@
                             'bg-blue-500 border-blue-500 text-white' :
                             'bg-black/30 border-white text-transparent hover:bg-black/50 hover:text-white'">
 
-<<<<<<< HEAD
                     <button type="button" 
                             @click.stop.prevent="toggleSelection('{{ $item['url'] }}')" 
                             @mousedown.stop @touchstart.stop
@@ -230,24 +208,6 @@
                         <a href="{{ $item['url'] }}" target="_blank" @click="handleLinkClick($event, '{{ $item['url'] }}')" class="block h-full w-full select-none relative z-10" style="-webkit-touch-callout: none;">
                             <img src="{{ $item['url'] }}" loading="lazy" alt="Recuerdo" 
                                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 select-none pointer-events-none">
-=======
-                        <flux:icon.check class="size-5" stroke-width="3" />
-                    </button>
-
-                    @if ($item['is_video'])
-                        <div class="relative h-full w-full bg-black">
-                            <video class="absolute inset-0 h-full w-full object-contain" preload="none" controls
-                                playsinline webkit-playsinline x-on:click.stop>
-                                <source src="{{ $item['url'] }}" type="video/mp4">
-                            </video>
-                        </div>
-                    @else
-                        <a href="{{ $item['url'] }}" target="_blank"
-                            @click="handleLinkClick($event, '{{ $item['url'] }}')"
-                            class="block h-full w-full select-none" style="-webkit-touch-callout: none;">
-                            <img src="{{ $item['url'] }}" loading="lazy" alt="Recuerdo"
-                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 select-none pointer-events-none">
->>>>>>> main
                         </a>
                     @endif
                 </div>

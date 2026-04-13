@@ -29,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/event/{id_evento}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
 
 Route::get('/event/{id}/qr', [EventController::class, 'qr'])
+    ->middleware('auth')
     ->name('events.qr');
 
 Route::get('/event/{id_evento}/file/{filename}', [EventController::class, 'serveFile'])->name('file.show');
