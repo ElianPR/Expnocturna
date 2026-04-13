@@ -19,8 +19,8 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'       => 'nullable|required_without:monogram|max:80',
-            'monogram'   => 'nullable|required_without:name|max:40',
+            'name' => 'required|max:80',
+            'monogram' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'typography' => 'nullable|max:40',
             'template'   => 'nullable|integer',
             'date'       => 'required|date',
@@ -41,11 +41,21 @@ class EventController extends Controller
                 'album'      => hex2bin($albumHex),
                 'id_user'    => Auth::id(),
                 'name'       => $validated['name'] ?? null,
-                'monogram'   => $validated['monogram'] ?? null,
+                'monogram' => $validated['monogram'] ?? null,
                 'typography' => $validated['typography'] ?? null,
                 'template'   => $request->input('template', 0),
                 'date'       => $validated['date'],
             ];
+
+            // Guardar Monograma (imagen)
+            if ($request->hasFile('monogram')) {
+                $monogramFile = $request->file('monogram');
+                $monogramName = substr($monogramFile->getClientOriginalName(), -50);
+
+                $monogramFile->storeAs($folderName, $monogramName, 'local');
+
+                $eventData['monogram'] = $monogramName; // guardas el nombre
+            }
 
             // Guardar Canción
             if ($request->hasFile('song')) {
@@ -164,7 +174,7 @@ class EventController extends Controller
     {
         // 1. Decodificamos a binario SOLO para buscar en la base de datos
         $id = hex2bin($id_hex);
-        $event = \App\Models\Event::findOrFail($id);
+        $event = Event::findOrFail($id);
 
         if (!$event->song) {
             abort(404);
