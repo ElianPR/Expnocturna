@@ -20,7 +20,8 @@
     $imgAttr = $isPreview ? ':src="imageUrl"' : 'src="' . $imgUrlFinal . '"';
 @endphp
 
-<x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam">
+<x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam"
+    bgStyle="background-image: url('{{ asset('images/papel.jpg') }}'); background-size: cover; background-position: center;">
 
     <div
         class="text-center text-[10px] sm:text-[11px] font-bold tracking-widest text-[#1b311e] px-6 mb-5 uppercase leading-relaxed">
@@ -70,8 +71,7 @@
         </x-papilia.button>
 
         <x-papilia.button icon="musical-note"
-            href="{{ $isPreview ? '#' : route('events.music', $event->id_hex ?? bin2hex($event->id ?? '')) }}"
-        >
+            href="{{ $isPreview ? '#' : route('events.music', $event->id_hex ?? bin2hex($event->id ?? '')) }}">
             Escucha su canción
         </x-papilia.button>
 
