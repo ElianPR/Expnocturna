@@ -24,10 +24,12 @@ class Event extends Model
         'watermark',
         'date',
         'id_user',
+        'is_active',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'is_active' => 'boolean',
     ];
 
     protected static function boot()

@@ -125,15 +125,39 @@ class EventController extends Controller
         $eventId = hex2bin($folder);
         $event = Event::where('id', $eventId)->firstOrFail();
 
-        // Buscamos la foto ligada al evento
+        // 1. COMPROBAR SI ESTÁ ACTIVO
+        if (!$event->is_active) {
+            // Si está desactivado, mostramos la pantalla de clausura
+            return view('events.thank_you', compact('event'));
+        }
+
+        // Si está activo, el flujo sigue normal...
         $photo = DB::table('photos')->where('id_event', $eventId)->first();
 
-        // Generamos la URL usando el nombre de la ruta que definiste
         $imageUrl = $photo
             ? route('file.show', ['id_evento' => $folder, 'filename' => $photo->url])
             : asset('images/fondo-papel.jpg');
 
         return view('events.show', compact('event', 'imageUrl'));
+    }
+
+    public function toggleStatus(Request $request, $id_hex)
+    {
+        try {
+            $id = hex2bin($id_hex);
+            $event = Event::findOrFail($id);
+            
+            // Invertimos el estado (si era true, pasa a false y viceversa)
+            $event->is_active = !$event->is_active;
+            $event->save();
+
+            return response()->json([
+                'success' => true, 
+                'is_active' => $event->is_active
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false], 500);
+        }
     }
 
     public function serveFile(string $id_evento, string $filename)
