@@ -26,7 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
 });
 
-Route::get('/event/{id_evento}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
+Route::get('/event/{id_evento}', [EventController::class, 'show'])->name('events.show');
 
 Route::get('/event/{id}/qr', [EventController::class, 'qr'])
     ->middleware('auth')
@@ -36,6 +36,15 @@ Route::get('/event/{id_evento}/file/{filename}', [EventController::class, 'serve
 Route::get('/album/{id_album}', [EventShareController::class, 'showAlbum'])->name('album.show');
 
 Route::get('/album/{id_album}/file/{filename}', [EventShareController::class, 'serveFile'])->name('album.file');
+
+Route::get('/album/{id_album}/admin', [EventShareController::class, 'adminAlbum'])
+    ->middleware('auth')
+    ->name('album.admin');
+
+Route::delete('/album/{id_album}/delete', [EventShareController::class, 'deleteMedia'])
+    ->middleware('auth')
+    ->name('album.delete');
+
 Route::get('/event/{id_evento}/compartir', [EventShareController::class, 'create'])
     ->name('events.share.create');
 

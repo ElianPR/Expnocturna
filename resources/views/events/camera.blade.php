@@ -694,7 +694,7 @@
         <img id="previewImg" class="preview-media" src="" alt="" style="display:none">
         <video id="previewVid" class="preview-media" controls playsinline loop style="display:none"></video>
         <div class="preview-actions">
-            <button class="btn-action btn-save" id="btnSave">Guardar</button>
+            <button class="btn-action btn-save" id="btnSave">Guardar en celular</button>
             <button class="btn-action btn-share" id="btnShare">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -704,7 +704,7 @@
                     <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                 </svg>
-                Compartir
+                Compartir en el álbum del evento
             </button>
             <button class="btn-action btn-retake" id="btnClose">Retomar</button>
         </div>

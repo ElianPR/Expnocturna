@@ -5,7 +5,8 @@
             <h1 class="text-2xl font-semibold">Eventos</h1>
 
             <flux:button href="{{ route('events.create') }}"
-                class="rounded-lg bg-black px-4 py-2 text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200" icon="plus">
+                class="rounded-lg bg-black px-4 py-2 text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+                icon="plus">
                 Agregar evento
             </flux:button>
         </div>
@@ -25,8 +26,9 @@
                     @forelse ($events as $event)
                         <tr class="border-t border-neutral-200 dark:border-neutral-700">
                             <td class="px-4 py-3">
-                                <a href="{{ route('events.qr', $event->id_hex) }}" class="font-semibold text-neutral-800 hover:text-blue-600 hover:underline dark:text-neutral-200 dark:hover:text-blue-400 transition-colors">
-                                    {{ $event->name ?? $event->monogram ?? '—' }}
+                                <a href="{{ route('events.qr', $event->id_hex) }}"
+                                    class="font-semibold text-neutral-800 hover:text-blue-600 hover:underline dark:text-neutral-200 dark:hover:text-blue-400 transition-colors">
+                                    {{ $event->name ?? ($event->monogram ?? '—') }}
                                 </a>
                             </td>
 
@@ -36,21 +38,26 @@
 
                             <td class="px-4 py-3">
                                 <div class="flex flex-col gap-2">
-                                    
+
                                     <div x-data="{ copied: false }" class="flex items-center gap-2">
                                         <div class="w-16">
-                                            <a href="{{ url('/event/' . $event->id_hex) }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
+                                            <a href="{{ url('/event/' . $event->id_hex) }}" target="_blank"
+                                                class="text-blue-600 hover:underline dark:text-blue-400">
                                                 Evento
                                             </a>
                                         </div>
-                                        
-                                        <button @click="forzarCopiado('{{ url('/event/' . $event->id_hex) }}'); copied = true; setTimeout(() => copied = false, 2000)" class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 focus:outline-none" title="Copiar enlace">
+
+                                        <button
+                                            @click="forzarCopiado('{{ url('/event/' . $event->id_hex) }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                            class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 focus:outline-none"
+                                            title="Copiar enlace">
                                             <flux:icon.document-duplicate x-show="!copied" class="size-4" />
                                             <flux:icon.check x-show="copied" class="size-4 text-green-500" x-cloak />
                                         </button>
-                                        
+
                                         <div class="w-16">
-                                            <span :class="copied ? 'opacity-100' : 'opacity-0'" class="text-xs font-medium text-green-500 transition-opacity duration-300">
+                                            <span :class="copied ? 'opacity-100' : 'opacity-0'"
+                                                class="text-xs font-medium text-green-500 transition-opacity duration-300">
                                                 ¡Copiado!
                                             </span>
                                         </div>
@@ -58,21 +65,53 @@
 
                                     <div x-data="{ copied: false }" class="flex items-center gap-2">
                                         <div class="w-16">
-                                            <a href="{{ url('/album/' . bin2hex($event->album)) }}" target="_blank" class="text-purple-600 hover:underline dark:text-purple-400">
+                                            <a href="{{ url('/album/' . bin2hex($event->album)) }}" target="_blank"
+                                                class="text-purple-600 hover:underline dark:text-purple-400">
                                                 Álbum
                                             </a>
                                         </div>
 
-                                        <button @click="forzarCopiado('{{ url('/album/' . bin2hex($event->album)) }}'); copied = true; setTimeout(() => copied = false, 2000)" class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 focus:outline-none" title="Copiar enlace">
+                                        <button
+                                            @click="forzarCopiado('{{ url('/album/' . bin2hex($event->album)) }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                            class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 focus:outline-none"
+                                            title="Copiar enlace">
                                             <flux:icon.document-duplicate x-show="!copied" class="size-4" />
                                             <flux:icon.check x-show="copied" class="size-4 text-green-500" x-cloak />
                                         </button>
 
                                         <div class="w-16">
-                                            <span :class="copied ? 'opacity-100' : 'opacity-0'" class="text-xs font-medium text-green-500 transition-opacity duration-300">
+                                            <span :class="copied ? 'opacity-100' : 'opacity-0'"
+                                                class="text-xs font-medium text-green-500 transition-opacity duration-300">
                                                 ¡Copiado!
                                             </span>
                                         </div>
+                                    </div>
+
+                                    <div x-data="{ copied: false }" class="flex items-center gap-2">
+
+                                        <div class="w-16">
+                                            <a href="{{ url('/album/' . bin2hex($event->album) . '/admin') }}"
+                                                target="_blank" class="text-red-600 hover:underline dark:text-red-400">
+                                                Admin
+                                            </a>
+                                        </div>
+
+                                        <button
+                                            @click="forzarCopiado('{{ url('/album/' . bin2hex($event->album) . '/admin') }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                            class="cursor-pointer text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 focus:outline-none"
+                                            title="Copiar enlace">
+
+                                            <flux:icon.document-duplicate x-show="!copied" class="size-4" />
+                                            <flux:icon.check x-show="copied" class="size-4 text-green-500" x-cloak />
+                                        </button>
+
+                                        <div class="w-16">
+                                            <span :class="copied ? 'opacity-100' : 'opacity-0'"
+                                                class="text-xs font-medium text-green-500 transition-opacity duration-300">
+                                                ¡Copiado!
+                                            </span>
+                                        </div>
+
                                     </div>
 
                                 </div>
@@ -116,7 +155,11 @@
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            try { document.execCommand('copy'); } catch (err) { console.error('Error', err); }
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Error', err);
+            }
             document.body.removeChild(textArea);
         }
     </script>
