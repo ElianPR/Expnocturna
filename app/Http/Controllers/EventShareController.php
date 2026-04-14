@@ -33,13 +33,19 @@ class EventShareController extends Controller
         }
 
         $allowedMimes = [
-            'image/jpeg', 'image/png', 'image/webp',
-            'image/heic', 'image/heif',
-            'video/mp4', 'video/quicktime', 'video/x-msvideo',
-            'video/x-matroska', 'video/webm'
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/heic',
+            'image/heif',
+            'video/mp4',
+            'video/quicktime',
+            'video/x-msvideo',
+            'video/x-matroska',
+            'video/webm'
         ];
 
-        $eventFolder = 'events/' . bin2hex($event->album); 
+        $eventFolder = 'events/' . bin2hex($event->album);
 
         $uploaded = 0;
         $errors = [];
@@ -80,7 +86,6 @@ class EventShareController extends Controller
                 );
 
                 $uploaded++;
-
             } catch (\Exception $e) {
                 $errors[] = $file->getClientOriginalName() . ' falló al subir.';
             }
@@ -109,7 +114,7 @@ class EventShareController extends Controller
             $isVideo = in_array($extension, ['mp4', 'mov', 'avi', 'mkv', 'webm']);
 
             $url = route('album.file', [
-                'id_album' => $id_album, 
+                'id_album' => $id_album,
                 'filename' => basename($file)
             ]);
 
@@ -132,5 +137,64 @@ class EventShareController extends Controller
         $rutaFisica = Storage::disk('local')->path($path);
 
         return response()->file($rutaFisica);
+    }
+
+    public function adminAlbum(string $id_album)
+    {
+        if (!ctype_xdigit($id_album) || strlen($id_album) !== 32) {
+            abort(404);
+        }
+
+        $event = Event::where('album', hex2bin($id_album))->firstOrFail();
+
+        $eventFolder = 'events/' . $id_album;
+        $files = Storage::disk('local')->files($eventFolder);
+
+        $media = [];
+        foreach ($files as $file) {
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $isVideo = in_array($extension, ['mp4', 'mov', 'avi', 'mkv', 'webm']);
+
+            $url = route('album.file', [
+                'id_album' => $id_album,
+                'filename' => basename($file)
+            ]);
+
+            $media[] = [
+                'url' => $url,
+                'is_video' => $isVideo,
+            ];
+        }
+
+        return view('events.album-admin', compact('event', 'media'));
+    }
+
+    public function deleteMedia(Request $request, string $id_album)
+    {
+        if (!ctype_xdigit($id_album) || strlen($id_album) !== 32) {
+            abort(404);
+        }
+
+        $files = $request->input('files', []);
+
+        if (empty($files)) {
+            return response()->json(['error' => 'No hay archivos seleccionados'], 422);
+        }
+
+        $deleted = 0;
+
+        foreach ($files as $url) {
+            $filename = basename(parse_url($url, PHP_URL_PATH));
+            $path = 'events/' . $id_album . '/' . $filename;
+
+            if (Storage::disk('local')->exists($path)) {
+                Storage::disk('local')->delete($path);
+                $deleted++;
+            }
+        }
+
+        return response()->json([
+            'message' => "$deleted archivo(s) eliminado(s)"
+        ]);
     }
 }
