@@ -41,7 +41,7 @@ Route::get('/album/{id_album}/admin', [EventShareController::class, 'adminAlbum'
     ->middleware('auth')
     ->name('album.admin');
 
-Route::delete('/album/{id_album}/delete', [EventShareController::class, 'deleteMedia'])
+Route::post('/album/{id_album}/delete', [EventShareController::class, 'deleteMedia'])
     ->middleware('auth')
     ->name('album.delete');
 
@@ -53,7 +53,7 @@ Route::post('/event/{id_evento}/compartir', [EventShareController::class, 'store
 
 Route::get('/event/{id_evento}/camara', [EventController::class, 'camera'])
     ->name('events.camera');
-    
+
 Route::patch('/events/{id_hex}/toggle-status', [App\Http\Controllers\EventController::class, 'toggleStatus'])
     ->name('events.toggle-status');
 
@@ -61,4 +61,4 @@ Route::get('/event/{id_evento}/musica', [EventController::class, 'music'])
     ->name('events.music');
 
 Route::get('/events/{id_hex}/stream-song', [EventController::class, 'streamSong'])->name('events.stream-song');
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

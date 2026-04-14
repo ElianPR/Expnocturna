@@ -148,31 +148,31 @@
 
                     await this.deleteSelected();
                 },
-
                 async deleteSelected() {
                     try {
+                        const formData = new FormData();
+                        formData.append('_token', document.querySelector('meta[name="csrf-token"]')
+                            .content);
+
+                        this.selected.forEach(file => {
+                            formData.append('files[]', file);
+                        });
+
                         const response = await fetch(
-                            `/album/{{ request()->route('id_album') }}/delete`, {
-                                method: 'DELETE',
-                                credentials: 'same-origin', // IMPORTANTE
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector(
-                                        'meta[name="csrf-token"]').content
-                                },
-                                body: JSON.stringify({
-                                    files: this.selected
-                                })
+                            `{{ route('album.delete', request()->route('id_album')) }}`, {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                body: formData
                             });
 
                         if (!response.ok) throw new Error();
 
-                        // eliminar del frontend
                         window.location.reload();
+
                     } catch (e) {
                         alert('Error al eliminar archivos');
                     }
-                },
+                }
             }));
         });
     </script>
