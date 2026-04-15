@@ -141,11 +141,27 @@
                     <flux:error name="main_image" />
                 </flux:field>
 
-                <flux:field>
-                    <flux:label>Canción de fondo (MP3, WAV)</flux:label>
-                    <flux:input type="file" name="song" accept="audio/mp3,audio/wav" />
-                    <flux:error name="song" />
-                </flux:field>
+                <div x-data="{ mediaType: '' }" class="space-y-6">
+                    <flux:field>
+                        <flux:label>Canción o Video (MP3, MP4, WAV, MOV)</flux:label>
+                        <flux:input 
+                            type="file" 
+                            name="song" 
+                            accept="audio/*,video/*" 
+                            @change="mediaType = $event.target.files[0] ? $event.target.files[0].type.split('/')[0] : ''" 
+                        />
+                        <flux:error name="song" />
+                    </flux:field>
+
+                    <div x-show="mediaType === 'audio'" x-transition x-cloak>
+                        <flux:field>
+                            <flux:label>Portada de la canción (Opcional, PNG/JPG)</flux:label>
+                            <flux:input type="file" name="song_cover" accept="image/jpeg,image/png,image/webp" />
+                            <flux:error name="song_cover" />
+                            <p class="text-xs text-neutral-500 mt-1">Esta imagen se mostrará como un disco mientras suena la canción.</p>
+                        </flux:field>
+                    </div>
+                </div>
 
                 <flux:field>
                     <flux:label>Imagen para Marca de Agua (PNG, JPG)</flux:label>

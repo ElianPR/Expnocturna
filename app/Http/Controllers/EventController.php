@@ -25,7 +25,8 @@ class EventController extends Controller
             'template'   => 'nullable|integer',
             'date'       => 'required|date',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
-            'song'       => 'nullable|file|mimes:mp3,wav|max:10240',
+            'song'       => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
+            'song_cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'watermark'  => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
@@ -57,7 +58,7 @@ class EventController extends Controller
                 $eventData['monogram'] = $monogramName; // guardas el nombre
             }
 
-            // Guardar Canción
+            // Guardar Canción o video
             if ($request->hasFile('song')) {
                 $songFile = $request->file('song');
                 $songName = substr($songFile->getClientOriginalName(), -50);
@@ -65,12 +66,12 @@ class EventController extends Controller
                 $eventData['song'] = $songName;
             }
 
-            // Guardar Marca de Agua
-            if ($request->hasFile('watermark')) {
-                $watermarkFile = $request->file('watermark');
-                $watermarkName = substr($watermarkFile->getClientOriginalName(), -50);
-                $watermarkFile->storeAs($folderName, $watermarkName, 'local');
-                $eventData['watermark'] = $watermarkName;
+            // Guardar Portada de la canción
+            if ($request->hasFile('song_cover')) {
+                $coverFile = $request->file('song_cover');
+                $coverName = substr($coverFile->getClientOriginalName(), -50);
+                $coverFile->storeAs($folderName, $coverName, 'local');
+                $eventData['song_cover'] = $coverName;
             }
 
             // 1. PRIMERO CREAMOS EL EVENTO
@@ -196,7 +197,6 @@ class EventController extends Controller
      */
     public function streamSong($id_hex)
     {
-        // 1. Decodificamos a binario SOLO para buscar en la base de datos
         $id = hex2bin($id_hex);
         $event = Event::findOrFail($id);
 
@@ -204,32 +204,42 @@ class EventController extends Controller
             abort(404);
         }
 
-        // 2. EL TRUCO: Armamos la ruta usando $id_hex (letras y números limpios), 
-        // no el $id binario que rompe las carpetas de Windows.
         $path = storage_path('app/private/' . $id_hex . '/' . $event->song);
-
-        // Por si acaso el sistema lo guardó usando el ID convertido a string en lugar de hex
         $pathString = storage_path('app/private/' . ((string) $event->id) . '/' . $event->song);
 
-        // Determinamos cuál es la ruta correcta donde realmente vive el archivo
-        $finalPath = null;
-        if (file_exists($path)) {
-            $finalPath = $path;
-        } elseif (file_exists($pathString)) {
-            $finalPath = $pathString;
-        }
+        $finalPath = file_exists($path) ? $path : (file_exists($pathString) ? $pathString : null);
 
         if (!$finalPath) {
-            // Si esto vuelve a salir, significa que la carpeta física en Windows 
-            // se llama distinto a $id_hex. 
             dd("Sigo sin encontrarlo. Tu archivo se llama: {$event->song}. Busqué en la carpeta: {$id_hex}");
         }
 
-        // 3. Enviamos el archivo con las cabeceras correctas para que el celular
-        // pueda reproducirlo y adelantar/atrasar sin problema.
+        // Detecta automáticamente si es video o audio para que el navegador no se confunda
+        $mime = mime_content_type($finalPath);
+
         return response()->file($finalPath, [
-            'Content-Type' => 'audio/mpeg',
+            'Content-Type' => $mime,
             'Accept-Ranges' => 'bytes'
         ]);
+    }
+
+    public function streamCover($id_hex)
+    {
+        $id = hex2bin($id_hex);
+        $event = Event::findOrFail($id);
+
+        if (!$event->song_cover) {
+            abort(404);
+        }
+
+        $path = storage_path('app/private/' . $id_hex . '/' . $event->song_cover);
+        $pathString = storage_path('app/private/' . ((string) $event->id) . '/' . $event->song_cover);
+
+        $finalPath = file_exists($path) ? $path : (file_exists($pathString) ? $pathString : null);
+
+        if (!$finalPath) abort(404);
+
+        $mime = mime_content_type($finalPath);
+
+        return response()->file($finalPath, ['Content-Type' => $mime]);
     }
 }

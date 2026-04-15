@@ -60,5 +60,8 @@ Route::patch('/events/{id_hex}/toggle-status', [App\Http\Controllers\EventContro
 Route::get('/event/{id_evento}/musica', [EventController::class, 'music'])
     ->name('events.music');
 
+Route::get('/events/{id_hex}/stream-cover', [App\Http\Controllers\EventController::class, 'streamCover'])
+    ->name('events.stream-cover');
+
 Route::get('/events/{id_hex}/stream-song', [EventController::class, 'streamSong'])->name('events.stream-song');
 require __DIR__.'/auth.php';

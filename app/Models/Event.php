@@ -21,6 +21,7 @@ class Event extends Model
         'template',
         'album',
         'song',
+        'song_cover',
         'watermark',
         'date',
         'id_user',
