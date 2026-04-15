@@ -17,7 +17,8 @@
                     <tr>
                         <th class="px-4 py-3 text-left">Nombre</th>
                         <th class="px-4 py-3 text-left">Fecha</th>
-                        <th class="px-4 py-3 text-center">Estado de Invitación</th>
+                        <th class="px-4 py-3 text-center">Estado de portada</th>
+                        <th class="px-4 py-3 text-center">Estado de Álbum</th>
                         <th class="px-4 py-3 text-left">Enlaces</th>
                         <th class="px-4 py-3 text-left">Acciones</th>
                     </tr>
@@ -38,14 +39,13 @@
                             </td>
 
                             <td class="px-4 py-3 text-center">
-                                <div x-data="{ 
-                                        active: {{ $event->is_active ? 'true' : 'false' }}, 
-                                        loading: false 
-                                    }" 
-                                    class="flex flex-col items-center justify-center gap-1">
-                                    
-                                    <button type="button" 
-                                            @click="
+                                <div x-data="{
+                                    active: {{ $event->is_active ? 'true' : 'false' }},
+                                    loading: false
+                                }" class="flex flex-col items-center justify-center gap-1">
+
+                                    <button type="button"
+                                        @click="
                                                 loading = true;
                                                 fetch('{{ route('events.toggle-status', $event->id_hex) }}', {
                                                     method: 'PATCH',
@@ -61,15 +61,57 @@
                                                 })
                                                 .finally(() => loading = false)
                                             "
-                                            :class="active ? 'bg-green-500' : 'bg-neutral-300 dark:bg-neutral-600'"
-                                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                            :disabled="loading">
+                                        :class="active ? 'bg-green-500' : 'bg-neutral-300 dark:bg-neutral-600'"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        :disabled="loading">
                                         <span class="sr-only">Cambiar estado</span>
-                                        <span :class="active ? 'translate-x-5' : 'translate-x-0'" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                        <span :class="active ? 'translate-x-5' : 'translate-x-0'"
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
                                     </button>
-                                    
-                                    <span x-text="active ? 'Activa' : 'Desactivada'" 
-                                        :class="active ? 'text-green-600 dark:text-green-400' : 'text-neutral-500 dark:text-neutral-400'"
+
+                                    <span x-text="active ? 'Activo' : 'Desactivado'"
+                                        :class="active ? 'text-green-600 dark:text-green-400' :
+                                            'text-neutral-500 dark:text-neutral-400'"
+                                        class="text-[11px] font-medium uppercase tracking-wider">
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="px-4 py-3 text-center">
+                                <div x-data="{
+                                    active: {{ $event->album_active ? 'true' : 'false' }},
+                                    loading: false
+                                }" class="flex flex-col items-center justify-center gap-1">
+
+                                    <button type="button"
+                                        @click="
+                                            loading = true;
+                                            fetch('{{ route('events.toggle-album', $event->id_hex) }}', {
+                                                method: 'PATCH',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/json'
+                                                }
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if(data.success) active = data.album_active;
+                                            })
+                                            .finally(() => loading = false)
+                                        "
+                                        :class="active ? 'bg-green-500' : 'bg-neutral-300 dark:bg-neutral-600'"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                        :disabled="loading">
+                                        <span class="sr-only">Cambiar estado álbum</span>
+                                        <span :class="active ? 'translate-x-5' : 'translate-x-0'"
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
+                                        </span>
+                                    </button>
+
+                                    <span x-text="active ? 'Activo' : 'Desactivado'"
+                                        :class="active ? 'text-green-600 dark:text-green-400' :
+                                            'text-neutral-500 dark:text-neutral-400'"
                                         class="text-[11px] font-medium uppercase tracking-wider">
                                     </span>
                                 </div>
@@ -169,7 +211,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-6 text-center text-neutral-500">
+                            <td colspan="5" class="px-4 py-6 text-center text-neutral-500">
                                 No hay eventos registrados
                             </td>
                         </tr>

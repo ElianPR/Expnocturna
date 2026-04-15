@@ -54,8 +54,11 @@ Route::post('/event/{id_evento}/compartir', [EventShareController::class, 'store
 Route::get('/event/{id_evento}/camara', [EventController::class, 'camera'])
     ->name('events.camera');
 
-Route::patch('/events/{id_hex}/toggle-status', [App\Http\Controllers\EventController::class, 'toggleStatus'])
+Route::patch('/events/{id_hex}/toggle-status', [EventController::class, 'toggleStatus'])
     ->name('events.toggle-status');
+
+Route::patch('/events/{id_hex}/toggle-album', [EventController::class, 'toggleAlbum'])
+    ->name('events.toggle-album');
 
 Route::get('/event/{id_evento}/musica', [EventController::class, 'music'])
     ->name('events.music');
