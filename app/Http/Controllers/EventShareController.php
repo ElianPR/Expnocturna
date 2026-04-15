@@ -105,6 +105,10 @@ class EventShareController extends Controller
 
         $event = Event::where('album', hex2bin($id_album))->firstOrFail();
 
+        if (!$event->album_active) {
+            return view('events.thank-you', compact('event'));
+        }
+
         $eventFolder = 'events/' . $id_album;
         $files = Storage::disk('local')->files($eventFolder);
 

@@ -129,7 +129,7 @@ class EventController extends Controller
         // 1. COMPROBAR SI ESTÁ ACTIVO
         if (!$event->is_active) {
             // Si está desactivado, mostramos la pantalla de clausura
-            return view('events.thank_you', compact('event'));
+            return view('events.thank-you', compact('event'));
         }
 
         // Si está activo, el flujo sigue normal...
@@ -147,13 +147,13 @@ class EventController extends Controller
         try {
             $id = hex2bin($id_hex);
             $event = Event::findOrFail($id);
-            
+
             // Invertimos el estado (si era true, pasa a false y viceversa)
             $event->is_active = !$event->is_active;
             $event->save();
 
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'is_active' => $event->is_active
             ]);
         } catch (\Exception $e) {
@@ -186,7 +186,6 @@ class EventController extends Controller
             $songUrl = $event->song ? route('events.stream-song', $id_hex) : null;
 
             return view('events.music', compact('event', 'songUrl'));
-
         } catch (\Exception $e) {
             return redirect()->route('dashboard')->with('swal_error', 'No se pudo cargar la música de este evento.');
         }
@@ -241,5 +240,22 @@ class EventController extends Controller
         $mime = mime_content_type($finalPath);
 
         return response()->file($finalPath, ['Content-Type' => $mime]);
+    }
+    public function toggleAlbum($id_hex)
+    {
+        try {
+            $id = hex2bin($id_hex);
+            $event = Event::findOrFail($id);
+
+            $event->album_active = !$event->album_active;
+            $event->save();
+
+            return response()->json([
+                'success' => true,
+                'album_active' => $event->album_active
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false], 500);
+        }
     }
 }

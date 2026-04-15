@@ -84,11 +84,18 @@
             const logo = await loadImage("{{ asset('images/logoP.png') }}");
 
             // fondo papel
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. ahora sí el papel con transparencia
+            ctx.save();
+            ctx.globalAlpha = 0.25;
             ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
 
             // tipografía 
             const fontFamily = "Georgia, serif";
-            const fontSize = 34;
+            const fontSize = 47;
             const lineHeight = 44;
 
             // --- TÍTULO arriba ---
