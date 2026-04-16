@@ -259,6 +259,126 @@ class EventController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        if (!ctype_xdigit($id) || strlen($id) !== 32) {
+            abort(404);
+        }
+
+        $event = Event::where('id', hex2bin($id))->firstOrFail();
+
+        $photo = DB::table('photos')
+            ->where('id_event', $event->id)
+            ->first();
+
+        return view('events.edit', compact('event', 'photo'));
+    }
+
+    public function update(Request $request, $id_hex)
+    {
+        if (!ctype_xdigit($id_hex) || strlen($id_hex) !== 32) {
+            abort(404);
+        }
+
+        $event = Event::where('id', hex2bin($id_hex))->firstOrFail();
+
+        $validated = $request->validate([
+            'name' => 'required|max:80',
+            'monogram' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'typography' => 'nullable|max:40',
+            'template'   => 'nullable|integer',
+            'date'       => 'required|date',
+            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'song'       => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
+            'song_cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'watermark'  => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+        ]);
+
+        try {
+            $folderName = $id_hex;
+
+            $eventData = [
+                'name'       => $validated['name'],
+                'typography' => $validated['typography'] ?? null,
+                'template'   => $request->input('template', 0),
+                'date'       => $validated['date'],
+            ];
+
+            if ($request->hasFile('monogram')) {
+                $file = $request->file('monogram');
+                $name = substr($file->getClientOriginalName(), -50);
+
+                $file->storeAs($folderName, $name, 'local');
+
+                $eventData['monogram'] = $name;
+            }
+
+            if ($request->hasFile('song')) {
+
+                $file = $request->file('song');
+                $mime = $file->getMimeType();
+                $isAudio = str_starts_with($mime, 'audio');
+                $isVideo = str_starts_with($mime, 'video');
+
+                if ($event->song) {
+                    Storage::disk('local')->delete($folderName . '/' . $event->song);
+                }
+
+                if ($isVideo && $event->song_cover) {
+                    Storage::disk('local')->delete($folderName . '/' . $event->song_cover);
+                    $eventData['song_cover'] = null;
+                }
+
+                $name = substr($file->getClientOriginalName(), -50);
+                $file->storeAs($folderName, $name, 'local');
+
+                $eventData['song'] = $name;
+            }
+
+            if ($request->hasFile('song_cover') && isset($isAudio) && $isAudio) {
+                $file = $request->file('song_cover');
+                $name = substr($file->getClientOriginalName(), -50);
+
+                $file->storeAs($folderName, $name, 'local');
+
+                $eventData['song_cover'] = $name;
+            }
+
+            if ($request->hasFile('watermark')) {
+                $file = $request->file('watermark');
+                $name = substr($file->getClientOriginalName(), -50);
+
+                $file->storeAs($folderName, $name, 'local');
+
+                $eventData['watermark'] = $name;
+            }
+
+            $event->update($eventData);
+
+            if ($request->hasFile('main_image')) {
+                $file = $request->file('main_image');
+                $name = substr($file->getClientOriginalName(), -50);
+
+                $file->storeAs($folderName, $name, 'local');
+
+                DB::table('photos')
+                    ->updateOrInsert(
+                        ['id_event' => $event->id],
+                        [
+                            'id'  => Str::uuid()->getBytes(),
+                            'url' => $name,
+                        ]
+                    );
+            }
+
+            return redirect()
+                ->route('events.edit', $id_hex)
+                ->with('success', 'Evento actualizado correctamente');
+        } catch (\Exception $e) {
+            return back()->with('swal_error', 'Error al actualizar el evento');
+        }
+    }
+
     public function destroy($id_hex)
     {
         try {

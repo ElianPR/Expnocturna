@@ -200,7 +200,8 @@
 
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2">
-                                    <flux:button href="#" size="sm" variant="subtle" icon="pencil-square">
+                                    <flux:button href="{{ route('events.edit', $event->id_hex) }}" size="sm"
+                                        variant="subtle" icon="pencil-square">
                                         Editar
                                     </flux:button>
                                     <flux:button 
