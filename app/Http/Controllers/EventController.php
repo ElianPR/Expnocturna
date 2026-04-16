@@ -258,4 +258,40 @@ class EventController extends Controller
             return response()->json(['success' => false], 500);
         }
     }
+
+    public function destroy($id_hex)
+    {
+        try {
+            $id = hex2bin($id_hex);
+            $event = Event::findOrFail($id);
+
+            // 1. Obtener las rutas exactas de las carpetas en el disco 'local'
+            // El evento está en la raíz del disco: storage/app/private/{id_evento}
+            $eventFolder = $id_hex; 
+            
+            // El álbum está en la subcarpeta: storage/app/private/events/{id_album}
+            // Usamos bin2hex() para asegurar que le pasamos la cadena de texto limpia
+            $albumFolder = 'events/' . bin2hex($event->album); 
+
+            // 2. Eliminar fotos de la tabla pivote para evitar errores de llave foránea
+            DB::table('photos')->where('id_event', $id)->delete();
+
+            // 3. Destruir las carpetas físicas y todo su contenido
+            if (Storage::disk('local')->exists($eventFolder)) {
+                Storage::disk('local')->deleteDirectory($eventFolder);
+            }
+            
+            if (Storage::disk('local')->exists($albumFolder)) {
+                Storage::disk('local')->deleteDirectory($albumFolder);
+            }
+
+            // 4. Finalmente, eliminar el evento de la base de datos
+            $event->delete();
+
+            return redirect()->route('dashboard')->with('success', 'Evento y archivos eliminados permanentemente.');
+
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard')->with('swal_error', 'Hubo un problema al intentar eliminar el evento.');
+        }
+    }
 }

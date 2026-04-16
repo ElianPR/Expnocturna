@@ -203,7 +203,13 @@
                                     <flux:button href="#" size="sm" variant="subtle" icon="pencil-square">
                                         Editar
                                     </flux:button>
-                                    <flux:button href="#" size="sm" variant="danger" icon="trash">
+                                    <flux:button 
+                                        type="button"
+                                        size="sm" 
+                                        variant="danger" 
+                                        icon="trash"
+                                        onclick="confirmDelete('{{ route('events.destroy', $event->id_hex) }}')"
+                                    >
                                         Eliminar
                                     </flux:button>
                                 </div>
@@ -221,8 +227,34 @@
         </div>
 
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function confirmDelete(url) {
+            Swal.fire({
+                title: '¿Estás completamente seguro?',
+                text: "Se eliminará el evento, la música, la portada y todas las fotos de la galería. Esta acción no se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444', // Rojo de peligro
+                cancelButtonColor: '#6b7280',  // Gris neutro
+                confirmButtonText: 'Sí, eliminar todo',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Crea un formulario fantasma y lo envía con el método DELETE de Laravel
+                    let form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.innerHTML = `
+                        @csrf
+                        @method('DELETE')
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
         function forzarCopiado(text) {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text);

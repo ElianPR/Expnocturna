@@ -24,6 +24,8 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
     Route::get('/events/crear', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    
+    Route::delete('/events/{id_hex}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.destroy');
 });
 
 Route::get('/event/{id_evento}', [EventController::class, 'show'])->name('events.show');
