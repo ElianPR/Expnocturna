@@ -144,11 +144,25 @@
                 <div x-data="{ mediaType: '' }" class="space-y-6">
                     <flux:field>
                         <flux:label>Canción o Video (MP3, MP4, WAV, MOV)</flux:label>
-                        <flux:input 
-                            type="file" 
-                            name="song" 
-                            accept="audio/*,video/*" 
-                            @change="mediaType = $event.target.files[0] ? $event.target.files[0].type.split('/')[0] : ''" 
+                        <flux:input type="file" name="song" accept="audio/*,video/*"
+                            @change="
+                                const file = $event.target.files[0];
+                                if (!file) {
+                                    mediaType = '';
+                                    return;
+                                }
+
+                                const type = file.type;
+                                const ext = file.name.split('.').pop().toLowerCase();
+
+                                if (type.startsWith('audio') || ['mp3','wav','mpeg'].includes(ext)) {
+                                    mediaType = 'audio';
+                                } else if (type.startsWith('video') || ['mp4','mov','webm'].includes(ext)) {
+                                    mediaType = 'video';
+                                } else {
+                                    mediaType = '';
+                                }
+                            " 
                         />
                         <flux:error name="song" />
                     </flux:field>
@@ -158,7 +172,8 @@
                             <flux:label>Portada de la canción (Opcional, PNG/JPG)</flux:label>
                             <flux:input type="file" name="song_cover" accept="image/jpeg,image/png,image/webp" />
                             <flux:error name="song_cover" />
-                            <p class="text-xs text-neutral-500 mt-1">Esta imagen se mostrará como un disco mientras suena la canción.</p>
+                            <p class="text-xs text-neutral-500 mt-1">Esta imagen se mostrará como un disco mientras
+                                suena la canción.</p>
                         </flux:field>
                     </div>
                 </div>

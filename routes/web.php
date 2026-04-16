@@ -67,4 +67,12 @@ Route::get('/events/{id_hex}/stream-cover', [App\Http\Controllers\EventControlle
     ->name('events.stream-cover');
 
 Route::get('/events/{id_hex}/stream-song', [EventController::class, 'streamSong'])->name('events.stream-song');
+
+Route::get('/event/{id}/edit', [EventController::class, 'edit'])
+    ->middleware('auth')
+    ->name('events.edit');
+
+Route::put('/event/{id}', [EventController::class, 'update'])
+    ->middleware('auth')
+    ->name('events.update');
 require __DIR__ . '/auth.php';
