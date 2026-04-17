@@ -283,8 +283,8 @@ class EventController extends Controller
         $event = Event::where('id', hex2bin($id_hex))->firstOrFail();
 
         $validated = $request->validate([
-            'name' => 'required|max:80',
-            'monogram' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'name'       => 'required|max:80',
+            'monogram'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'typography' => 'nullable|max:40',
             'template'   => 'nullable|integer',
             'date'       => 'required|date',
@@ -304,17 +304,26 @@ class EventController extends Controller
                 'date'       => $validated['date'],
             ];
 
-            if ($request->hasFile('monogram')) {
+            // --- MONOGRAMA ---
+            // Si el usuario marcó "quitar monograma", eliminamos el archivo y ponemos null
+            if ($request->boolean('remove_monogram')) {
+                if ($event->monogram) {
+                    Storage::disk('local')->delete($folderName . '/' . $event->monogram);
+                }
+                $eventData['monogram'] = null;
+            } elseif ($request->hasFile('monogram')) {
+                // Si subió uno nuevo, reemplazamos el anterior
+                if ($event->monogram) {
+                    Storage::disk('local')->delete($folderName . '/' . $event->monogram);
+                }
                 $file = $request->file('monogram');
                 $name = substr($file->getClientOriginalName(), -50);
-
                 $file->storeAs($folderName, $name, 'local');
-
                 $eventData['monogram'] = $name;
             }
 
+            // --- CANCIÓN / VIDEO ---
             if ($request->hasFile('song')) {
-
                 $file = $request->file('song');
                 $mime = $file->getMimeType();
                 $isAudio = str_starts_with($mime, 'audio');
@@ -331,51 +340,47 @@ class EventController extends Controller
 
                 $name = substr($file->getClientOriginalName(), -50);
                 $file->storeAs($folderName, $name, 'local');
-
                 $eventData['song'] = $name;
             }
 
+            // --- PORTADA DE CANCIÓN ---
             if ($request->hasFile('song_cover') && isset($isAudio) && $isAudio) {
                 $file = $request->file('song_cover');
                 $name = substr($file->getClientOriginalName(), -50);
-
                 $file->storeAs($folderName, $name, 'local');
-
                 $eventData['song_cover'] = $name;
             }
 
+            // --- MARCA DE AGUA ---
             if ($request->hasFile('watermark')) {
                 $file = $request->file('watermark');
                 $name = substr($file->getClientOriginalName(), -50);
-
                 $file->storeAs($folderName, $name, 'local');
-
                 $eventData['watermark'] = $name;
             }
 
             $event->update($eventData);
 
+            // --- FOTO PRINCIPAL ---
             if ($request->hasFile('main_image')) {
                 $file = $request->file('main_image');
                 $name = substr($file->getClientOriginalName(), -50);
-
                 $file->storeAs($folderName, $name, 'local');
 
-                DB::table('photos')
-                    ->updateOrInsert(
-                        ['id_event' => $event->id],
-                        [
-                            'id'  => Str::uuid()->getBytes(),
-                            'url' => $name,
-                        ]
-                    );
+                DB::table('photos')->updateOrInsert(
+                    ['id_event' => $event->id],
+                    [
+                        'id'  => Str::uuid()->getBytes(),
+                        'url' => $name,
+                    ]
+                );
             }
 
             return redirect()
                 ->route('events.edit', $id_hex)
-                ->with('success', 'Evento actualizado correctamente');
+                ->with('swal_success', 'Evento actualizado correctamente.');
         } catch (\Exception $e) {
-            return back()->with('swal_error', 'Error al actualizar el evento');
+            return back()->with('swal_error', 'Error al actualizar el evento.');
         }
     }
 
@@ -387,11 +392,11 @@ class EventController extends Controller
 
             // 1. Obtener las rutas exactas de las carpetas en el disco 'local'
             // El evento está en la raíz del disco: storage/app/private/{id_evento}
-            $eventFolder = $id_hex; 
-            
+            $eventFolder = $id_hex;
+
             // El álbum está en la subcarpeta: storage/app/private/events/{id_album}
             // Usamos bin2hex() para asegurar que le pasamos la cadena de texto limpia
-            $albumFolder = 'events/' . bin2hex($event->album); 
+            $albumFolder = 'events/' . bin2hex($event->album);
 
             // 2. Eliminar fotos de la tabla pivote para evitar errores de llave foránea
             DB::table('photos')->where('id_event', $id)->delete();
@@ -400,7 +405,7 @@ class EventController extends Controller
             if (Storage::disk('local')->exists($eventFolder)) {
                 Storage::disk('local')->deleteDirectory($eventFolder);
             }
-            
+
             if (Storage::disk('local')->exists($albumFolder)) {
                 Storage::disk('local')->deleteDirectory($albumFolder);
             }
@@ -409,7 +414,6 @@ class EventController extends Controller
             $event->delete();
 
             return redirect()->route('dashboard')->with('success', 'Evento y archivos eliminados permanentemente.');
-
         } catch (\Exception $e) {
             return redirect()->route('dashboard')->with('swal_error', 'Hubo un problema al intentar eliminar el evento.');
         }

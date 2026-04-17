@@ -7,9 +7,7 @@
 
     <style>
         .borde-rasgado {
-            mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1000 100" preserveAspectRatio="none"><path d="M0,50 L50,80 L100,40 L150,90 L200,30 L250,70 L300,20 L350,80 L400,10 L450,70 L500,30 L550,90 L600,40 L650,80 L700,20 L750,90 L800,30 L850,70 L900,10 L950,80 L1000,50 V100 H0 Z"/></svg>'),
-                linear-gradient(black, black),
-                url('data:image/svg+xml;utf8,<svg viewBox="0 0 1000 100" preserveAspectRatio="none"><path d="M0,50 L50,20 L100,60 L150,10 L200,70 L250,30 L300,80 L350,20 L400,90 L450,30 L500,70 L550,10 L600,60 L650,20 L700,80 L750,10 L800,70 L850,30 L900,90 L950,20 L1000,50 V0 H0 Z"/></svg>');
+            mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1000 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,50 L50,80 L100,40 L150,90 L200,30 L250,70 L300,20 L350,80 L400,10 L450,70 L500,30 L550,90 L600,40 L650,80 L700,20 L750,90 L800,30 L850,70 L900,10 L950,80 L1000,50 V100 H0 Z" fill="black"/></svg>'), linear-gradient(black, black), url('data:image/svg+xml;utf8,<svg viewBox="0 0 1000 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,50 L50,20 L100,60 L150,10 L200,70 L250,30 L300,80 L350,20 L400,90 L450,30 L500,70 L550,10 L600,60 L650,20 L700,80 L750,10 L800,70 L850,30 L900,90 L950,20 L1000,50 V0 H0 Z" fill="black"/></svg>');
             mask-position: top, center, bottom;
             mask-size: 100% 20px, 100% calc(100% - 40px), 100% 20px;
             mask-repeat: no-repeat;
@@ -32,16 +30,10 @@
         </flux:button>
     </div>
 
-    <div x-data="previewData()" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+    <div x-data="previewData()" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative w-full">
 
-        {{-- FORM --}}
-        <div class="lg:col-span-7 overflow-hidden rounded-xl border bg-white p-6 dark:bg-neutral-800">
-
-            @if (session('success'))
-                <div class="mb-4 text-green-600">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <div
+            class="lg:col-span-7 xl:col-span-7 overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
 
             <form action="{{ route('events.update', $event->id_hex) }}" method="POST" enctype="multipart/form-data"
                 class="space-y-6">
@@ -51,43 +43,65 @@
                 {{-- NOMBRE --}}
                 <flux:field>
                     <flux:label>Nombre del Evento *</flux:label>
-                    <flux:input type="text" name="name" x-model="name" value="{{ old('name', $event->name) }}"
+                    <flux:input type="text" name="name" x-model="name" placeholder="Ej. Boda de Ana y Juan"
                         maxlength="80" />
+                    <flux:error name="name" />
                 </flux:field>
 
                 {{-- MONOGRAMA --}}
                 <flux:field>
-                    <flux:label>Monograma</flux:label>
+                    <flux:label>Monograma (Imagen)</flux:label>
 
+                    {{-- Archivo actual con opción de quitar --}}
                     @if ($event->monogram)
-                        <img src="{{ route('file.show', [$event->id_hex, $event->monogram]) }}"
-                            class="w-24 mb-2 rounded">
+                        <div x-data="{ remove: false }" class="mb-3">
+                            <div class="flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                                <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
+                                <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate flex-1">
+                                    {{ $event->monogram }}
+                                </span>
+                                <label class="flex items-center gap-2 cursor-pointer shrink-0">
+                                    <input type="checkbox" name="remove_monogram" value="1"
+                                        x-model="remove"
+                                        class="rounded border-neutral-300 text-red-500 focus:ring-red-500">
+                                    <span class="text-sm text-red-600 dark:text-red-400 font-medium">Quitar</span>
+                                </label>
+                            </div>
+                            <p x-show="remove" x-transition
+                                class="mt-2 text-xs text-red-500 dark:text-red-400">
+                                El monograma se eliminará al guardar. Solo se usará el nombre del evento.
+                            </p>
+                        </div>
                     @endif
 
-                    <flux:input type="file" name="monogram" @change="monogramFile = $event.target.files[0]" />
+                    <flux:input type="file" name="monogram" accept="image/png,image/jpeg,image/webp"
+                        @change="monogramFile = $event.target.files[0]" />
+                    <flux:error name="monogram" />
                 </flux:field>
 
-                {{-- TYPO + TEMPLATE --}}
+                {{-- TIPOGRAFÍA + PLANTILLA --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <flux:field>
                         <flux:label>Tipografía</flux:label>
                         <flux:select name="typography" x-model="typography">
                             <flux:select.option value="Arial">Arial</flux:select.option>
                             <flux:select.option value="Times New Roman">Times New Roman</flux:select.option>
-                            <flux:select.option value="'Cinzel', serif">Cinzel</flux:select.option>
-                            <flux:select.option value="'Great Vibes', cursive">Great Vibes</flux:select.option>
-                            <flux:select.option value="'Playfair Display', serif">Playfair</flux:select.option>
+                            <flux:select.option value="'Cinzel', serif">Cinzel (Elegante)</flux:select.option>
+                            <flux:select.option value="'Great Vibes', cursive">Great Vibes (Cursiva)</flux:select.option>
+                            <flux:select.option value="'Playfair Display', serif">Playfair Display (Romántica)</flux:select.option>
                         </flux:select>
+                        <flux:error name="typography" />
                     </flux:field>
 
                     <flux:field>
                         <flux:label>Plantilla</flux:label>
                         <flux:select name="template" x-model="template">
-                            <flux:select.option value="1">Papilia</flux:select.option>
-                            <flux:select.option value="2">Acuarela</flux:select.option>
-                            <flux:select.option value="3">Elegante</flux:select.option>
-                            <flux:select.option value="0">Base</flux:select.option>
+                            <flux:select.option value="1">Papilia (Bordes rasgados)</flux:select.option>
+                            <flux:select.option value="2">Acuarela (Hojas y Pincelada)</flux:select.option>
+                            <flux:select.option value="3">Elegante (Flores Doradas)</flux:select.option>
+                            <flux:select.option value="0">Plantilla Base</flux:select.option>
                         </flux:select>
+                        <flux:error name="template" />
                     </flux:field>
                 </div>
 
@@ -95,42 +109,51 @@
                 <flux:field>
                     <flux:label>Fecha del evento</flux:label>
                     <flux:input type="date" name="date" x-model="date" required />
+                    <flux:error name="date" />
                 </flux:field>
 
                 <flux:separator variant="subtle" />
 
-                {{-- FOTO --}}
+                {{-- FOTO PRINCIPAL --}}
                 <flux:field>
-                    <flux:label>Foto principal</flux:label>
+                    <flux:label>Foto Principal (PNG, JPG, WebP)</flux:label>
 
                     @if ($photo)
-                        <img src="{{ route('file.show', [$event->id_hex, $photo->url]) }}"
-                            class="w-full max-w-xs mb-2 rounded">
+                        <div class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                            <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
+                            <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
+                                {{ $photo->url }}
+                            </span>
+                        </div>
                     @endif
 
-                    <flux:input type="file" name="main_image" @change="updateImage" />
+                    <flux:input type="file" name="main_image" accept="image/jpeg,image/png,image/webp"
+                        @change="updateImage" />
+                    <flux:error name="main_image" />
                 </flux:field>
 
-                {{-- MEDIA --}}
-                <div x-data="{ mediaType: '{{ $event->song ? (Str::endsWith($event->song, ['mp4','mov','webm']) ? 'video' : 'audio') : '' }}' }">
+                {{-- CANCIÓN / VIDEO --}}
+                <div x-data="{ mediaType: '{{ $event->song ? (Str::endsWith($event->song, ['mp4','mov','webm']) ? 'video' : 'audio') : '' }}' }"
+                    class="space-y-6">
+
                     <flux:field>
-                        <flux:label>Canción o Video</flux:label>
+                        <flux:label>Canción o Video (MP3, MP4, WAV, MOV)</flux:label>
 
                         @if ($event->song)
-                            <p class="text-xs text-neutral-500 mb-2">Actual: {{ $event->song }}</p>
+                            <div class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                                <flux:icon.musical-note class="size-5 text-neutral-400 shrink-0" />
+                                <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
+                                    {{ $event->song }}
+                                </span>
+                            </div>
                         @endif
 
                         <flux:input type="file" name="song" accept="audio/*,video/*"
                             @change="
                                 const file = $event.target.files[0];
-                                if (!file) {
-                                    mediaType = '';
-                                    return;
-                                }
-
+                                if (!file) { mediaType = ''; return; }
                                 const type = file.type;
                                 const ext = file.name.split('.').pop().toLowerCase();
-
                                 if (type.startsWith('audio') || ['mp3','wav','mpeg'].includes(ext)) {
                                     mediaType = 'audio';
                                 } else if (type.startsWith('video') || ['mp4','mov','webm'].includes(ext)) {
@@ -139,64 +162,80 @@
                                     mediaType = '';
                                 }
                             " />
+                        <flux:error name="song" />
                     </flux:field>
 
-                    <div x-show="mediaType === 'audio'" x-cloak>
-                        <br>
+                    <div x-show="mediaType === 'audio'" x-transition x-cloak>
                         <flux:field>
-                            <flux:label>Portada de la canción</flux:label>
+                            <flux:label>Portada de la canción (Opcional, PNG/JPG)</flux:label>
 
                             @if ($event->song_cover)
-                                <img src="{{ route('events.stream-cover', $event->id_hex) }}" class="w-24 mb-2 rounded">
+                                <div class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                                    <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
+                                    <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
+                                        {{ $event->song_cover }}
+                                    </span>
+                                </div>
                             @endif
 
-                            <flux:input type="file" name="song_cover" />
+                            <flux:input type="file" name="song_cover" accept="image/jpeg,image/png,image/webp" />
+                            <flux:error name="song_cover" />
+                            <p class="text-xs text-neutral-500 mt-1">Esta imagen se mostrará como un disco mientras
+                                suena la canción.</p>
                         </flux:field>
                     </div>
                 </div>
 
-                {{-- WATERMARK --}}
+                {{-- MARCA DE AGUA --}}
                 <flux:field>
-                    <flux:label>Imagen marca de Agua</flux:label>
+                    <flux:label>Imagen para Marca de Agua (PNG, JPG)</flux:label>
 
                     @if ($event->watermark)
-                        <img src="{{ route('file.show', [$event->id_hex, $event->watermark]) }}" class="w-24 mb-2">
+                        <div class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                            <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
+                            <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
+                                {{ $event->watermark }}
+                            </span>
+                        </div>
                     @endif
 
-                    <flux:input type="file" name="watermark" />
+                    <flux:input type="file" name="watermark" accept="image/jpeg,image/png" />
+                    <flux:error name="watermark" />
                 </flux:field>
 
                 <div class="flex justify-end pt-4">
-                    <flux:button type="submit">Actualizar Evento</flux:button>
+                    <flux:button type="submit" variant="primary">Actualizar Evento</flux:button>
                 </div>
-
             </form>
         </div>
 
-        {{-- PREVIEW --}}
-        <div class="lg:col-span-5 xl:col-span-5 lg:sticky lg:top-6 flex flex-col items-center">
+        {{-- VISTA PREVIA --}}
+        <div class="lg:col-span-5 xl:col-span-5 lg:sticky lg:top-6 flex flex-col items-center justify-start w-full">
 
-            <span class="text-sm font-semibold text-neutral-500 uppercase mb-4">
-                Vista Previa en Vivo
-            </span>
+            <span class="text-sm font-semibold text-neutral-500 uppercase tracking-widest mb-4">Vista Previa en
+                Vivo</span>
 
             <div
-                class="w-full max-w-[320px] h-[650px] bg-black rounded-[40px] p-2 shadow-2xl border-[6px] border-neutral-800 relative">
+                class="w-full max-w-[320px] h-[650px] bg-black rounded-[40px] p-2 shadow-2xl relative border-[6px] border-neutral-800 overflow-hidden mx-auto">
+                <div class="absolute top-0 inset-x-0 h-6 bg-black rounded-b-xl w-32 mx-auto z-50"></div>
 
-                <div class="absolute top-0 inset-x-0 h-6 bg-black rounded-b-xl w-32 mx-auto"></div>
+                <div class="w-full h-full bg-neutral-50 rounded-[32px] overflow-y-auto overflow-x-hidden no-scrollbar relative"
+                    style="font-family: 'Montserrat', sans-serif;">
 
-                <div class="w-full h-full bg-neutral-50 rounded-[32px] overflow-y-auto no-scrollbar">
-
-                    <div x-show="template == '1'" class="h-full" x-cloak>
+                    <div x-show="template == '1'" class="h-full w-full" x-cloak>
                         <x-templates.papilia :preview="true" />
                     </div>
-
-                    <div x-show="template == '2'" class="h-full" x-cloak>
+                    <div x-show="template == '2'" class="h-full w-full" x-cloak>
                         <x-templates.dos :preview="true" />
                     </div>
-
-                    <div x-show="template == '3'" class="h-full" x-cloak>
+                    <div x-show="template == '3'" class="h-full w-full" x-cloak>
                         <x-templates.tres :preview="true" />
+                    </div>
+
+                    <div x-show="template == '0'"
+                        class="relative z-10 px-6 py-16 flex flex-col items-center justify-center min-h-full" x-cloak>
+                        <h2 class="text-lg font-bold text-neutral-800 mb-2">Plantilla Base</h2>
+                        <p class="text-sm text-center text-neutral-500">En desarrollo.</p>
                     </div>
 
                 </div>
@@ -211,22 +250,18 @@
                 date: {!! json_encode(old('date', optional($event->date)->format('Y-m-d'))) !!},
                 typography: {!! json_encode(old('typography', $event->typography ?? "'Cinzel', serif")) !!},
                 template: '{{ old('template', $event->template ?? '1') }}',
-
-                imageUrl: '{{ $photo ? route('file.show', [$event->id_hex, $photo->url]) : '' }}',
+                imageUrl: '{{ $photo ? route('file.show', [$event->id_hex, $photo->url]) : 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' }}',
 
                 monogramFile: null,
 
                 get displayTitle() {
-                    return this.name || 'EVENTO';
+                    return this.name ? this.name : 'JUAN & MARÍA';
                 },
 
                 get displayDate() {
                     if (!this.date) return 'FECHA POR DEFINIR';
-
                     const d = new Date(this.date + 'T12:00:00');
-
                     if (isNaN(d)) return 'FECHA INVÁLIDA';
-
                     return d.toLocaleDateString('es-ES', {
                         day: 'numeric',
                         month: 'long',
@@ -247,5 +282,52 @@
                 }
             };
         }
+
+        function forzarCopiado(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text);
+                return;
+            }
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "-999999px";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try { document.execCommand('copy'); } catch (err) { console.error('Error', err); }
+            document.body.removeChild(textArea);
+        }
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (session('swal_success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Listo!',
+                    text: '{{ session('swal_success') }}',
+                    confirmButtonText: 'Continuar',
+                    confirmButtonColor: '#000',
+                });
+            });
+        </script>
+    @endif
+
+    @if (session('swal_error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Algo salió mal!',
+                    text: '{{ session('swal_error') }}',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#000',
+                });
+            });
+        </script>
+    @endif
 </x-layouts.app>
