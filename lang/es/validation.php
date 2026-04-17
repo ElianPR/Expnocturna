@@ -156,4 +156,12 @@ return [
     'uppercase'              => 'El campo :attribute debe estar en mayúscula.',
     'url'                    => 'El campo :attribute debe ser una URL válida.',
     'uuid'                   => 'El campo :attribute debe ser un UUID válido.',
+    'attributes' => [
+        'name' => 'nombre',
+        'monogram' => 'monograma',
+        'date' => 'fecha',
+        'song' => 'canción',
+        'song_cover' => 'portada de la canción',
+        'album' => 'álbum',
+    ],
 ];

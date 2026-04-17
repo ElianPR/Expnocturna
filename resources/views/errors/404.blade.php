@@ -26,13 +26,15 @@
         }
 
         .container {
-            max-width: 500px;
+            max-width: 520px;
             padding: 20px;
         }
 
         .logo {
-            width: 130px;
+            width: 70%;
+            height: auto;
             margin-bottom: 30px;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
             animation: float 3.5s ease-in-out infinite, fadeIn 1.2s ease forwards;
             opacity: 0;
         }
@@ -62,22 +64,24 @@
         }
 
         h1 {
-            font-size: 70px;
+            font-size: clamp(50px, 8vw, 70px);
             margin: 0;
             font-weight: 600;
             color: #1e88c7;
         }
 
         p {
-            margin-top: 10px;
-            font-size: 18px;
-            color: #555;
+            margin-top: 14px;
+            font-size: clamp(18px, 2.8vw, 20px);
+            color: #092D51;
+            font-weight: 500;
+            line-height: 1.5;
         }
 
         .link {
             margin-top: 35px;
             display: block;
-            font-size: 14px;
+            font-size: clamp(13px, 2.5vw, 14px);
             color: #1e88c7;
             text-decoration: none;
             transition: opacity 0.2s ease;
@@ -89,21 +93,37 @@
     </style>
 </head>
 
+@php
+    $options = [
+        [
+            'img' => 'images/4041.png',
+            'text' => '¡Oh, no! La página que buscas ha volado a otro lugar.',
+        ],
+        [
+            'img' => 'images/4042.png',
+            'text' => 'Metamorfosis fallida: Esta página no pudo transformarse',
+        ],
+        [
+            'img' => 'images/4043.png',
+            'text' => 'Parece que te has desviado del camino.',
+        ],
+    ];
+
+    $random = $options[array_rand($options)];
+@endphp
+
 <body>
 
     <div class="container">
-        <img src="{{ asset('images/logoC.png') }}" alt="Papilia Logo" class="logo">
-
-        <h1>404</h1>
+        <img src="{{ asset($random['img']) }}" alt="404 Imagen" class="logo">
 
         <p>
-            No encontramos esta página
+            {{ $random['text'] }}
         </p>
 
         <a href="https://papilia.net/papilia2021/" target="_blank" class="link">
             papilia.net
         </a>
-
     </div>
 
 </body>
