@@ -14,6 +14,7 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group heading="Menú" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Dashboard</flux:navlist.item>
+                    <flux:navlist.item icon="trash" :href="route('events.trash')" :current="request()->routeIs('events.trash')" wire:navigate>Papelera</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 

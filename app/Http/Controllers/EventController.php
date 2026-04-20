@@ -11,6 +11,20 @@ use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
+
+    public function dashboard()
+    {
+        // 1. Ejecutamos la limpieza
+        $this->limpiarPapeleraCaducada();
+
+        // 2. Traemos los eventos. 
+        // OJO: Cambié Event::all() por un filtro del usuario logueado. 
+        // Si usas all(), un usuario podría ver los eventos de otros usuarios.
+        $events = Event::where('id_user', Auth::id())->get();
+
+        return view('dashboard', compact('events'));
+    }
+
     public function create()
     {
         return view('events.create');
@@ -398,38 +412,112 @@ class EventController extends Controller
         }
     }
 
+    /**
+     * Manda el evento a la papelera (Soft Delete)
+     */
     public function destroy($id_hex)
     {
         try {
             $id = hex2bin($id_hex);
             $event = Event::findOrFail($id);
 
-            // 1. Obtener las rutas exactas de las carpetas en el disco 'local'
-            // El evento está en la raíz del disco: storage/app/private/{id_evento}
-            $eventFolder = $id_hex;
+            // 1. Apagamos los enlaces como pediste
+            $event->is_active = false;
+            $event->album_active = false; // Suponiendo que así se llama tu campo de álbum
+            $event->save();
 
-            // El álbum está en la subcarpeta: storage/app/private/events/{id_album}
-            // Usamos bin2hex() para asegurar que le pasamos la cadena de texto limpia
-            $albumFolder = 'events/' . bin2hex($event->album);
+            // 2. Lo mandamos a la papelera (esto llena el campo deleted_at automáticamente)
+            $event->delete();
 
-            // 2. Eliminar fotos de la tabla pivote para evitar errores de llave foránea
+            return redirect()->route('dashboard')->with('success', 'Evento enviado a la papelera.');
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard')->with('swal_error', 'Error al enviar a la papelera.');
+        }
+    }
+
+    /**
+     * Muestra los eventos en la papelera
+     */
+    public function trash()
+    {
+        $this->limpiarPapeleraCaducada();
+        // onlyTrashed() trae SOLAMENTE los que tienen fecha en deleted_at
+        $events = Event::onlyTrashed()->get();
+        return view('events.trash', compact('events'));
+    }
+
+    /**
+     * Restaura un evento de la papelera
+     */
+    public function restore($id_hex)
+    {
+        try {
+            $id = hex2bin($id_hex);
+            // withTrashed() es necesario para encontrarlo, porque está oculto
+            $event = Event::withTrashed()->findOrFail($id);
+            
+            // Esto vuelve a poner deleted_at en NULL
+            $event->restore();
+
+            return redirect()->route('events.trash')->with('success', 'Evento restaurado exitosamente.');
+        } catch (\Exception $e) {
+            return redirect()->route('events.trash')->with('swal_error', 'Error al restaurar.');
+        }
+    }
+
+    /**
+     * Elimina el evento permanentemente de la base de datos y del servidor
+     */
+    public function forceDestroy($id_hex)
+    {
+        try {
+            $id = hex2bin($id_hex);
+            $event = Event::withTrashed()->findOrFail($id);
+
+            $eventFolder = $id_hex; 
+            $albumFolder = 'events/' . bin2hex($event->album); 
+
             DB::table('photos')->where('id_event', $id)->delete();
 
-            // 3. Destruir las carpetas físicas y todo su contenido
             if (Storage::disk('local')->exists($eventFolder)) {
                 Storage::disk('local')->deleteDirectory($eventFolder);
             }
-
             if (Storage::disk('local')->exists($albumFolder)) {
                 Storage::disk('local')->deleteDirectory($albumFolder);
             }
 
-            // 4. Finalmente, eliminar el evento de la base de datos
-            $event->delete();
+            // forceDelete() lo borra permanentemente de la tabla
+            $event->forceDelete();
 
-            return redirect()->route('dashboard')->with('success', 'Evento y archivos eliminados permanentemente.');
+            return redirect()->route('events.trash')->with('success', 'Evento destruido permanentemente.');
         } catch (\Exception $e) {
-            return redirect()->route('dashboard')->with('swal_error', 'Hubo un problema al intentar eliminar el evento.');
+            return redirect()->route('events.trash')->with('swal_error', 'Error al destruir el evento.');
+        }
+    }
+
+    private function limpiarPapeleraCaducada()
+    {
+        // Traemos los eventos ocultos cuya fecha de eliminación fue hace 60 días o más
+        $oldEvents = Event::onlyTrashed()->where('deleted_at', '<=', now()->subDays(60))->get();
+
+        foreach ($oldEvents as $event) {
+            /** @var \App\Models\Event $event */
+            $eventFolder = bin2hex($event->id); 
+            $albumFolder = 'events/' . bin2hex($event->album); 
+
+            // Borramos fotos de la BD
+            DB::table('photos')->where('id_event', $event->id)->delete();
+            
+            // Borramos carpetas físicas
+            if (Storage::disk('local')->exists($eventFolder)) {
+                Storage::disk('local')->deleteDirectory($eventFolder);
+            }
+            if (Storage::disk('local')->exists($albumFolder)) {
+                Storage::disk('local')->deleteDirectory($albumFolder);
+            }
+            
+            // Destrucción total
+            $event->forceDelete();
         }
     }
 }

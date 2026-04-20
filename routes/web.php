@@ -10,11 +10,9 @@ Route::middleware('guest')->group(function () {
     Volt::route('/', 'auth.login')->name('home');
 });
 
-Route::get('/dashboard', function () {
-    $events = Event::all();
-
-    return view('dashboard', compact('events'));
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [EventController::class, 'dashboard'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -26,6 +24,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
     
     Route::delete('/events/{id_hex}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.destroy');
+    Route::get('/papelera', [App\Http\Controllers\EventController::class, 'trash'])->name('events.trash');
+    Route::patch('/events/{id_hex}/restore', [App\Http\Controllers\EventController::class, 'restore'])->name('events.restore');
+    Route::delete('/events/{id_hex}/force', [App\Http\Controllers\EventController::class, 'forceDestroy'])->name('events.force-destroy');
 });
 
 Route::get('/event/{id_evento}', [EventController::class, 'show'])->name('events.show');

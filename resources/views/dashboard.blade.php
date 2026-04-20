@@ -211,7 +211,7 @@
                                         icon="trash"
                                         onclick="confirmDelete('{{ route('events.destroy', $event->id_hex) }}')"
                                     >
-                                        Eliminar
+                                        Mover a la papelera
                                     </flux:button>
                                 </div>
                             </td>
@@ -233,7 +233,7 @@
         function confirmDelete(url) {
             Swal.fire({
                 title: '¿Estás completamente seguro?',
-                text: "Se eliminará el evento, la música, la portada y todas las fotos de la galería. Esta acción no se puede deshacer.",
+                text: "El evento se movera a la papelera y sera eliminado permanentemente despuede de 60 dias.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444', // Rojo de peligro
