@@ -19,8 +19,8 @@
 
     $colorMap = [
         1 => '#4A720D',
-        2 => '#092D9A',
-        3 => '#DEAD2B',
+        2 => '#092D51',
+        3 => '#A8792B',
     ];
 
     $buttonColor = $colorMap[$event->template] ?? '#000000';
@@ -107,7 +107,8 @@
             </div>
 
             <div class="mb-4 mt-3">
-                <flux:button href="javascript:history.back()" icon="arrow-left-end-on-rectangle"
+                <flux:button onclick="handleBack('{{ route('events.show', $event->id_hex) }}')"
+                    icon="arrow-left-end-on-rectangle"
                     class="w-full justify-center transition-all duration-300 hover:opacity-90"
                     style="background-color: {{ $buttonColor }}; color: white;">
                     Regresar
@@ -121,6 +122,16 @@
         class="mt-6 text-center italic block text-sm opacity-70 hover:opacity-100 transition text-black">
         papilia.net
     </a>
+
+    <script>
+        function handleBack(fallbackUrl) {
+            if (document.referrer && document.referrer !== window.location.href) {
+                history.back();
+            } else {
+                window.location.href = fallbackUrl;
+            }
+        }
+    </script>
 
     @fluxScripts
 </body>
