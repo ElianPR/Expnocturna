@@ -8,18 +8,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 
 class EventController extends Controller
 {
 
     public function dashboard()
     {
-        // 1. Ejecutamos la limpieza
         $this->limpiarPapeleraCaducada();
 
-        // 2. Traemos los eventos. 
-        // OJO: Cambié Event::all() por un filtro del usuario logueado. 
-        // Si usas all(), un usuario podría ver los eventos de otros usuarios.
         $events = Event::where('id_user', Auth::id())->get();
 
         return view('dashboard', compact('events'));
@@ -50,7 +47,6 @@ class EventController extends Controller
             $albumUuid = Str::uuid();
             $albumHex = str_replace('-', '', $albumUuid->toString());
 
-            // Preparamos los datos SOLAMENTE para la tabla events
             $eventData = [
                 'id'         => $uuid->getBytes(),
                 'album'      => hex2bin($albumHex),
@@ -62,17 +58,15 @@ class EventController extends Controller
                 'date'       => $validated['date'],
             ];
 
-            // Guardar Monograma (imagen)
             if ($request->hasFile('monogram')) {
                 $monogramFile = $request->file('monogram');
                 $monogramName = substr($monogramFile->getClientOriginalName(), -50);
 
                 $monogramFile->storeAs($folderName, $monogramName, 'local');
 
-                $eventData['monogram'] = $monogramName; // guardas el nombre
+                $eventData['monogram'] = $monogramName;
             }
 
-            // Guardar Canción o video
             if ($request->hasFile('song')) {
                 $songFile = $request->file('song');
                 $songName = substr($songFile->getClientOriginalName(), -50);
@@ -80,7 +74,6 @@ class EventController extends Controller
                 $eventData['song'] = $songName;
             }
 
-            // Guardar Portada de la canción
             if ($request->hasFile('song_cover')) {
                 $coverFile = $request->file('song_cover');
                 $coverName = substr($coverFile->getClientOriginalName(), -50);
@@ -88,10 +81,8 @@ class EventController extends Controller
                 $eventData['song_cover'] = $coverName;
             }
 
-            // 1. PRIMERO CREAMOS EL EVENTO
             $event = Event::create($eventData);
 
-            // 2. GUARDAMOS LA FOTO PRINCIPAL
             if ($request->hasFile('main_image')) {
                 $mainImageFile = $request->file('main_image');
                 $mainImageName = substr($mainImageFile->getClientOriginalName(), -50);
@@ -140,9 +131,7 @@ class EventController extends Controller
         $eventId = hex2bin($folder);
         $event = Event::where('id', $eventId)->firstOrFail();
 
-        // 1. COMPROBAR SI ESTÁ ACTIVO
         if (!$event->is_active) {
-            // Si está desactivado, mostramos la pantalla de clausura
             return view('events.thank-you', compact('event'));
         }
 
@@ -162,9 +151,15 @@ class EventController extends Controller
             $id = hex2bin($id_hex);
             $event = Event::findOrFail($id);
 
-            // Invertimos el estado (si era true, pasa a false y viceversa)
             $event->is_active = !$event->is_active;
             $event->save();
+
+            $estado = $event->is_active ? 'ACTIVADO' : 'DESACTIVADO';
+
+            Mail::raw("El evento '{$event->name}' ha sido {$estado}", function ($message) use ($event, $estado) {
+                $message->to('mariposa@papilia.net')
+                    ->subject("Evento {$estado}: {$event->name}");
+            });
 
             return response()->json([
                 'success' => true,
@@ -179,12 +174,10 @@ class EventController extends Controller
     {
         $path = $id_evento . '/' . $filename;
 
-        // Verificamos si el archivo existe
         if (!Storage::disk('local')->exists($path)) {
             abort(404);
         }
 
-        // Sacamos la ruta absoluta del servidor y la enviamos al navegador
         $rutaFisica = Storage::disk('local')->path($path);
 
         return response()->file($rutaFisica);
@@ -196,7 +189,6 @@ class EventController extends Controller
             $id = hex2bin($id_hex);
             $event = Event::findOrFail($id);
 
-            // En lugar de una URL pública, le damos la ruta de nuestro "puente seguro"
             $songUrl = $event->song ? route('events.stream-song', $id_hex) : null;
 
             return view('events.music', compact('event', 'songUrl'));
@@ -205,9 +197,6 @@ class EventController extends Controller
         }
     }
 
-    /**
-     * Transmite el archivo de audio privado.
-     */
     public function streamSong($id_hex)
     {
         $id = hex2bin($id_hex);
@@ -255,6 +244,7 @@ class EventController extends Controller
 
         return response()->file($finalPath, ['Content-Type' => $mime]);
     }
+
     public function toggleAlbum($id_hex)
     {
         try {
@@ -263,6 +253,13 @@ class EventController extends Controller
 
             $event->album_active = !$event->album_active;
             $event->save();
+
+            $estado = $event->album_active ? 'ACTIVADO' : 'DESACTIVADO';
+
+            Mail::raw("El álbum del evento '{$event->name}' ha sido {$estado}", function ($message) use ($event, $estado) {
+                $message->to('mariposa@papilia.net')
+                    ->subject("Álbum {$estado}: {$event->name}");
+            });
 
             return response()->json([
                 'success' => true,
@@ -455,7 +452,7 @@ class EventController extends Controller
             $id = hex2bin($id_hex);
             // withTrashed() es necesario para encontrarlo, porque está oculto
             $event = Event::withTrashed()->findOrFail($id);
-            
+
             // Esto vuelve a poner deleted_at en NULL
             $event->restore();
 
@@ -474,8 +471,8 @@ class EventController extends Controller
             $id = hex2bin($id_hex);
             $event = Event::withTrashed()->findOrFail($id);
 
-            $eventFolder = $id_hex; 
-            $albumFolder = 'events/' . bin2hex($event->album); 
+            $eventFolder = $id_hex;
+            $albumFolder = 'events/' . bin2hex($event->album);
 
             DB::table('photos')->where('id_event', $id)->delete();
 
@@ -502,12 +499,12 @@ class EventController extends Controller
 
         foreach ($oldEvents as $event) {
             /** @var \App\Models\Event $event */
-            $eventFolder = bin2hex($event->id); 
-            $albumFolder = 'events/' . bin2hex($event->album); 
+            $eventFolder = bin2hex($event->id);
+            $albumFolder = 'events/' . bin2hex($event->album);
 
             // Borramos fotos de la BD
             DB::table('photos')->where('id_event', $event->id)->delete();
-            
+
             // Borramos carpetas físicas
             if (Storage::disk('local')->exists($eventFolder)) {
                 Storage::disk('local')->deleteDirectory($eventFolder);
@@ -515,7 +512,7 @@ class EventController extends Controller
             if (Storage::disk('local')->exists($albumFolder)) {
                 Storage::disk('local')->deleteDirectory($albumFolder);
             }
-            
+
             // Destrucción total
             $event->forceDelete();
         }

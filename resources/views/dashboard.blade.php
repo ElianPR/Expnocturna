@@ -46,27 +46,42 @@
 
                                     <button type="button"
                                         @click="
-                                                loading = true;
-                                                fetch('{{ route('events.toggle-status', $event->id_hex) }}', {
-                                                    method: 'PATCH',
-                                                    headers: {
-                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                        'Accept': 'application/json',
-                                                        'Content-Type': 'application/json'
-                                                    }
-                                                })
-                                                .then(res => res.json())
-                                                .then(data => {
-                                                    if(data.success) active = data.is_active;
-                                                })
-                                                .finally(() => loading = false)
-                                            "
+                                            loading = true;
+                                            fetch('{{ route('events.toggle-status', $event->id_hex) }}', {
+                                                method: 'PATCH',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/json'
+                                                }
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if(data.success) active = data.is_active;
+                                            })
+                                            .finally(() => loading = false)
+                                        "
                                         :class="active ? 'bg-green-500' : 'bg-neutral-300 dark:bg-neutral-600'"
                                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                         :disabled="loading">
+
                                         <span class="sr-only">Cambiar estado</span>
-                                        <span :class="active ? 'translate-x-5' : 'translate-x-0'"
-                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+
+                                        <span x-show="!loading" :class="active ? 'translate-x-5' : 'translate-x-0'"
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
+                                        </span>
+
+                                        <div x-show="loading" class="absolute inset-0 flex items-center justify-center"
+                                            x-cloak>
+                                            <svg class="animate-spin h-4 w-4 text-white"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                    stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z">
+                                                </path>
+                                            </svg>
+                                        </div>
+
                                     </button>
 
                                     <span x-text="active ? 'Activo' : 'Desactivado'"
@@ -103,10 +118,24 @@
                                         :class="active ? 'bg-green-500' : 'bg-neutral-300 dark:bg-neutral-600'"
                                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                         :disabled="loading">
+
                                         <span class="sr-only">Cambiar estado álbum</span>
-                                        <span :class="active ? 'translate-x-5' : 'translate-x-0'"
+
+                                        <span x-show="!loading" :class="active ? 'translate-x-5' : 'translate-x-0'"
                                             class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
                                         </span>
+
+                                        <div x-show="loading" class="absolute inset-0 flex items-center justify-center"
+                                            x-cloak>
+                                            <svg class="animate-spin h-4 w-4 text-white"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                    stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z">
+                                                </path>
+                                            </svg>
+                                        </div>
+
                                     </button>
 
                                     <span x-text="active ? 'Activo' : 'Desactivado'"
@@ -172,7 +201,8 @@
 
                                         <div class="w-16">
                                             <a href="{{ url('/album/' . bin2hex($event->album) . '/admin') }}"
-                                                target="_blank" class="text-red-600 hover:underline dark:text-red-400">
+                                                target="_blank"
+                                                class="text-red-600 hover:underline dark:text-red-400">
                                                 Admin
                                             </a>
                                         </div>
@@ -204,13 +234,8 @@
                                         variant="subtle" icon="pencil-square">
                                         Editar
                                     </flux:button>
-                                    <flux:button 
-                                        type="button"
-                                        size="sm" 
-                                        variant="danger" 
-                                        icon="trash"
-                                        onclick="confirmDelete('{{ route('events.destroy', $event->id_hex) }}')"
-                                    >
+                                    <flux:button type="button" size="sm" variant="danger" icon="trash"
+                                        onclick="confirmDelete('{{ route('events.destroy', $event->id_hex) }}')">
                                         Mover a la papelera
                                     </flux:button>
                                 </div>
@@ -237,7 +262,7 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444', // Rojo de peligro
-                cancelButtonColor: '#6b7280',  // Gris neutro
+                cancelButtonColor: '#6b7280', // Gris neutro
                 confirmButtonText: 'Sí, eliminar todo',
                 cancelButtonText: 'Cancelar',
                 reverseButtons: true
@@ -256,6 +281,7 @@
                 }
             });
         }
+
         function forzarCopiado(text) {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text);
