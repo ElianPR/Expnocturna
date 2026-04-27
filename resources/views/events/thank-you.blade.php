@@ -29,10 +29,45 @@
             <img src="{{ asset('images/candado.png') }}" alt="Candado Mariposa" class="w-72 sm:w-80 h-auto max-w-full drop-shadow-xl object-contain">
         </div>
 
-        <!-- Subtitle -->
-        <p class="text-lg sm:text-xl font-bold text-[#092d51] mb-10 leading-snug">
-            Por el momento este espacio aún no está disponible.
-        </p>
+        <!-- Availability Info -->
+        @if(isset($type) && $type === 'album')
+            @if($event->album_availability && $event->album_expiration)
+                <p class="text-lg sm:text-xl font-bold text-[#092d51] mb-10 leading-snug">
+                    Este álbum solo estará disponible del 
+                    {{ $event->album_availability->format('d/m/Y') }} al {{ $event->album_expiration->format('d/m/Y') }}
+                </p>
+            @elseif($event->album_availability && !$event->album_expiration)
+                <p class="text-lg sm:text-xl font-bold text-[#092d51] mb-10 leading-snug">
+                    Este álbum estará disponible a partir del
+                    {{ $event->album_availability->format('d/m/Y') }}
+                </p>
+            @elseif(!$event->album_availability && $event->album_expiration)
+                <p class="text-lg sm:text-xl font-bold text-[#092d51] mb-10 leading-snug">
+                    Este álbum solo estará disponible hasta el
+                    {{ $event->album_expiration->format('d/m/Y') }}
+                </p>
+            @else
+                <p class="text-lg sm:text-xl font-bold text-[#092d51] mb-10 leading-snug">
+                    Por el momento este espacio aún no está disponible.
+                </p>
+            @endif
+        @else
+            @if($event->date && $event->cover_expiration)
+                <p class="text-lg sm:text-xl font-bold text-[#092d51] mb-10 leading-snug">
+                    Este evento solo se encontrará disponible del 
+                    {{ $event->date->format('d/m/Y') }} al {{ $event->cover_expiration->format('d/m/Y') }}
+                </p>
+            @elseif($event->date && !$event->cover_expiration)
+                <p class="text-lg sm:text-xl font-bold text-[#092d51] mb-10 leading-snug">
+                    Este evento estará disponible a partir del
+                    {{ $event->date->format('d/m/Y') }}
+                </p>
+            @else
+                <p class="text-lg sm:text-xl font-bold text-[#092d51] mb-10 leading-snug">
+                    Por el momento este espacio aún no está disponible.
+                </p>
+            @endif
+        @endif
 
         <!-- Footer -->
         <div class="mt-4 text-center font-medium text-[#092d51]">

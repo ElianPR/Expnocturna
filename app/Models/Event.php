@@ -29,12 +29,18 @@ class Event extends Model
         'id_user',
         'is_active',
         'album_active',
+        'cover_expiration',
+        'album_expiration',
+        'album_availability',
     ];
 
     protected $casts = [
         'date' => 'date',
         'is_active' => 'boolean',
         'album_active' => 'boolean',
+        'cover_expiration' => 'date',
+        'album_expiration' => 'date',
+        'album_availability' => 'date',
     ];
 
     protected static function boot()

@@ -126,11 +126,31 @@
                     </flux:field>
                 </div>
 
-                <flux:field>
-                    <flux:label>Fecha del evento</flux:label>
-                    <flux:input type="date" name="date" x-model="date" required />
-                    <flux:error name="date" />
-                </flux:field>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <flux:field>
+                        <flux:label>Fecha del evento</flux:label>
+                        <flux:input type="date" name="date" x-model="date" required />
+                        <flux:error name="date" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Expira portada</flux:label>
+                        <flux:input type="date" name="cover_expiration" x-model="cover_expiration" />
+                        <flux:error name="cover_expiration" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Apertura álbum</flux:label>
+                        <flux:input type="date" name="album_availability" x-model="album_availability" />
+                        <flux:error name="album_availability" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Expira álbum</flux:label>
+                        <flux:input type="date" name="album_expiration" x-model="album_expiration" />
+                        <flux:error name="album_expiration" />
+                    </flux:field>
+                </div>
 
                 <flux:separator variant="subtle" />
 
@@ -228,6 +248,9 @@
             return {
                 name: {!! json_encode(old('name', '')) !!},
                 date: {!! json_encode(old('date', '')) !!},
+                cover_expiration: {!! json_encode(old('cover_expiration', '')) !!},
+                album_expiration: {!! json_encode(old('album_expiration', '')) !!},
+                album_availability: {!! json_encode(old('album_availability', '')) !!},
                 typography: "'Cinzel', serif",
                 template: '{{ old('template', '1') }}',
                 imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',

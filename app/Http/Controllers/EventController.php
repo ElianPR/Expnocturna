@@ -35,6 +35,9 @@ class EventController extends Controller
             'typography' => 'nullable|max:40',
             'template'   => 'nullable|integer',
             'date'       => 'required|date',
+            'cover_expiration' => 'nullable|date',
+            'album_expiration' => 'nullable|date',
+            'album_availability' => 'nullable|date',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'song'       => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
             'song_cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
@@ -56,6 +59,9 @@ class EventController extends Controller
                 'typography' => $validated['typography'] ?? null,
                 'template'   => $request->input('template', 0),
                 'date'       => $validated['date'],
+                'cover_expiration' => $validated['cover_expiration'] ?? null,
+                'album_expiration' => $validated['album_expiration'] ?? null,
+                'album_availability' => $validated['album_availability'] ?? null,
             ];
 
             if ($request->hasFile('monogram')) {
@@ -132,7 +138,7 @@ class EventController extends Controller
         $event = Event::where('id', $eventId)->firstOrFail();
 
         if (!$event->is_active) {
-            return view('events.thank-you', compact('event'));
+            return view('events.thank-you', ['event' => $event, 'type' => 'event']);
         }
 
         // Si está activo, el flujo sigue normal...
@@ -299,6 +305,9 @@ class EventController extends Controller
             'typography' => 'nullable|max:40',
             'template'   => 'nullable|integer',
             'date'       => 'required|date',
+            'cover_expiration' => 'nullable|date',
+            'album_expiration' => 'nullable|date',
+            'album_availability' => 'nullable|date',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'song'       => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
             'song_cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
@@ -313,6 +322,9 @@ class EventController extends Controller
                 'typography' => $validated['typography'] ?? null,
                 'template'   => $request->input('template', 0),
                 'date'       => $validated['date'],
+                'cover_expiration' => $validated['cover_expiration'] ?? null,
+                'album_expiration' => $validated['album_expiration'] ?? null,
+                'album_availability' => $validated['album_availability'] ?? null,
             ];
 
             // --- MONOGRAMA ---

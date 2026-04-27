@@ -16,7 +16,7 @@
                 <thead class="bg-neutral-100 dark:bg-neutral-800">
                     <tr>
                         <th class="px-4 py-3 text-left">Nombre</th>
-                        <th class="px-4 py-3 text-left">Fecha</th>
+                        <th class="px-4 py-3 text-left">Fechas</th>
                         <th class="px-4 py-3 text-center">Estado de portada</th>
                         <th class="px-4 py-3 text-center">Estado de Álbum</th>
                         <th class="px-4 py-3 text-left">Enlaces</th>
@@ -26,6 +26,92 @@
 
                 <tbody>
                     @forelse ($events as $event)
+                        @php
+                            $today = \Carbon\Carbon::now()->startOfDay();
+                            
+                            // Lógica para EVENTO
+                            $eventoAviso = null;
+                            $eventoColor = '';
+                            
+                            if ($event->date) {
+                                $diffInicio = $today->diffInDays($event->date, false);
+                                
+                                if (!$event->is_active) {
+                                    if ($event->cover_expiration && $today->diffInDays($event->cover_expiration, false) < 0) {
+                                        $eventoAviso = 'Finalizado';
+                                        $eventoColor = 'bg-neutral-100 text-neutral-600 border-neutral-300 dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700';
+                                    } elseif ($diffInicio <= 0) {
+                                        $eventoAviso = 'Requiere Activar';
+                                        $eventoColor = 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-800';
+                                    } elseif ($diffInicio <= 3) {
+                                        $eventoAviso = 'Pronto a Iniciar';
+                                        $eventoColor = 'bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-800';
+                                    } else {
+                                        $eventoAviso = 'En Espera';
+                                        $eventoColor = 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800';
+                                    }
+                                } else {
+                                    if ($event->cover_expiration) {
+                                        $diffExp = $today->diffInDays($event->cover_expiration, false);
+                                        if ($diffExp < 0) {
+                                            $eventoAviso = 'Expirado, Desactivar';
+                                            $eventoColor = 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-800';
+                                        } elseif ($diffExp <= 3) {
+                                            $eventoAviso = 'Próximo a Expirar';
+                                            $eventoColor = 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/50 dark:text-orange-300 dark:border-orange-800';
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Lógica para ALBUM
+                            $albumAviso = null;
+                            $albumColor = '';
+
+                            if ($event->album_availability) {
+                                $diffAlb = $today->diffInDays($event->album_availability, false);
+                                if (!$event->album_active) {
+                                    if ($event->album_expiration && $today->diffInDays($event->album_expiration, false) < 0) {
+                                        $albumAviso = 'Finalizado';
+                                        $albumColor = 'bg-neutral-100 text-neutral-600 border-neutral-300 dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700';
+                                    } elseif ($diffAlb <= 0) {
+                                        $albumAviso = 'Requiere Activar';
+                                        $albumColor = 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-800';
+                                    } elseif ($diffAlb <= 3) {
+                                        $albumAviso = 'Pronto a Iniciar';
+                                        $albumColor = 'bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-800';
+                                    } else {
+                                        $albumAviso = 'En Espera';
+                                        $albumColor = 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800';
+                                    }
+                                } else {
+                                    if ($event->album_expiration) {
+                                        $diffAlbExp = $today->diffInDays($event->album_expiration, false);
+                                        if ($diffAlbExp < 0) {
+                                            $albumAviso = 'Expirado, Desactivar';
+                                            $albumColor = 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-800';
+                                        } elseif ($diffAlbExp <= 3) {
+                                            $albumAviso = 'Próximo a Expirar';
+                                            $albumColor = 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/50 dark:text-orange-300 dark:border-orange-800';
+                                        }
+                                    }
+                                }
+                            } elseif ($event->album_active && $event->album_expiration) {
+                                $diffAlbExp = $today->diffInDays($event->album_expiration, false);
+                                if ($diffAlbExp < 0) {
+                                    $albumAviso = 'Expirado, Desactivar';
+                                    $albumColor = 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-800';
+                                } elseif ($diffAlbExp <= 3) {
+                                    $albumAviso = 'Próximo a Expirar';
+                                    $albumColor = 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/50 dark:text-orange-300 dark:border-orange-800';
+                                }
+                            } elseif (!$event->album_active && $event->album_expiration) {
+                                if ($today->diffInDays($event->album_expiration, false) < 0) {
+                                    $albumAviso = 'Finalizado';
+                                    $albumColor = 'bg-neutral-100 text-neutral-600 border-neutral-300 dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700';
+                                }
+                            }
+                        @endphp
                         <tr class="border-t border-neutral-200 dark:border-neutral-700">
                             <td class="px-4 py-3">
                                 <a href="{{ route('events.qr', $event->id_hex) }}"
@@ -34,8 +120,37 @@
                                 </a>
                             </td>
 
-                            <td class="px-4 py-3">
-                                {{ $event->date ? $event->date->format('d/m/Y') : '—' }}
+                            <td class="px-4 py-3 text-sm">
+                                <div class="flex flex-col gap-3">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Evento</span>
+                                            @if($eventoAviso)
+                                                <span class="text-[9px] font-bold px-2 py-0.5 rounded border {{ $eventoColor }}">{{ $eventoAviso }}</span>
+                                            @endif
+                                        </div>
+                                        <span class="text-neutral-700 dark:text-neutral-300 whitespace-nowrap">
+                                            {{ $event->date ? $event->date->format('d/m/Y') : '—' }} 
+                                            @if($event->cover_expiration)
+                                                - {{ $event->cover_expiration->format('d/m/Y') }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Álbum</span>
+                                            @if($albumAviso)
+                                                <span class="text-[9px] font-bold px-2 py-0.5 rounded border {{ $albumColor }}">{{ $albumAviso }}</span>
+                                            @endif
+                                        </div>
+                                        <span class="text-neutral-700 dark:text-neutral-300 whitespace-nowrap">
+                                            {{ $event->album_availability ? $event->album_availability->format('d/m/Y') : '—' }} 
+                                            @if($event->album_expiration)
+                                                - {{ $event->album_expiration->format('d/m/Y') }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
                             </td>
 
                             <td class="px-4 py-3 text-center">
