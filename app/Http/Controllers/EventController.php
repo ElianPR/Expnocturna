@@ -157,7 +157,7 @@ class EventController extends Controller
             $estado = $event->is_active ? 'ACTIVADO' : 'DESACTIVADO';
 
             Mail::raw("El evento '{$event->name}' ha sido {$estado}", function ($message) use ($event, $estado) {
-                $message->to('mariposa@papilia.net')
+                $message->to('exnocturna@papilia.net')
                     ->subject("Evento {$estado}: {$event->name}");
             });
 
@@ -257,7 +257,7 @@ class EventController extends Controller
             $estado = $event->album_active ? 'ACTIVADO' : 'DESACTIVADO';
 
             Mail::raw("El álbum del evento '{$event->name}' ha sido {$estado}", function ($message) use ($event, $estado) {
-                $message->to('mariposa@papilia.net')
+                $message->to('exnocturna@papilia.net')
                     ->subject("Álbum {$estado}: {$event->name}");
             });
 
