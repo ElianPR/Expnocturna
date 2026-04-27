@@ -22,11 +22,11 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
     Route::get('/events/crear', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
-    
-    Route::delete('/events/{id_hex}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.destroy');
-    Route::get('/papelera', [App\Http\Controllers\EventController::class, 'trash'])->name('events.trash');
-    Route::patch('/events/{id_hex}/restore', [App\Http\Controllers\EventController::class, 'restore'])->name('events.restore');
-    Route::delete('/events/{id_hex}/force', [App\Http\Controllers\EventController::class, 'forceDestroy'])->name('events.force-destroy');
+
+    Route::delete('/events/{id_hex}', [EventController::class, 'destroy'])->name('events.destroy');
+    Route::get('/papelera', [EventController::class, 'trash'])->name('events.trash');
+    Route::patch('/events/{id_hex}/restore', [EventController::class, 'restore'])->name('events.restore');
+    Route::delete('/events/{id_hex}/force', [EventController::class, 'forceDestroy'])->name('events.force-destroy');
 });
 
 Route::get('/event/{id_evento}', [EventController::class, 'show'])->name('events.show');
@@ -66,7 +66,7 @@ Route::patch('/events/{id_hex}/toggle-album', [EventController::class, 'toggleAl
 Route::get('/event/{id_evento}/musica', [EventController::class, 'music'])
     ->name('events.music');
 
-Route::get('/events/{id_hex}/stream-cover', [App\Http\Controllers\EventController::class, 'streamCover'])
+Route::get('/events/{id_hex}/stream-cover', [EventController::class, 'streamCover'])
     ->name('events.stream-cover');
 
 Route::get('/events/{id_hex}/stream-song', [EventController::class, 'streamSong'])->name('events.stream-song');
@@ -78,4 +78,9 @@ Route::get('/event/{id}/edit', [EventController::class, 'edit'])
 Route::put('/event/{id}', [EventController::class, 'update'])
     ->middleware('auth')
     ->name('events.update');
+
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
+
 require __DIR__ . '/auth.php';
