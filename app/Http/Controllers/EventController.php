@@ -29,20 +29,27 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|max:80',
-            'monogram' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
-            'typography' => 'nullable|max:40',
-            'template'   => 'nullable|integer',
-            'date'       => 'required|date',
-            'cover_expiration' => 'nullable|date',
-            'album_expiration' => 'nullable|date',
-            'album_availability' => 'nullable|date',
-            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
-            'song'       => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
-            'song_cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'watermark'  => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-        ]);
+        $rules = [
+            'name'               => 'required|max:80',
+            'monogram'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'typography'         => 'nullable|max:40',
+            'template'           => 'nullable|integer',
+            'date'               => 'required|date',
+            'cover_expiration'   => 'required|date|after_or_equal:date',
+            'album_availability' => 'required|date',
+            'album_expiration'   => 'required|date|after_or_equal:album_availability',
+            'main_image'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'song'               => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
+            'song_cover'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'watermark'          => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+        ];
+
+        $customMessages = [
+            'cover_expiration.after_or_equal' => 'La expiración de la portada no puede ser anterior a la fecha del evento.',
+            'album_expiration.after_or_equal' => 'La expiración del álbum no puede ser anterior a su fecha de apertura.',
+        ];
+
+        $validated = $request->validate($rules, $customMessages);
 
         try {
             $uuid = Str::uuid();
@@ -299,20 +306,27 @@ class EventController extends Controller
 
         $event = Event::where('id', hex2bin($id_hex))->firstOrFail();
 
-        $validated = $request->validate([
-            'name'       => 'required|max:80',
-            'monogram'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
-            'typography' => 'nullable|max:40',
-            'template'   => 'nullable|integer',
-            'date'       => 'required|date',
-            'cover_expiration' => 'nullable|date',
-            'album_expiration' => 'nullable|date',
-            'album_availability' => 'nullable|date',
-            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
-            'song'       => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
-            'song_cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'watermark'  => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-        ]);
+        $rules = [
+            'name'               => 'required|max:80',
+            'monogram'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'typography'         => 'nullable|max:40',
+            'template'           => 'nullable|integer',
+            'date'               => 'required|date',
+            'cover_expiration'   => 'required|date|after_or_equal:date',
+            'album_availability' => 'required|date',
+            'album_expiration'   => 'required|date|after_or_equal:album_availability',
+            'main_image'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'song'               => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
+            'song_cover'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'watermark'          => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+        ];
+
+        $customMessages = [
+            'cover_expiration.after_or_equal' => 'La expiración de la portada no puede ser anterior a la fecha del evento.',
+            'album_expiration.after_or_equal' => 'La expiración del álbum no puede ser anterior a su fecha de apertura.',
+        ];
+
+        $validated = $request->validate($rules, $customMessages);
 
         try {
             $folderName = $id_hex;
