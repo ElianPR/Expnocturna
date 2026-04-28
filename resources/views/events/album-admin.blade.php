@@ -144,7 +144,7 @@
 
                     const result = await Swal.fire({
                         title: '¿Estás seguro?',
-                        text: 'Estas fotos se moverán a la papelera',
+                        text: 'Estas fotos se moverán a la papelera, los archivos estarán disponibles por 30 días',
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#ef4444',

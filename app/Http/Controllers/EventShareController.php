@@ -195,6 +195,8 @@ class EventShareController extends Controller
                     $origin,
                     $trash
                 );
+
+                touch(Storage::disk('local')->path($trash));
             }
         }
 
@@ -205,6 +207,8 @@ class EventShareController extends Controller
 
     public function trash(string $id_album)
     {
+        $this->cleanExpiredTrashMedia($id_album);
+
         $event = Event::where(
             'album',
             hex2bin($id_album)
@@ -273,6 +277,8 @@ class EventShareController extends Controller
                         $origin,
                         $dest
                     );
+
+                touch(Storage::disk('local')->path($dest));
             }
         }
 
@@ -308,5 +314,20 @@ class EventShareController extends Controller
             'message' =>
             'Eliminadas definitivamente'
         ]);
+    }
+
+    private function cleanExpiredTrashMedia(string $id_album)
+    {
+        $trashDir = "events/$id_album/trash";
+        if (Storage::disk('local')->exists($trashDir)) {
+            $files = Storage::disk('local')->files($trashDir);
+            foreach ($files as $file) {
+                $lastModified = Storage::disk('local')->lastModified($file);
+                // 30 días en segundos = 30 * 24 * 60 * 60 = 2592000
+                if (now()->timestamp - $lastModified >= 2592000) {
+                    Storage::disk('local')->delete($file);
+                }
+            }
+        }
     }
 }

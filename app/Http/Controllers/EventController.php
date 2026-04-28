@@ -542,5 +542,26 @@ class EventController extends Controller
             // Destrucción total
             $event->forceDelete();
         }
+
+        // LIMPIEZA DE FOTOS EN PAPELERA DE ÁLBUMES (30 días)
+        $this->limpiarFotosPapeleraCaducadaGlobal();
+    }
+
+    private function limpiarFotosPapeleraCaducadaGlobal()
+    {
+        $albums = Storage::disk('local')->directories('events');
+        foreach ($albums as $albumDir) {
+            $trashDir = $albumDir . '/trash';
+            if (Storage::disk('local')->exists($trashDir)) {
+                $files = Storage::disk('local')->files($trashDir);
+                foreach ($files as $file) {
+                    $lastModified = Storage::disk('local')->lastModified($file);
+                    // 30 días en segundos = 30 * 24 * 60 * 60 = 2592000
+                    if (now()->timestamp - $lastModified >= 2592000) {
+                        Storage::disk('local')->delete($file);
+                    }
+                }
+            }
+        }
     }
 }
