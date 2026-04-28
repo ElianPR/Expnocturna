@@ -132,15 +132,13 @@ class EventShareController extends Controller
 
     public function serveFile(string $id_album, string $filename)
     {
-        $path = 'events/' . $id_album . '/' . $filename;
+        $path = "events/$id_album/$filename";
 
         if (!Storage::disk('local')->exists($path)) {
             abort(404);
         }
 
-        $rutaFisica = Storage::disk('local')->path($path);
-
-        return response()->file($rutaFisica);
+        return response()->file(Storage::disk('local')->path($path));
     }
 
     public function adminAlbum(string $id_album)
@@ -173,32 +171,142 @@ class EventShareController extends Controller
         return view('events.album-admin', compact('event', 'media'));
     }
 
-    public function deleteMedia(Request $request, string $id_album)
+    public function moveToTrash(Request $request, string $id_album)
     {
-        if (!ctype_xdigit($id_album) || strlen($id_album) !== 32) {
-            abort(404);
-        }
-
         $files = $request->input('files', []);
 
-        if (empty($files)) {
-            return response()->json(['error' => 'No hay archivos seleccionados'], 422);
-        }
-
-        $deleted = 0;
-
         foreach ($files as $url) {
-            $filename = basename(parse_url($url, PHP_URL_PATH));
-            $path = 'events/' . $id_album . '/' . $filename;
 
-            if (Storage::disk('local')->exists($path)) {
-                Storage::disk('local')->delete($path);
-                $deleted++;
+            $filename = basename(parse_url($url, PHP_URL_PATH));
+
+            $origin =
+                "events/$id_album/$filename";
+
+            $trash =
+                "events/$id_album/trash/$filename";
+
+            if (Storage::disk('local')->exists($origin)) {
+
+                Storage::disk('local')->makeDirectory(
+                    "events/$id_album/trash"
+                );
+
+                Storage::disk('local')->move(
+                    $origin,
+                    $trash
+                );
             }
         }
 
         return response()->json([
-            'message' => "$deleted archivo(s) eliminado(s)"
+            'message' => 'Movidos a papelera'
+        ]);
+    }
+
+    public function trash(string $id_album)
+    {
+        $event = Event::where(
+            'album',
+            hex2bin($id_album)
+        )->firstOrFail();
+
+        $files = Storage::disk('local')
+            ->files("events/$id_album/trash");
+
+        $media = [];
+
+        foreach ($files as $file) {
+
+            $ext = strtolower(
+                pathinfo($file, PATHINFO_EXTENSION)
+            );
+
+            $media[] = [
+                'url' => route(
+                    'album.file',
+                    [
+                        'id_album' => $id_album,
+                        'filename' => 'trash/' . basename($file)
+                    ]
+                ),
+                'is_video' => in_array(
+                    $ext,
+                    ['mp4', 'mov', 'avi', 'mkv', 'webm']
+                )
+            ];
+        }
+
+        return view(
+            'events.album-trash-admin',
+            compact('event', 'media')
+        );
+    }
+
+    public function restoreMedia(Request $request, string $id_album) {
+
+        $files = $request->input(
+            'files',
+            []
+        );
+
+        foreach ($files as $url) {
+
+            $filename = basename(
+                parse_url(
+                    $url,
+                    PHP_URL_PATH
+                )
+            );
+
+            $origin =
+                "events/$id_album/trash/$filename";
+
+            $dest =
+                "events/$id_album/$filename";
+
+            if (
+                Storage::disk('local')
+                ->exists($origin)
+            ) {
+                Storage::disk('local')
+                    ->move(
+                        $origin,
+                        $dest
+                    );
+            }
+        }
+
+        return response()->json([
+            'message' => 'Restauradas'
+        ]);
+    }
+
+    public function forceDeleteMedia(Request $request, string $id_album)
+    {
+
+        $files = $request->input(
+            'files',
+            []
+        );
+
+        foreach ($files as $url) {
+
+            $filename = basename(
+                parse_url(
+                    $url,
+                    PHP_URL_PATH
+                )
+            );
+
+            Storage::disk('local')
+                ->delete(
+                    "events/$id_album/trash/$filename"
+                );
+        }
+
+        return response()->json([
+            'message' =>
+            'Eliminadas definitivamente'
         ]);
     }
 }

@@ -137,11 +137,11 @@
                     this.isDownloading = false;
                     this.selected = [];
                 },
-                async confirmDelete() {
+                async confirmTrash() {
                     if (this.selected.length === 0) return;
 
                     if (!confirm(
-                            '¿Estás seguro de eliminar estas fotos? Esta acción no se puede deshacer.'
+                            'Mover estas fotos a la papelera?'
                         )) {
                         return;
                     }
@@ -159,7 +159,7 @@
                         });
 
                         const response = await fetch(
-                            `{{ route('album.delete', request()->route('id_album')) }}`, {
+                            `{{ route('album.trash', request()->route('id_album')) }}`, {
                                 method: 'POST',
                                 credentials: 'same-origin',
                                 body: formData
@@ -198,13 +198,20 @@
             @endif
         </div>
 
-        @if (count($media) > 0)
-            <div class="flex justify-end mb-6">
+
+        <div class="flex justify-end mb-6">
+            @if (count($media) > 0)
                 <flux:button variant="subtle" size="sm" @click="toggleSelectAll()">
                     <span x-text="allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'">Seleccionar todo</span>
                 </flux:button>
-            </div>
-        @endif
+            @endif
+            <a href="{{ route('album.trash.view', request()->route('id_album')) }}">
+                <flux:button variant="subtle" icon="trash">
+                    Papelera
+                </flux:button>
+            </a>
+        </div>
+
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             @forelse ($media as $item)
@@ -275,8 +282,8 @@
                     <span x-text="isDownloading ? 'Descargando...' : 'Descargar'"></span>
                 </flux:button>
 
-                <flux:button variant="danger" icon="trash" @click="confirmDelete()" class="flex-1 sm:flex-none">
-                    Eliminar
+                <flux:button variant="danger" icon="trash" @click="confirmTrash()" class="flex-1 sm:flex-none">
+                    Mover a la papelera
                 </flux:button>
             </div>
         </div>

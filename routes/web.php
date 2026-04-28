@@ -38,15 +38,16 @@ Route::get('/event/{id}/qr', [EventController::class, 'qr'])
 Route::get('/event/{id_evento}/file/{filename}', [EventController::class, 'serveFile'])->name('file.show');
 Route::get('/album/{id_album}', [EventShareController::class, 'showAlbum'])->name('album.show');
 
-Route::get('/album/{id_album}/file/{filename}', [EventShareController::class, 'serveFile'])->name('album.file');
+Route::get(
+    '/album/{id_album}/file/{filename}',
+    [EventShareController::class, 'serveFile']
+)
+    ->where('filename', '.*')
+    ->name('album.file');
 
 Route::get('/album/{id_album}/admin', [EventShareController::class, 'adminAlbum'])
     ->middleware('auth')
     ->name('album.admin');
-
-Route::post('/album/{id_album}/delete', [EventShareController::class, 'deleteMedia'])
-    ->middleware('auth')
-    ->name('album.delete');
 
 Route::get('/event/{id_evento}/compartir', [EventShareController::class, 'create'])
     ->name('events.share.create');
@@ -82,5 +83,21 @@ Route::put('/event/{id}', [EventController::class, 'update'])
 Route::get('/terms', function () {
     return view('terms');
 })->name('terms');
+
+Route::post('/album/{id_album}/trash', [EventShareController::class, 'moveToTrash'])
+    ->middleware('auth')
+    ->name('album.trash');
+
+Route::get('/album/{id_album}/trash', [EventShareController::class, 'trash'])
+    ->middleware('auth')
+    ->name('album.trash.view');
+
+Route::post('/album/{id_album}/restore', [EventShareController::class, 'restoreMedia'])
+    ->middleware('auth')
+    ->name('album.restore');
+
+Route::delete('/album/{id_album}/force-delete', [EventShareController::class, 'forceDeleteMedia'])
+    ->middleware('auth')
+    ->name('album.force-delete');
 
 require __DIR__ . '/auth.php';
