@@ -9,6 +9,8 @@
 
     <title>Papelera - {{ $event->name ?? $event->monogram }}</title>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -130,13 +132,18 @@
                         return;
                     }
 
-                    if (
-                        !confirm(
-                            '¿Restaurar los elementos seleccionados?'
-                        )
-                    ) {
-                        return;
-                    }
+                    const result = await Swal.fire({
+                        title: '¿Restaurar archivos?',
+                        text: 'Los archivos volverán al álbum',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, restaurar',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#6b7280'
+                    });
+
+                    if (!result.isConfirmed) return;
 
                     this.processing = true;
 
@@ -173,11 +180,11 @@
                         window.location.reload();
 
                     } catch (e) {
-
-                        alert(
-                            'Error al restaurar archivos'
-                        );
-
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudieron restaurar los archivos'
+                        });
                     }
 
                     this.processing = false;
@@ -190,13 +197,18 @@
                         return;
                     }
 
-                    if (
-                        !confirm(
-                            'Esto eliminará definitivamente los archivos. ¿Continuar?'
-                        )
-                    ) {
-                        return;
-                    }
+                    const result = await Swal.fire({
+                        title: '¿Eliminar definitivamente?',
+                        text: 'Esta acción no se puede deshacer',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280'
+                    });
+
+                    if (!result.isConfirmed) return;
 
                     this.processing = true;
 
@@ -238,17 +250,14 @@
                         window.location.reload();
 
                     } catch (e) {
-
-                        alert(
-                            'Error al eliminar definitivamente'
-                        );
-
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudieron eliminar los archivos'
+                        });
                     }
-
                     this.processing = false;
-
                 }
-
             }));
 
         });
@@ -295,12 +304,12 @@
 
                 <flux:button variant="subtle" size="sm" @click="toggleSelectAll()">
 
-                    <span x-text="
+                    <span
+                        x-text="
                         allSelected
                         ? 'Deseleccionar todo'
                         : 'Seleccionar todo'
-                        "
-                    >
+                        ">
                     </span>
 
                 </flux:button>
@@ -310,7 +319,8 @@
 
 
 
-        <div class="
+        <div
+            class="
             grid
             grid-cols-1
             sm:grid-cols-2
@@ -318,8 +328,7 @@
             lg:grid-cols-4
             gap-4
             md:gap-6
-            "
-        >
+            ">
 
             @forelse($media as $item)
                 <div class="
@@ -343,7 +352,8 @@
                     @touchstart="startPress('{{ $item['url'] }}')" @touchend="cancelPress()" @touchmove="cancelPress()"
                     @mousedown="startPress('{{ $item['url'] }}')" @mouseup="cancelPress()" @mouseleave="cancelPress()">
 
-                    <button type="button" @click.stop.prevent="
+                    <button type="button"
+                        @click.stop.prevent="
                             toggleSelection(
                             '{{ $item['url'] }}'
                             )
@@ -390,13 +400,13 @@
                                 '{{ $item['url'] }}'
                                 )
                                 "
-                                                            class="
+                            class="
                                 block
                                 h-full
                                 w-full
                                 select-none
-                                " style="-webkit-touch-callout:none;"
-                            >
+                                "
+                            style="-webkit-touch-callout:none;">
 
                             <img src="{{ $item['url'] }}" loading="lazy" alt="Archivo en papelera"
                                 class="
@@ -408,8 +418,7 @@
                                     group-hover:scale-105
                                     select-none
                                     pointer-events-none
-                                    "
-                                >
+                                    ">
 
                         </a>
                     @endif
@@ -418,7 +427,8 @@
 
             @empty
 
-                <div class="
+                <div
+                    class="
                     col-span-full
                     flex
                     flex-col
@@ -426,23 +436,23 @@
                     justify-center
                     py-20
                     text-center
-                    "
-                >
+                    ">
 
-                    <flux:icon.trash class="
+                    <flux:icon.trash
+                        class="
                         size-20
                         text-neutral-300
                         dark:text-neutral-700
                         mb-6
                         " />
 
-                    <h3 class="
+                    <h3
+                        class="
                         text-xl
                         font-semibold
                         text-neutral-900
                         dark:text-neutral-200
-                        "
-                    >
+                        ">
                         La papelera está vacía
                     </h3>
 
@@ -459,7 +469,8 @@
 
 
 
-    <div x-show="selected.length>0" x-transition.translate.y.100% class="
+    <div x-show="selected.length>0" x-transition.translate.y.100%
+        class="
         fixed
         bottom-0
         left-0
@@ -491,7 +502,8 @@
                 dark:border-neutral-700
                 ">
 
-            <div class="
+            <div
+                class="
                 flex
                 items-center
                 gap-4
@@ -511,7 +523,8 @@
             </div>
 
 
-            <div class="
+            <div
+                class="
                 flex
                 items-center
                 gap-3
@@ -521,7 +534,8 @@
 
                 <flux:button variant="subtle" @click="toggleSelectAll()" class="hidden sm:flex">
 
-                    <span x-text="
+                    <span
+                        x-text="
                         allSelected
                         ? 'Deseleccionar'
                         : 'Seleccionar todo'

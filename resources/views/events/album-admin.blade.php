@@ -10,6 +10,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         /* Oculta la barra de abajo hasta que Alpine esté 100% listo */
         [x-cloak] {
@@ -140,11 +142,18 @@
                 async confirmTrash() {
                     if (this.selected.length === 0) return;
 
-                    if (!confirm(
-                            'Mover estas fotos a la papelera?'
-                        )) {
-                        return;
-                    }
+                    const result = await Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: 'Estas fotos se moverán a la papelera',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    });
+
+                    if (!result.isConfirmed) return;
 
                     await this.deleteSelected();
                 },
@@ -167,10 +176,22 @@
 
                         if (!response.ok) throw new Error();
 
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Listo',
+                            text: 'Archivos movidos a la papelera',
+                            timer: 1000,
+                            showConfirmButton: false
+                        });
+
                         window.location.reload();
 
                     } catch (e) {
-                        alert('Error al eliminar archivos');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudieron eliminar los archivos'
+                        });
                     }
                 }
             }));
