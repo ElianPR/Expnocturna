@@ -106,6 +106,13 @@ class EventShareController extends Controller
         $event = Event::where('album', hex2bin($id_album))->firstOrFail();
 
         if (!$event->album_active) {
+            if ($event->template == 1) {
+                return view('events.album-expired-1', compact('event'));
+            } elseif ($event->template == 2) {
+                return view('events.album-expired-2', compact('event'));
+            } elseif ($event->template == 3) {
+                return view('events.album-expired-3', compact('event'));
+            }
             return view('events.thank-you', ['event' => $event, 'type' => 'album']);
         }
 
