@@ -25,7 +25,7 @@
 
     <div
         class="text-center text-[10px] sm:text-[11px] font-bold tracking-widest text-[#1b311e] px-6 mb-5 uppercase leading-relaxed">
-        Vive la experiencia Papilia con <br> mariposas y la canción
+        Vive la experiencia Papilia con <br> mariposas y la canción del evento
     </div>
 
     <div class="w-full mb-8 relative z-10">

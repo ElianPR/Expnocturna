@@ -190,7 +190,7 @@
             </div>
 
             <div class="actions">
-                <button class="read" onclick="window.open('{{ route('terms') }}','_blank')">
+                <button class="read" onclick="window.open('{{ route('terms', $event->id_hex) }}','_blank')">
                     Consultar términos y condiciones
                 </button>
 

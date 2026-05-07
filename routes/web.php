@@ -80,10 +80,6 @@ Route::put('/event/{id}', [EventController::class, 'update'])
     ->middleware('auth')
     ->name('events.update');
 
-Route::get('/terms', function () {
-    return view('terms');
-})->name('terms');
-
 Route::post('/album/{id_album}/trash', [EventShareController::class, 'moveToTrash'])
     ->middleware('auth')
     ->name('album.trash');
@@ -99,5 +95,37 @@ Route::post('/album/{id_album}/restore', [EventShareController::class, 'restoreM
 Route::delete('/album/{id_album}/force-delete', [EventShareController::class, 'forceDeleteMedia'])
     ->middleware('auth')
     ->name('album.force-delete');
+
+Route::get('/terms/{id_hex?}', function ($id_hex = null) {
+
+    $themes = [
+        1 => [
+            'sidebar' => '#B1CA80',
+            'title' => '#285519',
+        ],
+
+        2 => [
+            'sidebar' => '#D2D7EA',
+            'title' => '#142854',
+        ],
+
+        3 => [
+            'sidebar' => '#DCA752',
+            'title' => '#A26E15',
+        ],
+    ];
+
+    $event = null;
+
+    if ($id_hex) {
+        $event = Event::whereRaw('HEX(id) = ?', [strtoupper($id_hex)])
+            ->first();
+    }
+
+    $template = $event?->template ?? 2;
+    $theme = $themes[$template] ?? $themes[2];
+
+    return view('terms', compact('theme'));
+})->name('terms');
 
 require __DIR__ . '/auth.php';
