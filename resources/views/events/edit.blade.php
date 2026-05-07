@@ -115,19 +115,19 @@
 
                     <flux:field>
                         <flux:label>Expira portada</flux:label>
-                        <flux:input type="date" name="cover_expiration" x-model="cover_expiration" />
+                        <flux:input type="date" name="cover_expiration" x-model="cover_expiration" required />
                         <flux:error name="cover_expiration" />
                     </flux:field>
 
                     <flux:field>
                         <flux:label>Apertura álbum</flux:label>
-                        <flux:input type="date" name="album_availability" x-model="album_availability" />
+                        <flux:input type="date" name="album_availability" x-model="album_availability" required />
                         <flux:error name="album_availability" />
                     </flux:field>
 
                     <flux:field>
                         <flux:label>Expira álbum</flux:label>
-                        <flux:input type="date" name="album_expiration" x-model="album_expiration" />
+                        <flux:input type="date" name="album_expiration" x-model="album_expiration" required />
                         <flux:error name="album_expiration" />
                     </flux:field>
                 </div>

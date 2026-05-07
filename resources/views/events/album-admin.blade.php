@@ -10,6 +10,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         /* Oculta la barra de abajo hasta que Alpine esté 100% listo */
         [x-cloak] {
@@ -137,14 +139,21 @@
                     this.isDownloading = false;
                     this.selected = [];
                 },
-                async confirmDelete() {
+                async confirmTrash() {
                     if (this.selected.length === 0) return;
 
-                    if (!confirm(
-                            '¿Estás seguro de eliminar estas fotos? Esta acción no se puede deshacer.'
-                        )) {
-                        return;
-                    }
+                    const result = await Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: 'Estas fotos se moverán a la papelera, los archivos estarán disponibles por 30 días',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    });
+
+                    if (!result.isConfirmed) return;
 
                     await this.deleteSelected();
                 },
@@ -159,7 +168,7 @@
                         });
 
                         const response = await fetch(
-                            `{{ route('album.delete', request()->route('id_album')) }}`, {
+                            `{{ route('album.trash', request()->route('id_album')) }}`, {
                                 method: 'POST',
                                 credentials: 'same-origin',
                                 body: formData
@@ -167,10 +176,22 @@
 
                         if (!response.ok) throw new Error();
 
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Listo',
+                            text: 'Archivos movidos a la papelera',
+                            timer: 1000,
+                            showConfirmButton: false
+                        });
+
                         window.location.reload();
 
                     } catch (e) {
-                        alert('Error al eliminar archivos');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudieron eliminar los archivos'
+                        });
                     }
                 }
             }));
@@ -198,13 +219,20 @@
             @endif
         </div>
 
-        @if (count($media) > 0)
-            <div class="flex justify-end mb-6">
+
+        <div class="flex justify-end mb-6">
+            @if (count($media) > 0)
                 <flux:button variant="subtle" size="sm" @click="toggleSelectAll()">
                     <span x-text="allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'">Seleccionar todo</span>
                 </flux:button>
-            </div>
-        @endif
+            @endif
+            <a href="{{ route('album.trash.view', request()->route('id_album')) }}">
+                <flux:button variant="subtle" icon="trash">
+                    Papelera
+                </flux:button>
+            </a>
+        </div>
+
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             @forelse ($media as $item)
@@ -275,8 +303,8 @@
                     <span x-text="isDownloading ? 'Descargando...' : 'Descargar'"></span>
                 </flux:button>
 
-                <flux:button variant="danger" icon="trash" @click="confirmDelete()" class="flex-1 sm:flex-none">
-                    Eliminar
+                <flux:button variant="danger" icon="trash" @click="confirmTrash()" class="flex-1 sm:flex-none">
+                    Mover a la papelera
                 </flux:button>
             </div>
         </div>
