@@ -29,10 +29,10 @@
         @media (max-width: 767px) {
             body {
                 background-image: var(--bg-mobile);
-                background-size: cover;
-                background-position: center;
+                background-size: contain;
+                background-position: top center;
                 background-repeat: no-repeat;
-                background-attachment: fixed;
+                background-color: #f8fafc;
             }
         }
     </style>
@@ -165,17 +165,17 @@
 @php
     $templates = [
         1 => [
-            'bg' => asset('images/fondoAV.jpg'),
+            'bg' => asset('images/fondoAV.png'),
             'textName' => '#000000',
             'button' => '#4A720D',
         ],
         2 => [
-            'bg' => asset('images/fondoAA.jpg'),
+            'bg' => asset('images/fondoAA.png'),
             'textName' => '#828189',
             'button' => '#092D51',
         ],
         3 => [
-            'bg' => asset('images/fondoAD.jpg'),
+            'bg' => asset('images/fondoAD.png'),
             'textName' => '#B4976E',
             'button' => '#A8792B',
         ],
@@ -194,20 +194,23 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
 
-        <div class="text-center mb-10">
+        <div class="text-center mb-2 -mt-4">
             <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-2"
                 style="{{ $theme['textName'] ? 'font-family: ' . ($event->typography ?? "'Cinzel', serif") . '; color: ' . $theme['textName'] . ';' : '' }}">
                 {{ $event->name ?? ($event->monogram ?? 'Nuestro Evento') }}
             </h1>
-            <p class="text-neutral-600 text-lg">
-                Galería de recuerdos
-            </p>
+
             @if ($event->date)
                 <p class="text-sm text-neutral-400 dark:text-neutral-500 mt-2">
                     {{ $event->date->format('d/m/Y') }}
                 </p>
             @endif
         </div>
+
+        <br>
+        <p class="text-center text-neutral-600 dark:text-neutral-400 mb-8 italic">
+            Galería de recuerdos
+        </p>
 
         @if (count($media) > 0)
             <div class="flex justify-end mb-6">
