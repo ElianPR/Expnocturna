@@ -19,7 +19,7 @@
     $templates = [
         1 => [
             'bg' => asset('images/fondoCV.png'),
-            'button' => '#4A720D',
+            'button' => '#436C00',
             'card' => '#CCD9B7',
             'text' => '#426B00',
             'textName' => '#000000',
@@ -81,7 +81,7 @@
 
         <!-- Header -->
         <div class="w-full text-center mb-2">
-            <flux:heading level="1" class="text-xl font-bold italic" style="color: {{ $theme['text'] }};">
+            <flux:heading level="1" class="text-xl font-semibold italic" style="color: {{ $theme['text'] }};">
                 Compartir recuerdos
             </flux:heading>
 
@@ -89,6 +89,8 @@
                 Sube fotos o videos de este evento.
             </flux:text>
         </div>
+
+        <br>
 
         <div class="w-full text-center my-6">
             <h2 class="text-5xl md:text-6xl tracking-normal"
@@ -105,6 +107,13 @@
             @endif
         </div>
 
+        @if ($theme === $templates[1])
+            <div class="w-full flex justify-center mb-4">
+                <img src="{{ asset('images/separador-hojas.png') }}" alt="Separador"
+                    class="w-40 md:w-52 object-contain">
+            </div>
+        @endif
+
         <div id="formMessage" class="w-full"></div>
 
         <!-- Form -->
@@ -114,7 +123,7 @@
             @csrf
 
             <!-- Card -->
-            <div class="rounded-2xl px-5 py-5 space-y-3 shadow-sm" style="background-color: {{ $theme['card'] }};">
+            <div class="rounded-2xl text-center px-5 py-5 space-y-3 shadow-sm" style="background-color: {{ $theme['card'] }};">
 
                 <flux:heading level="3" class="text-base font-semibold text-neutral-800">
                     Selecciona archivos

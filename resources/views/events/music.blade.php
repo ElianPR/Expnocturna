@@ -10,15 +10,15 @@
 
 @php
     $backgroundMap = [
-        1 => asset('images/fondoVM.jpg'),
-        2 => asset('images/fondoAM.jpg'),
-        3 => asset('images/fondoDM.jpg'),
+        1 => asset('images/fondoVM.png'),
+        2 => asset('images/fondoAM.png'),
+        3 => asset('images/fondoDM.png'),
     ];
 
     $backgroundImage = $backgroundMap[$event->template] ?? null;
 
     $colorMap = [
-        1 => '#4A720D',
+        1 => '#436C00',
         2 => '#092D51',
         3 => '#A8792B',
     ];
