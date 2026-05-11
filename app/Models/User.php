@@ -22,6 +22,9 @@ class User extends Authenticatable // implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'can_create_users',
+        'can_manage_events',
+        'can_access_trash',
     ];
 
     /**
@@ -44,6 +47,9 @@ class User extends Authenticatable // implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'can_create_users' => 'boolean',
+            'can_manage_events' => 'boolean',
+            'can_access_trash' => 'boolean',
         ];
     }
 

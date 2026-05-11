@@ -15,20 +15,30 @@ class EventController extends Controller
 
     public function dashboard()
     {
-        $this->limpiarPapeleraCaducada();
-
-        $events = Event::where('id_user', Auth::id())->get();
+        $events = collect();
+        if (auth()->user()->can_manage_events) {
+            $this->limpiarPapeleraCaducada();
+            $events = Event::with('user')->get();
+        }
 
         return view('dashboard', compact('events'));
     }
 
     public function create()
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         return view('events.create');
     }
 
     public function store(Request $request)
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         $rules = [
             'name'               => 'required|max:80',
             'monogram'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
@@ -160,6 +170,10 @@ class EventController extends Controller
 
     public function toggleStatus(Request $request, $id_hex)
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         try {
             $id = hex2bin($id_hex);
             $event = Event::findOrFail($id);
@@ -260,6 +274,10 @@ class EventController extends Controller
 
     public function toggleAlbum($id_hex)
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         try {
             $id = hex2bin($id_hex);
             $event = Event::findOrFail($id);
@@ -285,6 +303,10 @@ class EventController extends Controller
 
     public function edit($id)
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         if (!ctype_xdigit($id) || strlen($id) !== 32) {
             abort(404);
         }
@@ -300,6 +322,10 @@ class EventController extends Controller
 
     public function update(Request $request, $id_hex)
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         if (!ctype_xdigit($id_hex) || strlen($id_hex) !== 32) {
             abort(404);
         }
@@ -440,6 +466,10 @@ class EventController extends Controller
      */
     public function destroy($id_hex)
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         try {
             $id = hex2bin($id_hex);
             $event = Event::findOrFail($id);
@@ -463,9 +493,12 @@ class EventController extends Controller
      */
     public function trash()
     {
-        $this->limpiarPapeleraCaducada();
-        // onlyTrashed() trae SOLAMENTE los que tienen fecha en deleted_at
-        $events = Event::onlyTrashed()->get();
+        $events = collect();
+        if (auth()->user()->can_access_trash) {
+            $this->limpiarPapeleraCaducada();
+            $events = Event::with('user')->onlyTrashed()->get();
+        }
+        
         return view('events.trash', compact('events'));
     }
 
@@ -474,6 +507,10 @@ class EventController extends Controller
      */
     public function restore($id_hex)
     {
+        if (!auth()->user()->can_access_trash) {
+            abort(403, 'No tienes permisos para acceder a la papelera.');
+        }
+
         try {
             $id = hex2bin($id_hex);
             // withTrashed() es necesario para encontrarlo, porque está oculto
@@ -493,6 +530,10 @@ class EventController extends Controller
      */
     public function forceDestroy($id_hex)
     {
+        if (!auth()->user()->can_access_trash) {
+            abort(403, 'No tienes permisos para acceder a la papelera.');
+        }
+
         try {
             $id = hex2bin($id_hex);
             $event = Event::withTrashed()->findOrFail($id);

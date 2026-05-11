@@ -6,11 +6,20 @@
     @if (session('success'))
         @endif
 
+    @if(!auth()->user()->can_access_trash)
+        <div class="flex flex-col items-center justify-center p-12 mt-4 text-center bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <flux:icon.lock-closed class="size-12 text-neutral-400 mb-4" />
+            <h2 class="text-xl font-medium text-neutral-900 dark:text-neutral-100">Acceso Denegado</h2>
+            <p class="text-neutral-500 mt-2">No tienes permiso para acceder a la papelera.</p>
+        </div>
+    @else
+
     <div class="w-full overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
         <table class="min-w-full text-sm whitespace-nowrap">
             <thead class="bg-neutral-100 dark:bg-neutral-800">
                 <tr>
                     <th class="px-4 py-3 text-left">Nombre</th>
+                    <th class="px-4 py-3 text-left">Creador</th>
                     <th class="px-4 py-3 text-left">Eliminado el</th>
                     <th class="px-4 py-3 text-left">Tiempo restante</th>
                     <th class="px-4 py-3 text-left">Acciones</th>
@@ -33,6 +42,9 @@
                     <tr class="border-t border-neutral-200 dark:border-neutral-700">
                         <td class="px-4 py-3 font-semibold text-neutral-500">
                             {{ $event->name ?? $event->monogram ?? '—' }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-neutral-500">
+                            {{ $event->user->name ?? '—' }}
                         </td>
                         <td class="px-4 py-3 text-neutral-500">
                             {{ $event->deleted_at->format('d/m/Y') }}
@@ -64,7 +76,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-neutral-500">
+                        <td colspan="5" class="px-4 py-6 text-center text-neutral-500">
                             La papelera está vacía.
                         </td>
                     </tr>
@@ -72,6 +84,7 @@
             </tbody>
         </table>
     </div>
+    @endif
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

@@ -150,6 +150,10 @@ class EventShareController extends Controller
 
     public function adminAlbum(string $id_album)
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         if (!ctype_xdigit($id_album) || strlen($id_album) !== 32) {
             abort(404);
         }
@@ -180,6 +184,10 @@ class EventShareController extends Controller
 
     public function moveToTrash(Request $request, string $id_album)
     {
+        if (!auth()->user()->can_manage_events) {
+            abort(403, 'No tienes permisos para gestionar eventos.');
+        }
+
         $files = $request->input('files', []);
 
         foreach ($files as $url) {
@@ -214,6 +222,10 @@ class EventShareController extends Controller
 
     public function trash(string $id_album)
     {
+        if (!auth()->user()->can_access_trash) {
+            abort(403, 'No tienes permisos para acceder a la papelera.');
+        }
+
         $this->cleanExpiredTrashMedia($id_album);
 
         $event = Event::where(
@@ -254,6 +266,9 @@ class EventShareController extends Controller
     }
 
     public function restoreMedia(Request $request, string $id_album) {
+        if (!auth()->user()->can_access_trash) {
+            abort(403, 'No tienes permisos para acceder a la papelera.');
+        }
 
         $files = $request->input(
             'files',
@@ -296,6 +311,9 @@ class EventShareController extends Controller
 
     public function forceDeleteMedia(Request $request, string $id_album)
     {
+        if (!auth()->user()->can_access_trash) {
+            abort(403, 'No tienes permisos para acceder a la papelera.');
+        }
 
         $files = $request->input(
             'files',

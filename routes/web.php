@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventShareController;
+use App\Http\Controllers\UserController;
 use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -33,6 +34,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::patch('/events/{id_hex}/toggle-album', [EventController::class, 'toggleAlbum'])
     ->name('events.toggle-album');
+
+    // Rutas de usuarios administradores
+    Route::resource('users', UserController::class)->except(['show']);
 
 });
 

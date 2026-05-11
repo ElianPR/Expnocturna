@@ -13,8 +13,9 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group heading="Menú" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Dashboard</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Eventos</flux:navlist.item>
                     <flux:navlist.item icon="trash" :href="route('events.trash')" :current="request()->routeIs('events.trash')" wire:navigate>Papelera</flux:navlist.item>
+                    <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>Usuarios</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -47,12 +48,6 @@
                                 </div>
                             </div>
                         </div>
-                    </flux:menu.radio.group>
-
-                    <flux:menu.separator />
-
-                    <flux:menu.radio.group>
-                        <flux:menu.item href="/settings/profile" icon="cog" wire:navigate>Configuraciones</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -97,12 +92,6 @@
                                 </div>
                             </div>
                         </div>
-                    </flux:menu.radio.group>
-
-                    <flux:menu.separator />
-
-                    <flux:menu.radio.group>
-                        <flux:menu.item href="/settings/profile" icon="cog" wire:navigate>Settings</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
