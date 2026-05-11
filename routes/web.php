@@ -27,6 +27,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/papelera', [EventController::class, 'trash'])->name('events.trash');
     Route::patch('/events/{id_hex}/restore', [EventController::class, 'restore'])->name('events.restore');
     Route::delete('/events/{id_hex}/force', [EventController::class, 'forceDestroy'])->name('events.force-destroy');
+
+    Route::patch('/events/{id_hex}/toggle-status', [EventController::class, 'toggleStatus'])
+    ->name('events.toggle-status');
+
+    Route::patch('/events/{id_hex}/toggle-album', [EventController::class, 'toggleAlbum'])
+    ->name('events.toggle-album');
+
 });
 
 Route::get('/event/{id_evento}', [EventController::class, 'show'])->name('events.show');
@@ -57,12 +64,6 @@ Route::post('/event/{id_evento}/compartir', [EventShareController::class, 'store
 
 Route::get('/event/{id_evento}/camara', [EventController::class, 'camera'])
     ->name('events.camera');
-
-Route::patch('/events/{id_hex}/toggle-status', [EventController::class, 'toggleStatus'])
-    ->name('events.toggle-status');
-
-Route::patch('/events/{id_hex}/toggle-album', [EventController::class, 'toggleAlbum'])
-    ->name('events.toggle-album');
 
 Route::get('/event/{id_evento}/musica', [EventController::class, 'music'])
     ->name('events.music');
