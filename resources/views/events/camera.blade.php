@@ -148,6 +148,8 @@
         #canvas {
             display: block;
             border-radius: 24px;
+            will-change: transform;
+            transform: translateZ(0); /* Aceleración por hardware */
         }
 
         /* corner brackets */
@@ -232,6 +234,18 @@
             letter-spacing: 0.05em;
             min-width: 32px;
             opacity: 0.8;
+        }
+
+        /* video overlay */
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0; /* Se oculta del DOM porque ahora se pinta en el canvas */
         }
 
         /* flash */
@@ -650,6 +664,11 @@
 
                 <canvas id="canvas"></canvas>
 
+                <video id="overlayVid" class="video-overlay" autoplay loop muted playsinline>
+                    <source src="{{ asset('videos/T_1_A_Corazon_Apple.mov') }}" type="video/quicktime">
+                    <source src="{{ asset('videos/T_1_A_Corazon_Transparente.webm') }}" type="video/webm">
+                </video>
+
                 <div class="rec-badge" id="recBadge">
                     <div class="rec-dot"></div>
                     <span class="rec-label">REC</span>
@@ -721,138 +740,25 @@
 
     <script>
         // ═══════════════════════════════════════════
-        //  Butterfly system
-        // ═══════════════════════════════════════════
-        const COLORS = [
-            ['#E8A87C', '#D4956A', '#8B5E3C', '#FFF3E0'],
-            ['#7EC8E3', '#5BB8D4', '#2C5F6E', '#E8F7FF'],
-            ['#B5E7A0', '#93D47A', '#3D6B2E', '#F0FFF0'],
-            ['#F7C6D7', '#F0A0BF', '#8B3A5A', '#FFF0F5'],
-            ['#FFE066', '#F5C800', '#7A5C00', '#FFFDE0'],
-            ['#C9A0DC', '#B07CC8', '#5C3472', '#F5EEFF'],
-            ['#FF8C66', '#F07050', '#7A2810', '#FFE8E0'],
-            ['#80E0C0', '#55CCA8', '#1A6B50', '#EAFFF7'],
-        ];
-
-        class Butterfly {
-            constructor(cw, ch) {
-                this.cw = cw;
-                this.ch = ch;
-                this.colors = COLORS[Math.floor(Math.random() * COLORS.length)];
-                this.reset(true);
-            }
-            reset(init = false) {
-                this.x = init ? Math.random() * this.cw : -60;
-                this.y = init ? Math.random() * this.ch : Math.random() * this.ch;
-                this.size = 14 + Math.random() * 20;
-                this.vx = (0.5 + Math.random() * 1.1) * (0.6 + Math.random() * 0.8);
-                this.vy = (Math.random() - 0.5) * 0.7;
-                this.wf = 0.012 + Math.random() * 0.018;
-                this.wo = Math.random() * Math.PI * 2;
-                this.fs = 0.08 + Math.random() * 0.12;
-                this.fo = Math.random() * Math.PI * 2;
-                this.age = 0;
-                this.op = init ? Math.random() : 0;
-                this.dep = 0.4 + Math.random() * 0.6;
-            }
-            update(t) {
-                this.age++;
-                this.x += this.vx;
-                this.vy += Math.sin(this.age * this.wf + this.wo) * 0.04;
-                this.vy *= 0.96;
-                this.y += this.vy;
-                if (this.op < 1) this.op = Math.min(1, this.op + 0.02);
-                if (this.x > this.cw + 80) this.reset(false);
-                if (this.y < -80 || this.y > this.ch + 80) this.vy = (this.ch * 0.5 - this.y) * 0.008;
-            }
-            draw(ctx, t) {
-                const sx = Math.abs(Math.sin(t * this.fs + this.fo));
-                const s = this.size * this.dep;
-                ctx.save();
-                ctx.globalAlpha = this.op * this.dep * 0.92;
-                ctx.translate(this.x, this.y);
-                ctx.save();
-                ctx.globalAlpha = this.op * this.dep * 0.11;
-                ctx.translate(s * 0.14, s * 0.24);
-                this._wings(ctx, s, sx, true);
-                ctx.restore();
-                this._wings(ctx, s, sx, false);
-                this._body(ctx, s);
-                ctx.restore();
-            }
-            _wings(ctx, s, sx, sh) {
-                const [u, l, , p] = this.colors;
-                ctx.save();
-                ctx.scale(sx, 1);
-                const shapes = [
-                    [0, 0, s * .8, -s, s * 1.4, -s * .3, s, s * .3, s * .5, s * .6, s * .1, s * .2, 0, 0, u],
-                    [0, 0, -s * .8, -s, -s * 1.4, -s * .3, -s, s * .3, -s * .5, s * .6, -s * .1, s * .2, 0, 0, u],
-                    [0, s * .1, s * .6, s * .2, s, s * .9, s * .6, s * 1.3, s * .2, s * 1.5, 0, s, 0, s * .1, l],
-                    [0, s * .1, -s * .6, s * .2, -s, s * .9, -s * .6, s * 1.3, -s * .2, s * 1.5, 0, s, 0, s * .1,
-                        l
-                    ],
-                ];
-                shapes.forEach(([mx, my, c1x, c1y, c2x, c2y, c3x, c3y, c4x, c4y, c5x, c5y, ex, ey, col]) => {
-                    ctx.beginPath();
-                    ctx.moveTo(mx, my);
-                    ctx.bezierCurveTo(c1x, c1y, c2x, c2y, c3x, c3y);
-                    ctx.bezierCurveTo(c4x, c4y, c5x, c5y, ex, ey);
-                    ctx.fillStyle = sh ? '#000' : col;
-                    ctx.fill();
-                });
-                if (!sh) {
-                    ctx.globalAlpha = 0.5;
-                    [-1, 1].forEach(ox => {
-                        [
-                            [ox * s * .85, -s * .35, s * .12],
-                            [ox * s * .55, s * .65, s * .1]
-                        ].forEach(([ax, ay, r]) => {
-                            ctx.beginPath();
-                            ctx.arc(ax, ay, r, 0, Math.PI * 2);
-                            ctx.fillStyle = p;
-                            ctx.fill();
-                        });
-                    });
-                }
-                ctx.restore();
-            }
-            _body(ctx, s) {
-                const [, , b] = this.colors;
-                ctx.beginPath();
-                ctx.ellipse(0, s * .2, s * .1, s * .6, 0, 0, Math.PI * 2);
-                ctx.fillStyle = b;
-                ctx.fill();
-                ctx.strokeStyle = b;
-                ctx.lineWidth = 1;
-                [
-                    [s * .4, -s * .9, s * .5, -s * 1.1],
-                    [-s * .4, -s * .9, -s * .5, -s * 1.1]
-                ].forEach(([cpx, cpy, ex, ey]) => {
-                    ctx.beginPath();
-                    ctx.moveTo(0, -s * .2);
-                    ctx.quadraticCurveTo(cpx, cpy, ex, ey);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(ex, ey, s * .06, 0, Math.PI * 2);
-                    ctx.fillStyle = b;
-                    ctx.fill();
-                });
-            }
-        }
-
-        // ═══════════════════════════════════════════
         //  App state
         // ═══════════════════════════════════════════
         const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Eliminado desynchronized: true para evitar parpadeos/tearing en Android
         const vidEl = document.createElement('video');
         vidEl.autoplay = true;
         vidEl.playsInline = true;
         vidEl.muted = true;
+        const overlayVid = document.getElementById('overlayVid');
 
-        let butterflies = [],
-            animId, tick = 0;
+        let animId, tick = 0;
         let facingMode = 'environment';
+        
+        // Zoom state
+        let currentZoom = 1;
+        const MIN_ZOOM = 1;
+        const MAX_ZOOM = 4;
+        let initialPinchDistance = null;
+        let initialZoom = 1;
         let camStream = null;
         let mode = 'photo';
         let isRecording = false;
@@ -870,17 +776,18 @@
             const vpWrap = document.querySelector('.vp-wrap');
             const viewport = document.getElementById('viewport');
 
-            // ─── KEY FIX ───────────────────────────────────────────────────────────
-            // Camera sensor ALWAYS reports landscape dimensions (e.g. 1920×1080)
-            // regardless of how the phone is held. We must use the SCREEN orientation,
-            // not vidEl.videoWidth/videoHeight, to decide portrait vs landscape aspect.
             const screenIsLandscape = window.innerWidth > window.innerHeight;
 
-            // Use standard phone aspect ratios driven by screen orientation:
-            //   Portrait  → 9:16  (tall)
-            //   Landscape → 16:9  (wide)
-            const aspect = screenIsLandscape ? (16 / 9) : (9 / 16);
-            // ───────────────────────────────────────────────────────────────────────
+            // Usar la relación de aspecto EXACTA que nos entrega el sensor para evitar TODO recorte
+            let aspect = screenIsLandscape ? (4 / 3) : (3 / 4);
+            if (vidEl && vidEl.videoWidth && vidEl.videoHeight) {
+                const vidAspect = vidEl.videoWidth / vidEl.videoHeight;
+                // A veces el sensor reporta ancho > alto incluso en retrato. Lo ajustamos a la orientación de la pantalla.
+                if (screenIsLandscape && vidAspect > 1) aspect = vidAspect;
+                if (!screenIsLandscape && vidAspect < 1) aspect = vidAspect;
+                if (screenIsLandscape && vidAspect < 1) aspect = 1 / vidAspect;
+                if (!screenIsLandscape && vidAspect > 1) aspect = 1 / vidAspect;
+            }
 
             const wrapW = vpWrap.clientWidth;
             const wrapH = vpWrap.clientHeight;
@@ -904,83 +811,53 @@
             viewport.style.height = h + 'px';
 
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = w * dpr;
-            canvas.height = h * dpr;
+            const safeDpr = Math.min(dpr, 1.5); // Limitar para evitar resoluciones extremas
+            
+            // Asegurar que el ancho y alto sean pares (obligatorio para muchos codificadores Android)
+            let cw = Math.floor(w * safeDpr);
+            let ch = Math.floor(h * safeDpr);
+            if (cw % 2 !== 0) cw -= 1;
+            if (ch % 2 !== 0) ch -= 1;
+
+            canvas.width = cw;
+            canvas.height = ch;
             canvas.style.width = w + 'px';
             canvas.style.height = h + 'px';
 
-            if (butterflies.length) {
-                butterflies.forEach(b => {
-                    b.cw = canvas.width;
-                    b.ch = canvas.height;
-                });
-            }
         }
 
         // ═══════════════════════════════════════════
         //  Camera
         // ═══════════════════════════════════════════
-        function initButterflies() {
-            butterflies = [];
-            for (let i = 0; i < 18; i++) butterflies.push(new Butterfly(canvas.width, canvas.height));
-        }
-
         async function startCamera() {
             if (isRecording) stopRecording();
             if (camStream) camStream.getTracks().forEach(t => t.stop());
             try {
                 const screenIsLandscape = window.innerWidth > window.innerHeight;
 
-                // ─── MÁXIMA RESOLUCIÓN DEL DISPOSITIVO ───────────────────────────────
-                // Usar valores extremadamente altos como "ideal" hace que el navegador
-                // negocie la máxima resolución que el hardware soporta (4K, 12MP, etc.)
-                // sin forzar un valor exact que podría fallar en algunos dispositivos.
+                // ─── RESOLUCIÓN ÓPTIMA (4:3) ───────────────────────────────
+                // Pedimos exactamente 1280x960 (4:3 estandar). Es un formato 
+                // soportado nativamente por hardware en casi todos los celulares.
+                // Esto fuerza a Android a darnos la vista MÁS AMPLIA del sensor (sin 
+                // recortes de zoom) manteniendo un rendimiento súper fluido.
                 const videoConstraints = screenIsLandscape ? {
                     facingMode,
-                    width: {
-                        ideal: 99999
-                    },
-                    height: {
-                        ideal: 99999
-                    }
+                    width: { ideal: 1280 },
+                    height: { ideal: 960 }
                 } : {
                     facingMode,
-                    width: {
-                        ideal: 99999
-                    },
-                    height: {
-                        ideal: 99999
-                    }
+                    width: { ideal: 960 },
+                    height: { ideal: 1280 }
                 };
-                // ─────────────────────────────────────────────────────────────────────
+                // ─────────────────────────────────────────────────────────────
 
                 camStream = await navigator.mediaDevices.getUserMedia({
                     video: videoConstraints,
                     audio: true
                 });
-
-                // ─── APLICAR RESOLUCIÓN MÁXIMA REAL DEL SENSOR ───────────────────────
-                // Después de obtener el stream, leer las capacidades reales del track
-                // y aplicar el máximo exacto que el hardware reporta.
-                const track = camStream.getVideoTracks()[0];
-                if (track.getCapabilities) {
-                    try {
-                        const caps = track.getCapabilities();
-                        if (caps.width?.max && caps.height?.max) {
-                            await track.applyConstraints({
-                                width: {
-                                    ideal: caps.width.max
-                                },
-                                height: {
-                                    ideal: caps.height.max
-                                }
-                            });
-                        }
-                    } catch (e) {
-                        /* dispositivo no soporta applyConstraints — continuar */
-                    }
-                }
-                // ─────────────────────────────────────────────────────────────────────
+                
+                // Ya no forzamos `caps.width.max` porque necesitamos
+                // mantener la carga del CPU/GPU baja para evitar el lag de giro.
 
                 const vidOnly = new MediaStream(camStream.getVideoTracks());
                 vidEl.srcObject = vidOnly;
@@ -989,7 +866,6 @@
                 // Esperar a que el video reporte sus dimensiones reales
                 await new Promise(r => setTimeout(r, 150));
                 sizeViewport();
-                initButterflies();
                 document.getElementById('startScreen').classList.add('hidden');
                 if (!animId) loop();
             } catch (e) {
@@ -1020,13 +896,41 @@
                     sx = 0;
                     sy = (vidEl.videoHeight - sh) / 2;
                 }
+                
+                // Aplicar el zoom digital reduciendo el área fuente y centrándola
+                const zoomedSw = sw / currentZoom;
+                const zoomedSh = sh / currentZoom;
+                const zoomedSx = sx + (sw - zoomedSw) / 2;
+                const zoomedSy = sy + (sh - zoomedSh) / 2;
+
                 ctx.save();
                 if (facingMode === 'user') {
                     ctx.translate(canvas.width, 0);
                     ctx.scale(-1, 1);
                 }
-                ctx.drawImage(vidEl, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(vidEl, zoomedSx, zoomedSy, zoomedSw, zoomedSh, 0, 0, canvas.width, canvas.height);
                 ctx.restore();
+            }
+
+            if (overlayVid && overlayVid.readyState >= 2) {
+                const vr = overlayVid.videoWidth / overlayVid.videoHeight;
+                const cr = canvas.width / canvas.height;
+                let sw, sh, sx, sy;
+                
+                // Usamos una lógica tipo "contain" para el overlay para asegurarnos
+                // de que la animación completa (el corazón) sea visible en el nuevo aspect ratio 3:4
+                if (vr > cr) {
+                    sw = canvas.width;
+                    sh = sw / vr;
+                    sx = 0;
+                    sy = (canvas.height - sh) / 2;
+                } else {
+                    sh = canvas.height;
+                    sw = sh * vr;
+                    sy = 0;
+                    sx = (canvas.width - sw) / 2;
+                }
+                ctx.drawImage(overlayVid, 0, 0, overlayVid.videoWidth, overlayVid.videoHeight, sx, sy, sw, sh);
             }
 
             // vignette
@@ -1038,13 +942,6 @@
             vig.addColorStop(1, 'rgba(0,0,0,0.36)');
             ctx.fillStyle = vig;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            butterflies.forEach(b => {
-                b.cw = canvas.width;
-                b.ch = canvas.height;
-                b.update(tick);
-                b.draw(ctx, tick);
-            });
         }
 
         // ═══════════════════════════════════════════
@@ -1118,16 +1015,22 @@
             try {
                 mediaRecorder = new MediaRecorder(cs, mime ? {
                     mimeType: mime,
-                    videoBitsPerSecond: 16_000_000
+                    videoBitsPerSecond: 2500000 // 2.5 Mbps para estabilidad
                 } : {});
             } catch (e) {
                 mediaRecorder = new MediaRecorder(cs);
             }
+            
+            mediaRecorder.onerror = e => {
+                showToast("Error del codificador de video. " + (e.error ? e.error.message : ''));
+                if (isRecording) stopRecording();
+            };
+
             mediaRecorder.ondataavailable = e => {
                 if (e.data?.size > 0) recordedChunks.push(e.data);
             };
             mediaRecorder.onstop = finalizeVideo;
-            mediaRecorder.start(100);
+            mediaRecorder.start(1000); // Chunks de 1 segundo para evitar sobrecarga
             isRecording = true;
             document.getElementById('btnShutter').classList.add('recording');
             document.getElementById('recBadge').classList.add('show');
@@ -1147,6 +1050,14 @@
         }
 
         function finalizeVideo() {
+            if (isRecording) {
+                isRecording = false;
+                clearInterval(timerInterval);
+                document.getElementById('btnShutter').classList.remove('recording');
+                document.getElementById('recBadge').classList.remove('show');
+                document.getElementById('recTimer').textContent = '0:00';
+            }
+
             const mime = mediaRecorder.mimeType || 'video/webm';
             const blob = new Blob(recordedChunks, {
                 type: mime
@@ -1224,6 +1135,35 @@
         // ═══════════════════════════════════════════
         document.getElementById('btnStart').addEventListener('click', startCamera);
 
+        // Pinch to zoom logic
+        const vpEl = document.getElementById('viewport');
+        vpEl.addEventListener('touchstart', e => {
+            if (e.touches.length === 2) {
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                initialZoom = currentZoom;
+            }
+        }, { passive: true });
+
+        vpEl.addEventListener('touchmove', e => {
+            if (e.touches.length === 2 && initialPinchDistance) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                const distanceRatio = currentDistance / initialPinchDistance;
+                currentZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, initialZoom * distanceRatio));
+            }
+        }, { passive: true });
+
+        vpEl.addEventListener('touchend', e => {
+            if (e.touches.length < 2) {
+                initialPinchDistance = null;
+            }
+        });
+
         document.getElementById('btnShutter').addEventListener('click', () => {
             if (mode === 'photo') capturePhoto();
             else if (!isRecording) startRecording();
@@ -1270,7 +1210,6 @@
                 } else {
                     // Same orientation, just a resize — re-fit the viewport
                     sizeViewport();
-                    initButterflies();
                 }
             }, 150);
         });
