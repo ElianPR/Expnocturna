@@ -1204,9 +1204,8 @@
                 const nowOrientation = nowLandscape ? 'landscape' : 'portrait';
 
                 if (nowOrientation !== lastOrientation) {
-                    // Orientation actually changed — restart camera with correct dimensions
                     lastOrientation = nowOrientation;
-                    if (camStream) startCamera(); // re-request with new width/height ideal
+                    if (camStream) startCamera();
                 } else {
                     // Same orientation, just a resize — re-fit the viewport
                     sizeViewport();
@@ -1214,15 +1213,8 @@
             }, 150);
         });
 
-        // ═══════════════════════════════════════════
-        //  Auto-start
-        // ═══════════════════════════════════════════
-        (async () => {
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                if (devices.some(d => d.kind === 'videoinput')) startCamera();
-            } catch {}
-        })();
+        document.getElementById('btnStart')
+            .addEventListener('click', startCamera);
     </script>
 </body>
 
