@@ -63,6 +63,16 @@ class Event extends Model
         return bin2hex($this->id);
     }
 
+    public function photos()
+    {
+        return $this->hasMany(Photo::class, 'event_id');
+    }
+
+    public function cameraAnimations()
+    {
+        return $this->belongsToMany(CameraAnimation::class, 'camera_animation_event', 'event_id', 'camera_animation_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');

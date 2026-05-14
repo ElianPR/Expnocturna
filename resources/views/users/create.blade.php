@@ -67,6 +67,13 @@
                         description="Permite ver, restaurar y eliminar permanentemente eventos de la papelera." 
                         :checked="old('can_access_trash')"
                     />
+
+                    <flux:checkbox 
+                        name="can_manage_animations" 
+                        label="Administrar animaciones" 
+                        description="Permite subir, editar y eliminar las animaciones .mov y .webm de la cámara." 
+                        :checked="old('can_manage_animations')"
+                    />
                 </div>
 
                 <div class="flex justify-end pt-4">

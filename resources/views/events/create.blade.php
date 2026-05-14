@@ -154,6 +154,31 @@
 
                 <flux:separator variant="subtle" />
 
+                <div class="space-y-3">
+                    <flux:label>Animaciones de Cámara</flux:label>
+                    <p class="text-sm text-neutral-500">Selecciona las animaciones que estarán disponibles para este evento en la pantalla de la cámara.</p>
+                    
+                    @if($cameraAnimations->count() > 0)
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 border border-neutral-200 dark:border-neutral-700 p-4 rounded-xl">
+                            @foreach($cameraAnimations as $animation)
+                                <flux:checkbox 
+                                    name="camera_animations[]" 
+                                    value="{{ $animation->id }}" 
+                                    label="{{ $animation->title }}" 
+                                    :checked="is_array(old('camera_animations')) && in_array($animation->id, old('camera_animations'))"
+                                />
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 text-center">
+                            <p class="text-sm text-neutral-500">No hay animaciones disponibles.</p>
+                        </div>
+                    @endif
+                    <flux:error name="camera_animations" />
+                </div>
+
+                <flux:separator variant="subtle" />
+
                 <flux:field>
                     <flux:label>Foto Principal (PNG, JPG, WebP)</flux:label>
                     <flux:input type="file" name="main_image" accept="image/jpeg,image/png,image/webp"

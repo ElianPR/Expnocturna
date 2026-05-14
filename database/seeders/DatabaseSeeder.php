@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
                 'can_create_users' => true,
                 'can_manage_events' => true,
                 'can_access_trash' => true,
+                'can_manage_animations' => true,
             ]
         );
     }

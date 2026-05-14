@@ -16,6 +16,7 @@
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Eventos</flux:navlist.item>
                     <flux:navlist.item icon="trash" :href="route('events.trash')" :current="request()->routeIs('events.trash')" wire:navigate>Papelera</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>Usuarios</flux:navlist.item>
+                    <flux:navlist.item icon="video-camera" :href="route('camera-animations.index')" :current="request()->routeIs('camera-animations.*')" wire:navigate>Animaciones</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
