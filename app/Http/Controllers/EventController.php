@@ -30,7 +30,9 @@ class EventController extends Controller
             abort(403, 'No tienes permisos para gestionar eventos.');
         }
 
-        return view('events.create');
+        $cameraAnimations = \App\Models\CameraAnimation::all();
+
+        return view('events.create', compact('cameraAnimations'));
     }
 
     public function store(Request $request)
@@ -105,6 +107,10 @@ class EventController extends Controller
             }
 
             $event = Event::create($eventData);
+
+            if ($request->has('camera_animations')) {
+                $event->cameraAnimations()->sync($request->input('camera_animations'));
+            }
 
             if ($request->hasFile('main_image')) {
                 $mainImageFile = $request->file('main_image');
@@ -317,7 +323,9 @@ class EventController extends Controller
             ->where('id_event', $event->id)
             ->first();
 
-        return view('events.edit', compact('event', 'photo'));
+        $cameraAnimations = \App\Models\CameraAnimation::all();
+
+        return view('events.edit', compact('event', 'photo', 'cameraAnimations'));
     }
 
     public function update(Request $request, $id_hex)
@@ -437,6 +445,12 @@ class EventController extends Controller
             }
 
             $event->update($eventData);
+
+            if ($request->has('camera_animations')) {
+                $event->cameraAnimations()->sync($request->input('camera_animations'));
+            } else {
+                $event->cameraAnimations()->detach();
+            }
 
             // --- FOTO PRINCIPAL ---
             if ($request->hasFile('main_image')) {

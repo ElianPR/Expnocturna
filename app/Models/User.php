@@ -25,6 +25,7 @@ class User extends Authenticatable // implements MustVerifyEmail
         'can_create_users',
         'can_manage_events',
         'can_access_trash',
+        'can_manage_animations',
     ];
 
     /**
@@ -50,6 +51,7 @@ class User extends Authenticatable // implements MustVerifyEmail
             'can_create_users' => 'boolean',
             'can_manage_events' => 'boolean',
             'can_access_trash' => 'boolean',
+            'can_manage_animations' => 'boolean',
         ];
     }
 

@@ -64,6 +64,7 @@ class UserController extends Controller
             'can_create_users' => $request->boolean('can_create_users'),
             'can_manage_events' => $request->boolean('can_manage_events'),
             'can_access_trash' => $request->boolean('can_access_trash'),
+            'can_manage_animations' => $request->boolean('can_manage_animations'),
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
@@ -114,6 +115,7 @@ class UserController extends Controller
         $user->can_create_users = $request->boolean('can_create_users');
         $user->can_manage_events = $request->boolean('can_manage_events');
         $user->can_access_trash = $request->boolean('can_access_trash');
+        $user->can_manage_animations = $request->boolean('can_manage_animations');
 
         $user->save();
 
