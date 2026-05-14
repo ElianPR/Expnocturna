@@ -664,9 +664,8 @@
 
                 <canvas id="canvas"></canvas>
 
-                <video id="overlayVid" class="video-overlay" autoplay loop muted playsinline>
-                    <source src="{{ asset('videos/T_1_A_Corazon_Apple.mov') }}" type="video/quicktime">
-                    <source src="{{ asset('videos/T_1_A_Corazon_Transparente.webm') }}" type="video/webm">
+                <video id="overlayVid" class="video-overlay" autoplay loop muted playsinline crossorigin="anonymous">
+                    <source src="{{ asset('videos/T 3 B Arriba.mp4') }}" type="video/mp4">
                 </video>
 
                 <div class="rec-badge" id="recBadge">
@@ -930,7 +929,49 @@
                     sy = 0;
                     sx = (canvas.width - sw) / 2;
                 }
-                ctx.drawImage(overlayVid, 0, 0, overlayVid.videoWidth, overlayVid.videoHeight, sx, sy, sw, sh);
+                
+                // Chroma key processing para eliminar el fondo verde
+                if (!window.offscreenCanvas) {
+                    window.offscreenCanvas = document.createElement('canvas');
+                    window.offscreenCtx = window.offscreenCanvas.getContext('2d', { willReadFrequently: true });
+                }
+                
+                const procW = Math.floor(sw);
+                const procH = Math.floor(sh);
+                
+                if (window.offscreenCanvas.width !== procW || window.offscreenCanvas.height !== procH) {
+                    window.offscreenCanvas.width = procW;
+                    window.offscreenCanvas.height = procH;
+                }
+                
+                window.offscreenCtx.drawImage(overlayVid, 0, 0, overlayVid.videoWidth, overlayVid.videoHeight, 0, 0, procW, procH);
+                
+                try {
+                    let frame = window.offscreenCtx.getImageData(0, 0, procW, procH);
+                    let l = frame.data.length / 4;
+                    
+                    for (let i = 0; i < l; i++) {
+                        let r = frame.data[i * 4 + 0];
+                        let g = frame.data[i * 4 + 1];
+                        let b = frame.data[i * 4 + 2];
+                        
+                        // Detectar fondo verde (rango ajustable según el video)
+                        if (g > 100 && g > r * 1.3 && g > b * 1.3) {
+                            frame.data[i * 4 + 3] = 0; // Transparent
+                        } else if (g > 80 && g > r * 1.1 && g > b * 1.1) {
+                            // Suavizado de bordes (anti-aliasing)
+                            let dif = g - Math.max(r, b);
+                            frame.data[i * 4 + 3] = Math.max(0, 255 - dif * 4);
+                            frame.data[i * 4 + 1] = Math.min(g, Math.max(r, b)); // Reducir componente verde en el borde
+                        }
+                    }
+                    
+                    window.offscreenCtx.putImageData(frame, 0, 0);
+                    ctx.drawImage(window.offscreenCanvas, 0, 0, procW, procH, sx, sy, sw, sh);
+                } catch (e) {
+                    // Fallback en caso de error de CORS o similar
+                    ctx.drawImage(overlayVid, 0, 0, overlayVid.videoWidth, overlayVid.videoHeight, sx, sy, sw, sh);
+                }
             }
 
             // vignette
