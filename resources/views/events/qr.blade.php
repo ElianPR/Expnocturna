@@ -51,22 +51,24 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            const template = {{ $event->template ?? 1 }};
             renderQR(
                 'qrEvento',
                 'canvasEvento',
                 '"Un momento mágico está por comenzar…"',
-                'Escanea y graba el primer baile con mariposas'
+                'Escanea aquí y graba el primer baile con mariposas ',
+                template
             );
             renderQR(
                 'qrAlbum',
                 'canvasAlbum',
                 'Escanea para ver los recuerdos del evento',
-                'Revive cada momento especial capturado'
+                'Revive cada momento especial capturado',
+                template
             );
         });
 
-        async function renderQR(sourceId, canvasId, titleText, subtitleText) {
-
+        async function renderQR(sourceId, canvasId, titleText, subtitleText, template) {
             const svg = document.querySelector(`#${sourceId} svg`);
             const svgData = new XMLSerializer().serializeToString(svg);
 
@@ -79,43 +81,53 @@
             canvas.width = size;
             canvas.height = size + topPad + bottomPad;
 
-            const bg = await loadImage("{{ asset('images/papel.jpg') }}");
+            let bgPath = "";
+
+            switch (template) {
+                case 1:
+                    bgPath = "{{ asset('images/fondosV/fondoV.png') }}";
+                    break;
+                case 2:
+                    bgPath = "{{ asset('images/fondosA/fondoAQR.png') }}";
+                    break;
+                case 3:
+                    bgPath = "{{ asset('images/fondosD/fondoDQr.png') }}";
+                    break;
+                default:
+                    bgPath = "{{ asset('images/fondosV/fondoV.png') }}";
+            }
+
+            const bg = await loadImage(bgPath);
             const qrImg = await loadImage("data:image/svg+xml;base64," + btoa(svgData));
             const logo = await loadImage("{{ asset('images/logoP.png') }}");
 
-            // fondo papel
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // 2. ahora sí el papel con transparencia
             ctx.save();
-            ctx.globalAlpha = 0.25;
+            ctx.globalAlpha = template === 1 ? 0.55 : 1;
             ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
             ctx.restore();
 
-            // tipografía 
             const fontFamily = "Georgia, serif";
             const fontSize = 47;
             const lineHeight = 44;
 
-            // --- TÍTULO arriba ---
             ctx.save();
             ctx.fillStyle = "#3b2f1e";
             ctx.font = `${fontSize}px ${fontFamily}`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            // centro vertical del bloque de título: mitad del topPad
-            wrapText(ctx, titleText, size / 2, topPad / 2, size - 100, lineHeight);
+            wrapText(ctx, titleText, size / 2, topPad / 2 + 70, size - 100, lineHeight);
             ctx.restore();
 
-            // --- QR (sin caja blanca extra, el SVG ya trae fondo blanco) ---
             const qrBoxSize = 500;
             const qrX = (size - qrBoxSize) / 2;
             const qrY = topPad + (size - qrBoxSize) / 2;
 
             ctx.drawImage(qrImg, qrX + 40, qrY + 40, qrBoxSize - 80, qrBoxSize - 80);
 
-            // --- LOGO centrado sobre el QR ---
             const logoSize = 100;
             const logoX = size / 2 - logoSize / 2;
             const logoY = qrY + qrBoxSize / 2 - logoSize / 2;
@@ -124,14 +136,12 @@
             roundRect(ctx, logoX - 10, logoY - 10, logoSize + 20, logoSize + 20, 12, true);
             ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
 
-            // --- SUBTÍTULO abajo ---
             ctx.save();
             ctx.fillStyle = "#3b2f1e";
             ctx.font = `${fontSize}px ${fontFamily}`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            // inicio del área de subtítulo: topPad + size, centro: + bottomPad/2
-            wrapText(ctx, subtitleText, size / 2, topPad + size + bottomPad / 2, size - 100, lineHeight);
+            wrapText(ctx, subtitleText, size / 2, topPad + size + bottomPad / 2 - 70, size - 100, lineHeight);
             ctx.restore();
         }
 

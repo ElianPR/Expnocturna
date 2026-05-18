@@ -12,15 +12,15 @@
     @php
         $themes = [
             1 => [
-                'bg' => asset('images/fondoCamV.png'),
+                'bg' => asset('images/fondosV/fondoV.png'),
                 'primary' => '#305820',
             ],
             2 => [
-                'bg' => asset('images/fondoCamA.png'),
+                'bg' => asset('images/fondosA/fondoA.png'),
                 'primary' => '#092D51',
             ],
             3 => [
-                'bg' => asset('images/fondoCamD.png'),
+                'bg' => asset('images/fondosD/fondoD.png'),
                 'primary' => '#8F6827',
             ],
         ];

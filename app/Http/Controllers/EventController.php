@@ -141,7 +141,7 @@ class EventController extends Controller
         $url_evento = route('events.show', $event->id_hex);
         $url_album  = route('album.show', $event->album_hex);
 
-        return view('events.qr', compact('url_evento', 'url_album'));
+        return view('events.qr', compact('event', 'url_evento', 'url_album'));
     }
 
     public function camera($id_evento)

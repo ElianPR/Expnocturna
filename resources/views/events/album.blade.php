@@ -165,17 +165,17 @@
 @php
     $templates = [
         1 => [
-            'bg' => asset('images/fondoAV.png'),
+            'bg' => asset('images/fondosV/fondoV.png'),
             'textName' => '#000000',
             'button' => '#4A720D',
         ],
         2 => [
-            'bg' => asset('images/fondoAA.png'),
+            'bg' => asset('images/fondosA/fondoA.png'),
             'textName' => '#828189',
             'button' => '#092D51',
         ],
         3 => [
-            'bg' => asset('images/fondoAD.png'),
+            'bg' => asset('images/fondosD/fondoD.png'),
             'textName' => '#B4976E',
             'button' => '#A8792B',
         ],

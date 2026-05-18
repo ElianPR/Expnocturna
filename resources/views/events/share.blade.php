@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Great+Vibes&family=Playfair+Display:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:wght@400;600;700&family=Great+Vibes&family=Playfair+Display:wght@400;700&display=swap"
         rel="stylesheet">
 </head>
 
@@ -29,7 +29,7 @@
             'button' => '#092D51',
             'card' => '#BFC5DE',
             'text' => '#092D51',
-            'textName' => '#828189',
+            'textName' => '#092D51',
         ],
         3 => [
             'bg' => asset('images/fondosD/fondoD.png'),
@@ -68,7 +68,6 @@
         }
     </style>
 
-    <!-- Loader -->
     <div id="loader" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
         <div class="bg-white px-6 py-5 rounded-2xl shadow text-center">
             <div class="animate-spin rounded-full h-10 w-10 border-4 border-t-transparent mx-auto"
@@ -79,57 +78,37 @@
 
     <div class="mx-auto flex min-h-screen w-full max-w-sm flex-col items-center pt-6 pb-10">
 
-        <!-- Header -->
-        <div class="w-full text-center mb-2">
-            <flux:heading level="1" class="text-xl font-semibold italic" style="color: {{ $theme['text'] }};">
-                Compartir recuerdos
-            </flux:heading>
+        <div class="w-full text-center mt-2 mb-8">
 
-            <flux:text class="text-sm" style="color: {{ $theme['text'] }};">
-                Sube fotos o videos de este evento.
-            </flux:text>
-        </div>
-
-        <br>
-
-        <div class="w-full text-center my-6">
-            <h2 class="text-5xl md:text-6xl tracking-normal"
-                style="font-family: {{ $event->typography ?? "'Cinzel', serif" }};
-                       color: {{ $theme['textName'] }};">
-
+            <h1 class="text-[2.5rem] md:text-[2.8rem] leading-none text-center"
+                style="
+                    font-family: {!! $event->typography ?? "'Cinzel', serif" !!};
+                    color: {{ $theme['textName'] }};
+                    line-height: 1.1;
+                    letter-spacing: 0.02em;
+                    font-weight: 600;
+                ">
                 {{ $event->name ?? ($event->monogram ?? 'Evento') }}
-            </h2>
+            </h1>
 
-            @if (!empty($event->date))
-                <p class="text-sm uppercase tracking-widest mt-2" style="color: {{ $theme['text'] }}; opacity: 0.6;">
-                    {{ \Carbon\Carbon::parse($event->date)->translatedFormat('j \d\e F \d\e Y') }}
-                </p>
-            @endif
+            <flux:text class="text-xl" style="color: {{ $theme['text'] }};"> Compartir </flux:text>
         </div>
-
-        @if ($theme === $templates[1])
-            <div class="w-full flex justify-center mb-4">
-                <img src="{{ asset('images/separador-hojas.png') }}" alt="Separador"
-                    class="w-40 md:w-52 object-contain">
-            </div>
-        @endif
+        <flux:text class="text-sm" style="color: {{ $theme['text'] }};"> Sube fotos o videos de este evento.</flux:text>
 
         <div id="formMessage" class="w-full"></div>
 
-        <!-- Form -->
         <form id="uploadForm" action="{{ route('events.share.store', $event->id_hex) }}" method="POST"
             enctype="multipart/form-data" class="w-full space-y-4 mt-2">
 
             @csrf
+            <div class="rounded-2xl text-center px-5 py-5 space-y-3 shadow-md border border-white/40"
+                style="background-color: {{ $theme['card'] }};">
 
-            <!-- Card -->
-            <div class="rounded-2xl text-center px-5 py-5 space-y-3 shadow-sm" style="background-color: {{ $theme['card'] }};">
-
-                <flux:heading level="3" class="text-base font-semibold text-neutral-800">
+                <flux:heading level="3" class="text-lg !font-black" style="color: {{ $theme['text'] }};">
                     Selecciona archivos
                 </flux:heading>
 
-                <flux:text class="text-sm leading-5 text-neutral-600">
+                <flux:text class="text-sm leading-5" style="color: {{ $theme['text'] }};">
                     Puedes subir fotos o videos de hasta 25 MB por archivo.
                 </flux:text>
 
@@ -143,8 +122,9 @@
             </div>
 
             <div class="rounded-2xl bg-white/40 px-5 py-3 shadow-sm">
-                <flux:text class="text-xs italic text-black/60 text-center">
-                    Los archivos se guardan en una carpeta privada del evento.
+                <flux:text class="text-xs text-center leading-5" style="color: {{ $theme['text'] }};">
+                    Nota: Los archivos se guardan en una
+                    carpeta privada del evento.
                 </flux:text>
             </div>
 
@@ -162,6 +142,19 @@
             </flux:button>
 
         </form>
+
+        <div class="mt-8 text-center px-6">
+            <p class="text-sm leading-5" style="color: {{ $theme['text'] }};">
+                Que no se te escape el vuelo:
+                <br>
+
+                Esta experiencia estará disponible hasta el
+
+                <span class="font-semibold">
+                    {{ \Carbon\Carbon::parse($event->cover_expiration)->translatedFormat('j \d\e F') }}
+                </span>
+            </p>
+        </div>
 
         <a href="https://papilia.net/papilia2021/" target="_blank"
             class="mt-8 text-center italic block text-sm text-black/60 hover:text-black/90 transition">
