@@ -12,15 +12,9 @@
     $imgUrlFinal = $imageUrl ?? asset('img/boda-ejemplo.jpg');
 @endphp
 
-<x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam" bgStyle="background-color: #ffffff;"
-    class="bg-white relative min-h-screen">
+<x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam" bgStyle="background-image: url('{{ asset('images/fondosA/fondoA.png') }}');">
 
-    <!-- Hojas -->
-    <img src="{{ asset('images/hojas-arriba.png') }}"
-        class="absolute top-0 left-0 w-28 opacity-80 pointer-events-none z-0 -mt-2 -ml-2">
 
-    <img src="{{ asset('images/hojas-abajo.png') }}"
-        class="absolute bottom-0 right-0 w-24 opacity-80 pointer-events-none z-0">
 
     <div class="relative z-10 w-full px-6 pt-10" style="padding-left: 95px;">
 
@@ -86,7 +80,7 @@
 
     <div class="relative z-20 text-center px-8 mt-6"
         style="color: #9ca8b1; font-size: clamp(0.9rem, 2.8vw, 1.2rem); line-height: 1.5;">
-        Vive la Experiencia PAPILIA con mariposas y la canción del evento
+        <strong>Vive la Experiencia PAPILIA</strong> con mariposas y la canción del evento
     </div>
 
     <div class="relative z-20 px-6 mt-8 space-y-4 {{ $isPreview ? 'pointer-events-none' : '' }}">
