@@ -388,19 +388,18 @@ body::after {
     position: absolute;
     inset: 0;
     background: rgba(255, 255, 255, 0.96);
-    border-radius: 24px;
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: 20px;
     z-index: 50;
     transition: opacity 0.4s;
     backdrop-filter: blur(6px);
-
-    padding: 24px 24px 42px;
+    padding: 32px 28px 48px;
+    margin: 12px;
 }
-
 .start-screen.hidden {
     opacity: 0;
     pointer-events: none;
@@ -413,13 +412,16 @@ body::after {
 }
 
 .start-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1rem;
-    font-style: italic;
-    letter-spacing: 0.12em;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 300;
+    font-style: normal;
+    letter-spacing: 0.08em;
+    text-align: center;
+    line-height: 1.7;
+    padding: 0 12px;
     color: var(--primary);
-    font-weight: 600;
-    text-transform: none;
+    opacity: 0.85;
 }
 
 .btn-start {
@@ -576,4 +578,11 @@ body::after {
     50% {
         opacity: 0.25
     }
+}
+
+.start-icon {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    opacity: 0.85;
 }

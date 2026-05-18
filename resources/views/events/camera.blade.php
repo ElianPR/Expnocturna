@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>{{ $event->name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=Great+Vibes&family=Montserrat:wght@400;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/camera-event.css') }}">
     @php
@@ -14,18 +17,22 @@
             1 => [
                 'bg' => asset('images/fondosV/fondoV.png'),
                 'primary' => '#305820',
+                'icon' => asset('images/fondosV/camaraV.png'),
             ],
             2 => [
                 'bg' => asset('images/fondosA/fondoA.png'),
                 'primary' => '#092D51',
+                'icon' => asset('images/fondosA/camaraA.png'),
             ],
             3 => [
                 'bg' => asset('images/fondosD/fondoD.png'),
                 'primary' => '#8F6827',
+                'icon' => asset('images/fondosD/camaraD.png'),
             ],
         ];
 
         $theme = $themes[$event->template ?? 1];
+        $eventFont = $event->typography ?? "'Playfair Display', serif";
     @endphp
 </head>
 
@@ -38,8 +45,11 @@
     <div class="app" id="app">
 
         <div class="header">
-            <div class="title">
-                Experiencia Papilia
+            <div class="title" style="font-family: {{ $eventFont }}; color: {{ $theme['primary'] }};">
+                {{ $event->name }}
+            </div>
+            <div class="subtitle" style="color: {{ $theme['primary'] }}; opacity: 0.7;">
+                Toma foto y video
             </div>
             <div class="mode-toggle" id="modeToggle">
                 <button class="mode-btn active" id="btnModePhoto" onclick="setMode('photo')">Foto</button>
@@ -50,10 +60,16 @@
         <!-- ── Camera viewport ── -->
         <div class="vp-wrap">
             <div class="viewport" id="viewport">
-
                 <div class="start-screen" id="startScreen">
-                    <div class="start-text">Abrir Cámara</div>
-                    <button class="btn-start" id="btnStart">Permitir Cámara</button>
+                    <img src="{{ $theme['icon'] }}" alt="Ícono del evento" class="start-icon">
+                    <div class="start-text"
+                        style="color: {{ $theme['primary'] }}; font-family: 'Jost', sans-serif; font-style: normal; font-weight: 300; text-align: center;">
+                        Abre la cámara y deja que las mariposas entren en tu pantalla.
+                    </div>
+
+                    <button class="btn-start" id="btnStart">
+                        Permitir Cámara
+                    </button>
                 </div>
 
                 <canvas id="canvas"></canvas>
@@ -69,20 +85,16 @@
                 </div>
 
                 <div class="corner tl"><svg viewBox="0 0 22 22" fill="none">
-                        <path d="M1 11V1H11" stroke="var(--primary)" stroke-width="1.2"
-                            stroke-linecap="round" />
+                        <path d="M1 11V1H11" stroke="var(--primary)" stroke-width="1.2" stroke-linecap="round" />
                     </svg></div>
                 <div class="corner tr"><svg viewBox="0 0 22 22" fill="none">
-                        <path d="M1 11V1H11" stroke="var(--primary)" stroke-width="1.2"
-                            stroke-linecap="round" />
+                        <path d="M1 11V1H11" stroke="var(--primary)" stroke-width="1.2" stroke-linecap="round" />
                     </svg></div>
                 <div class="corner bl"><svg viewBox="0 0 22 22" fill="none">
-                        <path d="M1 11V1H11" stroke="var(--primary)" stroke-width="1.2"
-                            stroke-linecap="round" />
+                        <path d="M1 11V1H11" stroke="var(--primary)" stroke-width="1.2" stroke-linecap="round" />
                     </svg></div>
                 <div class="corner br"><svg viewBox="0 0 22 22" fill="none">
-                        <path d="M1 11V1H11" stroke="var(--primary)" stroke-width="1.2"
-                            stroke-linecap="round" />
+                        <path d="M1 11V1H11" stroke="var(--primary)" stroke-width="1.2" stroke-linecap="round" />
                     </svg></div>
 
                 <div class="flash" id="flash"></div>
@@ -112,8 +124,8 @@
         <div class="preview-actions">
             <button class="btn-action btn-save" id="btnSave">Guardar en celular</button>
             <button class="btn-action btn-share" id="btnShare">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="18" cy="5" r="3" />
                     <circle cx="6" cy="12" r="3" />
                     <circle cx="18" cy="19" r="3" />
@@ -340,32 +352,35 @@
                     sy = 0;
                     sx = (canvas.width - sw) / 2;
                 }
-                
+
                 // Chroma key processing para eliminar el fondo verde
                 if (!window.offscreenCanvas) {
                     window.offscreenCanvas = document.createElement('canvas');
-                    window.offscreenCtx = window.offscreenCanvas.getContext('2d', { willReadFrequently: true });
+                    window.offscreenCtx = window.offscreenCanvas.getContext('2d', {
+                        willReadFrequently: true
+                    });
                 }
-                
+
                 const procW = Math.floor(sw);
                 const procH = Math.floor(sh);
-                
+
                 if (window.offscreenCanvas.width !== procW || window.offscreenCanvas.height !== procH) {
                     window.offscreenCanvas.width = procW;
                     window.offscreenCanvas.height = procH;
                 }
-                
-                window.offscreenCtx.drawImage(overlayVid, 0, 0, overlayVid.videoWidth, overlayVid.videoHeight, 0, 0, procW, procH);
-                
+
+                window.offscreenCtx.drawImage(overlayVid, 0, 0, overlayVid.videoWidth, overlayVid.videoHeight, 0, 0, procW,
+                    procH);
+
                 try {
                     let frame = window.offscreenCtx.getImageData(0, 0, procW, procH);
                     let l = frame.data.length / 4;
-                    
+
                     for (let i = 0; i < l; i++) {
                         let r = frame.data[i * 4 + 0];
                         let g = frame.data[i * 4 + 1];
                         let b = frame.data[i * 4 + 2];
-                        
+
                         // Detectar fondo verde (rango ajustable según el video)
                         if (g > 100 && g > r * 1.3 && g > b * 1.3) {
                             frame.data[i * 4 + 3] = 0; // Transparent
@@ -376,7 +391,7 @@
                             frame.data[i * 4 + 1] = Math.min(g, Math.max(r, b)); // Reducir componente verde en el borde
                         }
                     }
-                    
+
                     window.offscreenCtx.putImageData(frame, 0, 0);
                     ctx.drawImage(window.offscreenCanvas, 0, 0, procW, procH, sx, sy, sw, sh);
                 } catch (e) {
