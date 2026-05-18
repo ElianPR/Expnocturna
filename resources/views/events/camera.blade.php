@@ -693,6 +693,9 @@
 
         document.getElementById('btnStart')
             .addEventListener('click', startCamera);
+
+        // Inicializar el tamaño del viewport al cargar la página
+        sizeViewport();
     </script>
 </body>
 
