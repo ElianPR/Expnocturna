@@ -43,22 +43,30 @@ class CameraAnimationController extends Controller
             abort(403, 'No tienes permisos para administrar animaciones.');
         }
 
+        if ($request->hasFile('mp4_file')) {
+            $file = $request->file('mp4_file');
+            if (!$file->isValid()) {
+                dd('ERROR DE SUBIDA DE PHP:', $file->getErrorMessage(), 'Código de error:', $file->getError());
+            }
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
-            'mov_file' => 'required|file|mimes:mov,qt,mp4|max:50000', // mimes for video
-            'webm_file' => 'required|file|mimes:webm|max:50000',
+            'mp4_file' => 'required|file|mimes:mp4,mov,qt,webm|max:500000',
+        ], [
+            'mp4_file.required' => 'Debes seleccionar un archivo de video.',
+            'mp4_file.file' => 'Hubo un error al recibir el archivo. Puede que sea demasiado pesado.',
+            'mp4_file.mimes' => 'El archivo debe ser un video en formato válido (MP4).',
+            'mp4_file.max' => 'El archivo no debe pesar más de 500MB.',
         ]);
 
-        $movName = 'anim_' . time() . '_' . uniqid() . '.' . $request->file('mov_file')->getClientOriginalExtension();
-        $webmName = 'anim_' . time() . '_' . uniqid() . '.' . $request->file('webm_file')->getClientOriginalExtension();
+        $mp4Name = 'anim_' . time() . '_' . uniqid() . '.' . $request->file('mp4_file')->getClientOriginalExtension();
 
-        $request->file('mov_file')->storeAs('animations', $movName, 'local');
-        $request->file('webm_file')->storeAs('animations', $webmName, 'local');
+        $request->file('mp4_file')->storeAs('animations', $mp4Name, 'local');
 
         CameraAnimation::create([
             'title' => $request->title,
-            'mov_file' => 'animations/' . $movName,
-            'webm_file' => 'animations/' . $webmName,
+            'mp4_file' => 'animations/' . $mp4Name,
         ]);
 
         return redirect()->route('camera-animations.index')->with('success', 'Animación subida exitosamente.');
@@ -87,28 +95,22 @@ class CameraAnimationController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
-            'mov_file' => 'nullable|file|mimes:mov,qt,mp4|max:50000',
-            'webm_file' => 'nullable|file|mimes:webm|max:50000',
+            'mp4_file' => 'nullable|file|mimes:mp4,mov,qt,webm|max:500000',
+        ], [
+            'mp4_file.file' => 'Hubo un error al recibir el archivo. Puede que sea demasiado pesado.',
+            'mp4_file.mimes' => 'El archivo debe ser un video en formato válido (MP4).',
+            'mp4_file.max' => 'El archivo no debe pesar más de 500MB.',
         ]);
 
         $data = ['title' => $request->title];
 
-        if ($request->hasFile('mov_file')) {
-            if ($cameraAnimation->mov_file && Storage::disk('local')->exists($cameraAnimation->mov_file)) {
-                Storage::disk('local')->delete($cameraAnimation->mov_file);
+        if ($request->hasFile('mp4_file')) {
+            if ($cameraAnimation->mp4_file && Storage::disk('local')->exists($cameraAnimation->mp4_file)) {
+                Storage::disk('local')->delete($cameraAnimation->mp4_file);
             }
-            $movName = 'anim_' . time() . '_' . uniqid() . '.' . $request->file('mov_file')->getClientOriginalExtension();
-            $request->file('mov_file')->storeAs('animations', $movName, 'local');
-            $data['mov_file'] = 'animations/' . $movName;
-        }
-
-        if ($request->hasFile('webm_file')) {
-            if ($cameraAnimation->webm_file && Storage::disk('local')->exists($cameraAnimation->webm_file)) {
-                Storage::disk('local')->delete($cameraAnimation->webm_file);
-            }
-            $webmName = 'anim_' . time() . '_' . uniqid() . '.' . $request->file('webm_file')->getClientOriginalExtension();
-            $request->file('webm_file')->storeAs('animations', $webmName, 'local');
-            $data['webm_file'] = 'animations/' . $webmName;
+            $mp4Name = 'anim_' . time() . '_' . uniqid() . '.' . $request->file('mp4_file')->getClientOriginalExtension();
+            $request->file('mp4_file')->storeAs('animations', $mp4Name, 'local');
+            $data['mp4_file'] = 'animations/' . $mp4Name;
         }
 
         $cameraAnimation->update($data);
@@ -125,12 +127,8 @@ class CameraAnimationController extends Controller
             abort(403, 'No tienes permisos para administrar animaciones.');
         }
 
-        if ($cameraAnimation->mov_file && Storage::disk('local')->exists($cameraAnimation->mov_file)) {
-            Storage::disk('local')->delete($cameraAnimation->mov_file);
-        }
-
-        if ($cameraAnimation->webm_file && Storage::disk('local')->exists($cameraAnimation->webm_file)) {
-            Storage::disk('local')->delete($cameraAnimation->webm_file);
+        if ($cameraAnimation->mp4_file && Storage::disk('local')->exists($cameraAnimation->mp4_file)) {
+            Storage::disk('local')->delete($cameraAnimation->mp4_file);
         }
 
         $cameraAnimation->delete();
@@ -138,9 +136,9 @@ class CameraAnimationController extends Controller
         return redirect()->route('camera-animations.index')->with('success', 'Animación eliminada exitosamente.');
     }
 
-    public function stream(CameraAnimation $cameraAnimation, $type)
+    public function stream(CameraAnimation $cameraAnimation, $type = 'mp4')
     {
-        $file = $type === 'mov' ? $cameraAnimation->mov_file : $cameraAnimation->webm_file;
+        $file = $cameraAnimation->mp4_file;
 
         if (!$file || !Storage::disk('local')->exists($file)) {
             abort(404);

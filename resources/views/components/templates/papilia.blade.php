@@ -21,11 +21,11 @@
 @endphp
 
 <x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam"
-    bgStyle="background-image: url('{{ asset('images/papel.jpg') }}'); background-size: cover; background-position: center;">
+    bgStyle="background-image: url('{{ asset('images/fondosV/fondoV.png') }}');">
 
     <div
-        class="text-center text-[10px] sm:text-[11px] font-bold tracking-widest text-[#1b311e] px-6 mb-5 uppercase leading-relaxed">
-        Vive la experiencia Papilia con <br> mariposas y la canción del evento
+        class="text-center text-[10px] sm:text-[11px] font-bold tracking-widest text-[#436c00] px-6 mb-5 uppercase leading-relaxed">
+        VIVE LA EXPERIENCIA PAPILIA CON <br> MARIPOSAS Y LA CANCIÓN DEL EVENTO
     </div>
 
     <div class="w-full mb-8 relative z-10">

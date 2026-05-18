@@ -2,6 +2,9 @@
 
 @php
     $isPreview = filter_var($preview, FILTER_VALIDATE_BOOLEAN);
+    // Extraer solo el nombre de la fuente (ej: "'Great Vibes', cursive" -> "Great Vibes")
+    $cleanFont = str_replace(["'", '"'], '', $fontFamily);
+    $googleFontName = trim(explode(',', $cleanFont)[0]);
 @endphp
 
 @if(!$isPreview)
@@ -16,21 +19,21 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family={{ str_replace(' ', '+', $fontFamily) }}:wght@400;600;700&family=Montserrat:ital,wght@0,400;0,500;1,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family={{ str_replace(' ', '+', $googleFontName) }}:wght@400;600;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
     
     <style>
         .font-nombres { font-family: '{{ $fontFamily }}', serif; }
-        .font-base { font-family: 'Montserrat', sans-serif; }
+        .font-base { font-family: 'Poppins', sans-serif; }
     </style>
 </head>
 <body class="font-base text-neutral-800 min-h-screen bg-neutral-900 flex justify-center w-full relative">
 @endif
 
-    <div class="{{ $isPreview
+    <div id="papilia-wrapper" class="{{ $isPreview
     ? 'w-full min-h-full'
     : 'w-full min-h-screen shadow-2xl sm:max-w-md md:max-w-[768px] lg:max-w-[1024px] xl:max-w-[1280px]' }}
-    relative flex flex-col overflow-x-hidden mx-auto" }} relative flex flex-col overflow-x-hidden mx-auto" 
-         style="{{ $bgStyle }} background-size: cover; background-position: center;">
+    relative flex flex-col overflow-x-hidden mx-auto"
+         style="{{ $bgStyle }} background-size: 100% 100%; background-position: center; background-repeat: no-repeat;">
         
         <div class="absolute inset-0 bg-white/40 z-0 pointer-events-none"></div>
 

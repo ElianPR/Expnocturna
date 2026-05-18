@@ -11,24 +11,13 @@
     $imgUrlFinal = $imageUrl ?? asset('images/boda-ejemplo-brocha.png');
 @endphp
 
-<x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam" bgStyle="background-color: #ffffff;">
+<x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam" bgStyle="background-image: url('{{ asset('images/fondosD/fondoD.png') }}');">
     <div
         class="
-        bg-white relative min-h-screen w-full overflow-x-hidden flex flex-col
+        relative min-h-screen w-full overflow-x-hidden flex flex-col
         {{ $isPreview ? 'max-w-none px-0' : 'max-w-[430px] md:max-w-[768px] lg:max-w-[1024px] mx-auto' }}
     ">
-        <img src="{{ asset('images/flores-doradas-abajo.svg') }}"
-            class="absolute bottom-0 right-0
-                {{ $isPreview
-                    ? 'w-24 sm:w-28 md:w-32 translate-y-10 sm:translate-y-12 md:translate-y-14'
-                    : 'w-36 sm:w-44 md:w-56 lg:w-64 xl:w-72 translate-y-16 sm:translate-y-20 md:translate-y-24' }}
-                opacity-90 pointer-events-none z-0 translate-x-2">
-
         <div class="w-full relative flex justify-end z-10 pt-4 md:pt-6 lg:pt-8">
-            <img src="{{ asset('images/flores-doradas-arriba.png') }}"
-                class="absolute top-0 left-0
-                    {{ $isPreview ? 'w-20 sm:w-24 md:w-28' : 'w-32 sm:w-40 md:w-56 lg:w-64 xl:w-72' }}
-                    opacity-90 pointer-events-none -mt-4 -ml-4">
 
             <img @if ($isPreview) :src="imageUrl || '{{ $imgUrlFinal }}'"
                 @else
@@ -81,9 +70,9 @@
                 @endunless
             </p>
 
-            <div class="text-center font-medium mt-6 md:mt-8 mb-6 md:mb-8"
+            <div class="text-center mt-6 md:mt-8 mb-6 md:mb-8"
                 style="color: #d1b88a; font-size: clamp(1rem, 2.5vw, 1.6rem);">
-                Vive la Experiencia PAPILIA
+                <strong>Vive la Experiencia PAPILIA</strong> con mariposas y la canción del evento
             </div>
 
             <div
