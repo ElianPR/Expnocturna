@@ -10,9 +10,9 @@
 
 @php
     $backgroundMap = [
-        1 => asset('images/fondoVM.png'),
-        2 => asset('images/fondoAM.png'),
-        3 => asset('images/fondoDM.png'),
+        1 => asset('images/fondosV/fondoV.png'),
+        2 => asset('images/fondosA/fondoA.png'),
+        3 => asset('images/fondosD/fondoD.png'),
     ];
 
     $backgroundImage = $backgroundMap[$event->template] ?? null;

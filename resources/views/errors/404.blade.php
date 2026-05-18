@@ -96,15 +96,15 @@
 @php
     $options = [
         [
-            'img' => 'images/4041.png',
+            'img' => 'images/404/4041.png',
             'text' => '¡Oh, no! La página que buscas ha volado a otro lugar.',
         ],
         [
-            'img' => 'images/4042.png',
+            'img' => 'images/404/4042.png',
             'text' => 'Metamorfosis fallida: Esta página no pudo transformarse',
         ],
         [
-            'img' => 'images/4043.png',
+            'img' => 'images/404/4043.png',
             'text' => 'Parece que te has desviado del camino.',
         ],
     ];

@@ -18,21 +18,21 @@
 @php
     $templates = [
         1 => [
-            'bg' => asset('images/fondoCV.png'),
+            'bg' => asset('images/fondosV/fondoV.png'),
             'button' => '#436C00',
             'card' => '#CCD9B7',
             'text' => '#426B00',
             'textName' => '#000000',
         ],
         2 => [
-            'bg' => asset('images/fondoCA.png'),
+            'bg' => asset('images/fondosA/fondoA.png'),
             'button' => '#092D51',
             'card' => '#BFC5DE',
             'text' => '#092D51',
             'textName' => '#828189',
         ],
         3 => [
-            'bg' => asset('images/fondoCD.png'),
+            'bg' => asset('images/fondosD/fondoD.png'),
             'button' => '#A8792B',
             'card' => '#F5E9DB',
             'text' => '#8F6827',
