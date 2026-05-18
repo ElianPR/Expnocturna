@@ -25,8 +25,7 @@
                 <thead class="bg-neutral-100 dark:bg-neutral-800">
                     <tr>
                         <th class="px-4 py-3 text-left">Título</th>
-                        <th class="px-4 py-3 text-left">Archivo .MOV (iOS)</th>
-                        <th class="px-4 py-3 text-left">Archivo .WEBM (Android)</th>
+                        <th class="px-4 py-3 text-left">Archivo .MP4 (Pantalla Verde)</th>
                         <th class="px-4 py-3 text-left">Acciones</th>
                     </tr>
                 </thead>
@@ -37,15 +36,8 @@
                                 {{ $animation->title }}
                             </td>
                             <td class="px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                                @if($animation->mov_file)
-                                    <a href="{{ route('camera-animations.stream', [$animation->id, 'mov']) }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline">Ver archivo</a>
-                                @else
-                                    N/A
-                                @endif
-                            </td>
-                            <td class="px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                                @if($animation->webm_file)
-                                    <a href="{{ route('camera-animations.stream', [$animation->id, 'webm']) }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline">Ver archivo</a>
+                                @if($animation->mp4_file)
+                                    <a href="{{ route('camera-animations.stream', [$animation->id]) }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline">Ver archivo</a>
                                 @else
                                     N/A
                                 @endif
@@ -63,7 +55,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-6 text-center text-neutral-500">
+                            <td colspan="3" class="px-4 py-6 text-center text-neutral-500">
                                 No hay animaciones registradas
                             </td>
                         </tr>

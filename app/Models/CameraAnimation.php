@@ -8,8 +8,7 @@ class CameraAnimation extends Model
 {
     protected $fillable = [
         'title',
-        'mov_file',
-        'webm_file',
+        'mp4_file',
     ];
 
     public function events()
