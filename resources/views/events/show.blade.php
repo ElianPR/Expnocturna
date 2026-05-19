@@ -7,24 +7,51 @@
 
     <title>{{ $event->name ?: 'Evento' }}</title>
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=Great+Vibes&family=Montserrat:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    @php
+        $backgroundMap = [
+            1 => asset('images/fondosV/fondoV.png'),
+            2 => asset('images/fondosA/fondoA.png'),
+            3 => asset('images/fondosD/fondoD.png'),
+        ];
+
+        $colorMap = [
+            1 => '#436C00',
+            2 => '#092D51',
+            3 => '#A8792B',
+        ];
+
+        $backgroundImage = $backgroundMap[$event->template] ?? $backgroundMap[1];
+
+        $themeColor = $colorMap[$event->template] ?? '#436C00';
+
+        $eventFont = $event->typography ?? "'Playfair Display', serif";
+    @endphp
 
     <style>
-        :root {
-            --brand: #22A5E8;
-        }
-
         * {
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
             padding: 0;
-            font-family: Poppins, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background: #000;
         }
 
         #loader {
@@ -35,177 +62,185 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: .45s ease;
+            transition: opacity .45s ease;
         }
 
         #loader img {
+            width: 100%;
             height: 100%;
-            max-width: 480px;
-            width: auto;
             object-fit: cover;
-            display: block;
         }
 
         #mainContent {
             display: none;
         }
 
+        /* ========= MODAL ========= */
+
         #termsModal {
             position: fixed;
             inset: 0;
-            background: rgba(10, 20, 35, .58);
-            backdrop-filter: blur(8px);
+            z-index: 10000;
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 10000;
             padding: 20px;
+            background: rgba(0, 0, 0, .45);
+            backdrop-filter: blur(10px);
         }
 
-        .modal-box {
-            background: white;
-            max-width: 520px;
+        .terms-card {
             width: 100%;
-            border-radius: 28px;
-            padding: 38px 34px;
-            box-shadow:
-                0 20px 70px rgba(0, 0, 0, .18);
+            max-width: 390px;
+            min-height: 720px;
+
+            position: relative;
+
+            background-image: url('{{ $backgroundImage }}');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+
+            border-radius: 0;
+            overflow: hidden;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            padding:
+                70px 28px 30px;
+        }
+
+        .event-title {
+            text-align: center;
+            font-size: 4.2rem;
+            line-height: 1;
+            margin: 0;
+            font-weight: 500;
+            color: {{ $event->template == 1 ? '#595959' : $themeColor }};
+            font-family: {!! $eventFont !!};
+        }
+
+        .event-date {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            color: {{ $themeColor }};
+            font-weight: 500;
             text-align: center;
         }
 
-        .logo-box {
-            width: 90px;
-            height: 90px;
-            margin: auto;
-            margin-bottom: 20px;
-            background: #f5fbff;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #d9eefb;
+        .terms-box {
+            margin-top: 90px;
+
+            width: 100%;
+            border: 6px solid {{ $themeColor }};
+            border-radius: 18px;
+
+            background: rgba(255, 255, 255, 0.18);
+
+            backdrop-filter: blur(3px);
+
+            padding: 26px 18px 24px;
         }
 
-        .logo-box img {
-            width: 58px;
+        .terms-btn {
+            width: 100% !important;
+            justify-content: center !important;
+
+            border-radius: 12px !important;
+
+            background: {{ $themeColor }} !important;
+            color: white !important;
+
+            min-height: 88px !important;
+
+            font-size: 1.05rem !important;
+            line-height: 1.2 !important;
+            font-weight: 700 !important;
+
+            text-align: center !important;
+
+            box-shadow: none !important;
         }
 
-        .modal-box h2 {
-            margin: 0 0 14px;
-            font-size: 30px;
-            color: #111827;
+        .terms-link {
+            margin-top: 16px;
+            display: block;
+            text-align: center;
+
+            font-size: .92rem;
+            text-decoration: none;
+
+            color: {{ $themeColor }};
         }
 
-        .modal-box p {
-            line-height: 1.7;
-            color: #4b5563;
-            margin-bottom: 28px;
+        .terms-link:hover {
+            opacity: .8;
         }
 
-        .notice {
-            background: #f0f9ff;
-            border: 1px solid #d8effb;
-            padding: 16px;
-            border-radius: 16px;
-            font-size: 14px;
-            margin-bottom: 28px;
-            line-height: 1.7;
-        }
-
-        .actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        button {
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
-            transition: .2s;
-        }
-
-        .accept {
-            background: var(--brand);
-            color: white;
-            padding: 15px;
-            font-weight: 600;
-            border-radius: 14px;
-        }
-
-        .accept:hover {
-            transform: translateY(-1px);
-        }
-
-        .read {
-            background: white;
-            border: 1px solid #d6d6d6;
-            padding: 14px;
-            border-radius: 14px;
-            font-weight: 500;
-        }
-
-        .decline {
-            background: #f4f4f5;
-            padding: 14px;
-            border-radius: 14px;
-            color: #444;
-        }
-
-        @media (max-width:600px) {
-            .modal-box {
-                padding: 28px 24px;
+        @media (max-width: 480px) {
+            .terms-card {
+                min-height: 100vh;
+                max-width: 100%;
+                border-radius: 0;
             }
 
-            .modal-box h2 {
-                font-size: 25px;
+            .event-title {
+                font-size: 3.7rem;
+            }
+
+            .terms-box {
+                margin-top: 70px;
             }
         }
     </style>
 </head>
 
 <body>
-
     <div id="loader">
-        <img src="{{ asset('videos/simulacion.gif') }}">
+        <img src="{{ asset('videos/simulacion.gif') }}" alt="">
     </div>
 
     <div id="termsModal">
-        <div class="modal-box">
 
-            <div class="logo-box">
-                <img src="{{ asset('images/logoC.png') }}">
+        <div class="terms-card">
+
+            <h1 class="event-title">
+                {{ $event->name }}
+            </h1>
+
+            <div class="event-date">
+                {{ \Carbon\Carbon::parse($event->date)->locale('es')->translatedFormat('j F Y') }}
             </div>
 
-            <h2>Antes de continuar</h2>
+            <div class="terms-box">
 
-            <p>
-                Para usar Experiencias Papilia es necesario aceptar
-                los Términos y Condiciones y el Aviso de Privacidad.
-            </p>
+                <flux:button class="terms-btn" onclick="acceptTerms()">
+                    ACEPTAR <br>
+                    Términos y Condiciones <br>
+                    CONTINUAR
+                </flux:button>
 
-            <div class="notice">
-                Al continuar autorizas el uso de la plataforma
-                conforme a las políticas aplicables del evento.
+                <a href="{{ route('terms', $event->id_hex) }}" target="_blank" class="terms-link">
+                    Consulta Términos y Condiciones.
+                </a>
+
             </div>
 
-            <div class="actions">
-                <button class="read" onclick="window.open('{{ route('terms', $event->id_hex) }}','_blank')">
-                    Consultar términos y condiciones
-                </button>
+            <a href="https://papilia.net/papilia2021/" target="_blank"
+                class="relative z-20 text-center mt-10 md:mt-14 lg:mt-16 block"
+                style="color: #4a4a4a; font-size: clamp(0.9rem, 1.8vw, 1.2rem); font-family: 'Poppins', sans-serif;">
+                papilia.net
+            </a>
 
-                <button class="accept" onclick="acceptTerms()">
-                    Aceptar y continuar
-                </button>
-
-                <button class="decline" onclick="declineTerms()">
-                    No aceptar
-                </button>
-            </div>
         </div>
+
     </div>
 
+    {{-- CONTENIDO --}}
     <div id="mainContent">
+
         @if ($event->template == 1)
             <x-templates.papilia :event="$event" :imageUrl="$imageUrl" />
         @elseif($event->template == 2)
@@ -217,6 +252,7 @@
                 <h2>Esta plantilla está en construcción</h2>
             </div>
         @endif
+
     </div>
 
     <script>
@@ -226,38 +262,43 @@
 
         const storageKey = "papilia_terms_event_{{ $event->id }}";
 
-
         function showModal() {
             modal.style.display = "flex";
         }
 
         function showContent() {
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                loader.style.display = 'none';
-                let accepted = localStorage.getItem(storageKey);
-                if (accepted === "accepted") {
-                    content.style.display = 'block';
-                } else {
-                    showModal();
-                }
-            }, 450);
 
+            loader.style.opacity = '0';
+
+            setTimeout(() => {
+
+                loader.style.display = 'none';
+
+                const accepted = localStorage.getItem(storageKey);
+
+                if (accepted === "accepted") {
+
+                    content.style.display = 'block';
+
+                } else {
+
+                    showModal();
+
+                }
+
+            }, 450);
         }
 
-
         function acceptTerms() {
+
             localStorage.setItem(
                 storageKey,
                 "accepted"
             );
-            modal.style.display = 'none';
-            content.style.display = 'block';
-        }
 
-        function declineTerms() {
-            window.location.href =
-                "https://papilia.net/papilia2021/";
+            modal.style.display = 'none';
+
+            content.style.display = 'block';
         }
 
         setTimeout(
@@ -265,6 +306,8 @@
             7000
         );
     </script>
+
+    @fluxScripts
 
 </body>
 
