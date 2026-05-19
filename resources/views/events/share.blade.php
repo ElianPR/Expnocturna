@@ -158,7 +158,8 @@
         </div>
 
         <a href="https://papilia.net/papilia2021/" target="_blank"
-            class="mt-8 text-center italic block text-sm text-black/60 hover:text-black/90 transition">
+            class="relative z-20 text-center mt-10 md:mt-14 lg:mt-16 block"
+            style="color: #4a4a4a; font-size: clamp(0.9rem, 1.8vw, 1.2rem); font-family: 'Poppins', sans-serif;">
             papilia.net
         </a>
 
