@@ -19,22 +19,12 @@ body {
     height: 100%;
     overflow: hidden;
     background:
-        linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)),
+        linear-gradient(rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0)),
         var(--bg-image);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-}
-
-body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 999;
-    opacity: 0.35;
 }
 
 .app {
@@ -97,8 +87,8 @@ body::after {
 }
 
 .mode-btn.active {
-    background: rgba(201, 169, 110, 0.25);
-    color: var(--cream);
+    background: var(--primary);
+    color: #ffffff;
 }
 
 .vp-wrap {
@@ -267,7 +257,7 @@ body::after {
     position: absolute;
     inset: 4px;
     border-radius: 50%;
-    background: var(--cream);
+    background: var(--shutter-fill);
     transition: transform 0.15s, opacity 0.15s, background 0.25s, border-radius 0.25s, inset 0.25s;
 }
 
@@ -276,7 +266,7 @@ body::after {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 2px solid rgba(201, 169, 110, 0.6);
+    border: 2px solid var(--shutter-border);
     transition: border-color 0.25s;
 }
 
@@ -353,10 +343,6 @@ body::after {
         color: var(--primary);
     }
 
-    .subtitle {
-        display: none;
-    }
-
     .vp-wrap {
         padding: 8px 6px;
     }
@@ -371,16 +357,33 @@ body::after {
     }
 
     .mode-toggle {
-        flex-direction: column;
+        display: flex;
+        background: color-mix(in srgb, var(--primary) 15%, transparent);
+        /* fondo suave del color primario */
+        border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+        border-radius: 100px;
         padding: 3px;
         gap: 2px;
-        margin-top: 10px;
+        flex-shrink: 0;
+        opacity: 0;
+        animation: fadeIn 0.8s ease 0.4s forwards;
     }
 
     .mode-btn {
-        padding: 7px 8px;
-        font-size: 0.5rem;
-        letter-spacing: 0.15em;
+        padding: 5px 16px;
+        border-radius: 100px;
+        border: none;
+        background: transparent;
+        color: color-mix(in srgb, var(--primary) 60%, white);
+        /* texto tenue del color primario */
+        font-family: 'Jost', sans-serif;
+        font-size: 0.8rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        cursor: pointer;
+        outline: none;
+        transition: background 0.2s, color 0.2s;
+        -webkit-tap-highlight-color: transparent;
     }
 }
 
@@ -400,6 +403,7 @@ body::after {
     padding: 32px 28px 48px;
     margin: 12px;
 }
+
 .start-screen.hidden {
     opacity: 0;
     pointer-events: none;
@@ -422,28 +426,6 @@ body::after {
     padding: 0 12px;
     color: var(--primary);
     opacity: 0.85;
-}
-
-.btn-start {
-    padding: 12px 30px;
-    border-radius: 100px;
-    border: 1.5px solid var(--primary);
-    background: var(--primary);
-    color: #ffffff;
-    font-family: 'Jost', sans-serif;
-    font-size: 0.72rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.25s ease;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-
-.btn-start:hover {
-    transform: translateY(-1px);
-    opacity: 0.92;
 }
 
 .preview-overlay {
@@ -493,51 +475,6 @@ body::after {
     flex-wrap: wrap;
     justify-content: center;
 }
-
-.btn-action {
-    padding: 9px 20px;
-    border-radius: 100px;
-    border: 1px solid;
-    font-family: 'Jost', sans-serif;
-    font-weight: 300;
-    font-size: 0.68rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    cursor: pointer;
-    outline: none;
-    transition: background 0.2s, color 0.2s;
-    -webkit-tap-highlight-color: transparent;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-save,
-.btn-share,
-.btn-retake {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-}
-
-.btn-save svg,
-.btn-share svg,
-.btn-retake svg {
-    stroke: #fff;
-}
-
-.btn-save:active,
-.btn-share:active,
-.btn-retake:active {
-    opacity: 0.85;
-}
-
-.btn-share svg {
-    width: 13px;
-    height: 13px;
-    flex-shrink: 0;
-}
-
 .toast {
     position: fixed;
     bottom: 36px;

@@ -91,8 +91,12 @@
                 {{ $event->name ?? ($event->monogram ?? 'Evento') }}
             </h1>
 
-            <flux:text class="text-xl" style="color: {{ $theme['text'] }};"> Compartir </flux:text>
+            <flux:text class="text-xl" style="color: {{ $theme['text'] }};">
+                {{ \Carbon\Carbon::parse($event->date)->translatedFormat('j F Y') }}
+            </flux:text>
         </div>
+
+        <flux:text class="text-xl font-extrabold" style="color: {{ $theme['text'] }};"> Compartir recuerdos</flux:text>
         <flux:text class="text-sm" style="color: {{ $theme['text'] }};"> Sube fotos o videos de este evento.</flux:text>
 
         <div id="formMessage" class="w-full"></div>
@@ -145,13 +149,10 @@
 
         <div class="mt-8 text-center px-6">
             <p class="text-sm leading-5" style="color: {{ $theme['text'] }};">
-                Que no se te escape el vuelo:
-                <br>
-
                 Esta experiencia estará disponible hasta el
 
                 <span class="font-semibold">
-                    {{ \Carbon\Carbon::parse($event->cover_expiration)->translatedFormat('j \d\e F') }}
+                    {{ \Carbon\Carbon::parse($event->cover_expiration)->translatedFormat('j F Y') }}
                 </span>
             </p>
         </div>

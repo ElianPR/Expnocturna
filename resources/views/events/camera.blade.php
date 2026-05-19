@@ -31,25 +31,69 @@
             ],
         ];
 
-        $theme = $themes[$event->template ?? 1];
+        $shutterColors = [
+            1 => ['fill' => '#71ca5b', 'border' => '#245b00'],
+            2 => ['fill' => '#6daae3', 'border' => '#092d51'],
+            3 => ['fill' => '#dca752', 'border' => '#8f6827'],
+        ];
+
+        $template = $event->template ?? 1;
+        $theme = $themes[$template];
+        $shutter = $shutterColors[$template];
         $eventFont = $event->typography ?? "'Playfair Display', serif";
     @endphp
+
+    <style>
+        .btn-shutter::before {
+            background: {{ $shutter['fill'] }} !important;
+        }
+
+        .btn-shutter::after {
+            border-color: {{ $shutter['border'] }} !important;
+        }
+
+        .btn-shutter.video-mode::before {
+            background: #e04040 !important;
+        }
+
+        .btn-shutter.video-mode::after {
+            border-color: rgba(224, 64, 64, 0.55) !important;
+        }
+
+        .btn-shutter.recording::before {
+            background: #e04040 !important;
+            border-radius: 6px !important;
+            inset: 20px !important;
+        }
+
+        .btn-shutter.recording::after {
+            border-color: rgba(224, 64, 64, 0.7) !important;
+        }
+
+        .mode-toggle {
+            background: {{ $shutter['border'] }}26;
+            border-color: {{ $shutter['border'] }}66;
+        }
+
+        .mode-btn.active {
+            background: {{ $theme['primary'] }};
+        }
+    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body
     style="
-        --gold: {{ $theme['primary'] }};
-        --primary: {{ $theme['primary'] }};
-        --bg-image: url('{{ $theme['bg'] }}');
-    ">
+    --gold: {{ $theme['primary'] }};
+    --primary: {{ $theme['primary'] }};
+    --bg-image: url('{{ $theme['bg'] }}');
+">
     <div class="app" id="app">
 
         <div class="header">
-            <div class="title" style="font-family: {{ $eventFont }}; color: {{ $theme['primary'] }};">
+            <div class="title"
+                style="font-family: {{ $eventFont }}; color: {{ $event->template == 1 ? '#595959' : $theme['primary'] }};">
                 {{ $event->name }}
-            </div>
-            <div class="subtitle" style="color: {{ $theme['primary'] }}; opacity: 0.7;">
-                Toma foto y video
             </div>
             <div class="mode-toggle" id="modeToggle">
                 <button class="mode-btn active" id="btnModePhoto" onclick="setMode('photo')">Foto</button>
@@ -67,9 +111,11 @@
                         Abre la cámara y deja que las mariposas entren en tu pantalla.
                     </div>
 
-                    <button class="btn-start" id="btnStart">
+                    <flux:button id="btnStart" variant="primary" icon="camera"
+                        class="w-64 justify-center rounded-xl text-lg font-semibold"
+                        style="background-color: {{ $theme['primary'] }}; color: white;">
                         Permitir Cámara
-                    </button>
+                    </flux:button>
                 </div>
 
                 <canvas id="canvas"></canvas>
@@ -118,23 +164,28 @@
 
     <!-- Preview overlay -->
     <div class="preview-overlay" id="previewOverlay">
-        <div class="preview-label" id="previewLabel">Tu foto</div>
+        <div class="preview-label" id="previewLabel"></div>
         <img id="previewImg" class="preview-media" src="" alt="" style="display:none">
         <video id="previewVid" class="preview-media" controls playsinline loop style="display:none"></video>
         <div class="preview-actions">
-            <button class="btn-action btn-save" id="btnSave">Guardar en celular</button>
-            <button class="btn-action btn-share" id="btnShare">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="18" cy="5" r="3" />
-                    <circle cx="6" cy="12" r="3" />
-                    <circle cx="18" cy="19" r="3" />
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                </svg>
+            <flux:button id="btnSave" variant="primary" icon="arrow-down-tray"
+                class="w-64 justify-center rounded-xl text-lg font-semibold"
+                style="background-color: {{ $theme['primary'] }}; color: white;">
+                Guardar en celular
+            </flux:button>
+
+            <flux:button id="btnShare" variant="primary" icon="share"
+                class="w-64 justify-center rounded-xl text-lg font-semibold"
+                style="background-color: {{ $theme['primary'] }}; color: white;">
                 Compartir en el álbum del evento
-            </button>
-            <button class="btn-action btn-retake" id="btnClose">Retomar</button>
+            </flux:button>
+
+            <flux:button id="btnClose" variant="primary" icon="arrow-uturn-left"
+                class="w-64 justify-center rounded-xl text-lg font-semibold"
+                style="background-color: {{ $theme['primary'] }}; color: white;"
+            >
+                Retomar
+            </flux:button>
         </div>
     </div>
 
@@ -288,6 +339,8 @@
                 await new Promise(r => setTimeout(r, 150));
                 sizeViewport();
                 document.getElementById('startScreen').classList.add('hidden');
+                overlayVid.currentTime = 0;
+                overlayVid.play().catch(() => {});
                 if (!animId) loop();
                 setControlsEnabled(true);
             } catch (e) {
@@ -455,7 +508,6 @@
             img.style.display = 'block';
             vid.style.display = 'none';
             vid.src = '';
-            document.getElementById('previewLabel').textContent = 'Tu foto';
 
             document.getElementById('btnSave').onclick = () => {
                 const a = document.createElement('a');
@@ -697,6 +749,7 @@
         // Inicializar el tamaño del viewport al cargar la página
         sizeViewport();
     </script>
+    @fluxScripts
 </body>
 
 </html>
