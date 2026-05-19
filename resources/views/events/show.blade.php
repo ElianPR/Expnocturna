@@ -59,23 +59,25 @@
             inset: 0;
             background: #000;
             z-index: 9999;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity .45s ease;
         }
 
         #loader img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            max-width: 100vw;
+            max-height: 100vh;
+
+            width: auto;
+            height: auto;
+
+            object-fit: contain;
         }
 
         #mainContent {
             display: none;
         }
-
-        /* ========= MODAL ========= */
 
         #termsModal {
             position: fixed;
