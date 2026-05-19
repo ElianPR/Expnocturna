@@ -1,17 +1,25 @@
 <x-papilia.layout :preview="false" fontFamily="Poppins" bgStyle="background-image: url('{{ asset('images/fondosD/fondoD.png') }}');" class="bg-cover bg-center bg-no-repeat min-h-screen flex flex-col justify-between">
 
+    @php
+        $type = $type ?? 'event';
+        $targetDate = ($type === 'album' && $event?->album_availability) ? $event->album_availability : $event?->date;
+        $dateText = $targetDate
+            ? \Carbon\Carbon::parse($targetDate)->translatedFormat('d \d\e F \d\e Y')
+            : 'la fecha de apertura';
+    @endphp
+
     <div class="relative z-10 w-full flex flex-col items-center justify-center min-h-[80vh] px-6 py-12 text-center flex-1">
 
         <h1 class="text-3xl sm:text-4xl font-extrabold text-[#a8792b] mb-8 max-w-[90%] sm:max-w-lg mx-auto leading-tight" style="font-family: 'Poppins', sans-serif;">
-            Los recuerdos<br>de este evento ya no<br>están disponibles.
+            Alistando<br>las alas.
         </h1>
 
         <div class="w-full mx-auto mb-8 relative z-10 flex justify-center">
-            <img src="{{ asset('images/fondosD/Pantalla C2.png') }}" alt="Capullo de mariposa" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
+            <img src="{{ asset('images/fondosD/Pantalla C1.png') }}" alt="Mariposa" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
         </div>
 
         <p class="text-lg sm:text-xl text-[#a8792b] font-bold max-w-[90%] sm:max-w-md mx-auto leading-snug" style="font-family: 'Poppins', sans-serif;">
-            El tiempo de visualización para<br>este evento ha terminado.<br>Deseamos que este recuerdo<br>brille siempre.
+            Este evento se activará el {{ $dateText }}.<br>¡Te esperamos!
         </p>
 
     </div>

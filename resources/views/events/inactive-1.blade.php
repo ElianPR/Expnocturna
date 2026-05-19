@@ -1,9 +1,17 @@
 <x-papilia.layout :preview="false" fontFamily="Poppins" bgStyle="background-image: url('{{ asset('images/fondosV/fondoV.png') }}');" class="bg-cover bg-center bg-no-repeat min-h-screen flex flex-col justify-between">
 
+    @php
+        $type = $type ?? 'event';
+        $targetDate = ($type === 'album' && $event?->album_availability) ? $event->album_availability : $event?->date;
+        $dateText = $targetDate
+            ? \Carbon\Carbon::parse($targetDate)->translatedFormat('d \d\e F \d\e Y')
+            : 'la fecha de apertura';
+    @endphp
+
     <div class="relative z-10 w-full flex flex-col items-center justify-center min-h-[80vh] px-6 py-12 text-center flex-1">
 
         <h1 class="text-3xl sm:text-4xl font-extrabold text-[#305820] mb-6 max-w-[90%] sm:max-w-lg mx-auto leading-tight" style="font-family: 'Poppins', sans-serif;">
-            Esta galería ha<br>cumplido su ciclo
+            El jardín está<br>preparándose para<br>la magia.
         </h1>
 
         <div class="px-8 w-full select-none pointer-events-none mb-8">
@@ -11,11 +19,11 @@
         </div>
 
         <div class="w-full mx-auto mb-8 relative z-10 flex justify-center">
-            <img src="{{ asset('images/fondosV/Pantalla V2.png') }}" alt="Mariposa en rama" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
+            <img src="{{ asset('images/fondosV/Pantalla V2.png') }}" alt="Jardín y mariposa" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
         </div>
 
         <p class="text-lg sm:text-xl text-[#305820] font-bold max-w-[90%] sm:max-w-md mx-auto leading-snug" style="font-family: 'Poppins', sans-serif;">
-            Esta galería ya no esta disponible<br>para nuevas capturas.<br>Esperamos que la experiencia fuera<br>única.
+            Podrás comenzar a capturar<br>momentos a partir del {{ $dateText }}.
         </p>
 
     </div>

@@ -3,15 +3,15 @@
     <div class="relative z-10 w-full flex flex-col items-center justify-center min-h-[80vh] px-6 py-12 text-center flex-1">
 
         <h1 class="text-3xl sm:text-4xl font-bold text-[#092d51] mb-8 max-w-[90%] sm:max-w-lg mx-auto leading-tight" style="font-family: 'Poppins', sans-serif;">
-            Esta galería<br>ha cumplido su ciclo
+            Las mariposas ya no<br>habitan en este QR.
         </h1>
 
         <div class="w-full mx-auto mb-8 relative z-10 flex justify-center">
-            <img src="{{ asset('images/fondosA/Pantalla F2.png') }}" alt="Mariposa en rama" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
+            <img src="{{ asset('images/fondosA/Pantalla F1.png') }}" alt="Mariposa" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
         </div>
 
         <p class="text-lg sm:text-xl text-[#092d51] font-bold max-w-[90%] sm:max-w-md mx-auto leading-snug" style="font-family: 'Poppins', sans-serif;">
-            Gracias por la confianza y por<br>permitirnos ser parte de su historia.<br>Por ahora este ciclo ha expirado,<br>esperamos volver a volar juntos
+            Confiamos en que su<br>experiencia fue única.<br>Gracias por elegirnos para<br>capturar su historia.
         </p>
 
     </div>

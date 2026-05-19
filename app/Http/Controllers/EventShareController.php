@@ -106,12 +106,22 @@ class EventShareController extends Controller
         $event = Event::where('album', hex2bin($id_album))->firstOrFail();
 
         if (!$event->album_active) {
+            $expirationDate = $event->album_expiration ?? $event->date;
             if ($event->template == 1) {
-                return view('events.album-expired-1', compact('event'));
+                if (\Carbon\Carbon::parse($expirationDate)->isFuture() || \Carbon\Carbon::parse($event->album_availability ?? $event->date)->isFuture()) {
+                    return view('events.inactive-1', ['event' => $event, 'type' => 'album']);
+                }
+                return view('events.album-expired-1', ['event' => $event, 'type' => 'album']);
             } elseif ($event->template == 2) {
-                return view('events.album-expired-2', compact('event'));
+                if (\Carbon\Carbon::parse($expirationDate)->isFuture() || \Carbon\Carbon::parse($event->album_availability ?? $event->date)->isFuture()) {
+                    return view('events.inactive-2', ['event' => $event, 'type' => 'album']);
+                }
+                return view('events.album-expired-2', ['event' => $event, 'type' => 'album']);
             } elseif ($event->template == 3) {
-                return view('events.album-expired-3', compact('event'));
+                if (\Carbon\Carbon::parse($expirationDate)->isFuture() || \Carbon\Carbon::parse($event->album_availability ?? $event->date)->isFuture()) {
+                    return view('events.inactive-3', ['event' => $event, 'type' => 'album']);
+                }
+                return view('events.album-expired-3', ['event' => $event, 'type' => 'album']);
             }
             return view('events.thank-you', ['event' => $event, 'type' => 'album']);
         }

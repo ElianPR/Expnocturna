@@ -161,6 +161,23 @@ class EventController extends Controller
         $event = Event::where('id', $eventId)->firstOrFail();
 
         if (!$event->is_active) {
+            $expirationDate = $event->cover_expiration ?? $event->date;
+            if ($event->template == 1) {
+                if (\Carbon\Carbon::parse($expirationDate)->isFuture()) {
+                    return view('events.inactive-1', ['event' => $event, 'type' => 'event']);
+                }
+                return view('events.event-expired-1', ['event' => $event, 'type' => 'event']);
+            } elseif ($event->template == 2) {
+                if (\Carbon\Carbon::parse($expirationDate)->isFuture()) {
+                    return view('events.inactive-2', ['event' => $event, 'type' => 'event']);
+                }
+                return view('events.event-expired-2', ['event' => $event, 'type' => 'event']);
+            } elseif ($event->template == 3) {
+                if (\Carbon\Carbon::parse($expirationDate)->isFuture()) {
+                    return view('events.inactive-3', ['event' => $event, 'type' => 'event']);
+                }
+                return view('events.event-expired-3', ['event' => $event, 'type' => 'event']);
+            }
             return view('events.thank-you', ['event' => $event, 'type' => 'event']);
         }
 
