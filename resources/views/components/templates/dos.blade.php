@@ -27,7 +27,7 @@
             <h1 x-show="!monogramPreview" x-text="displayTitle || 'Juan & María'"
                 :style="`
                                     font-family: ${typography || '{{ $fontFam }}'};
-                                    color: #828189;
+                                    color: #092d51;
                                     font-size: ${
                                         (displayTitle || '').length > 10
                                             ? 'clamp(1.4rem, 5vw, 2.4rem)'
@@ -39,7 +39,7 @@
                                     width: 100%;
                                     display: block;
                                 `"
-                class="font-normal"></h1>
+                class="font-bold"></h1>
         @else
             @if ($event?->monogram)
                 <img src="{{ route('file.show', ['id_evento' => $event->id_hex, 'filename' => $event->monogram]) }}"
@@ -47,7 +47,7 @@
             @else
                 <h1 style="
                         font-family: {{ $fontFam }};
-                        color: #828189;
+                        color: #092d51;
                         font-size: {{ mb_strlen($event->name ?? '') > 10 ? 'clamp(1.4rem, 5vw, 2.4rem)' : 'clamp(1.8rem, 7vw, 3rem)' }};
                         line-height: 0.95;
                         word-break: break-word;
@@ -55,7 +55,7 @@
                         width: 100%;
                         display: block;
                     "
-                    class="font-normal">
+                    class="font-bold">
                     {{ $event->name ?? 'Juan & María' }}
                 </h1>
             @endif
@@ -63,8 +63,8 @@
         @endif
 
         <p @if ($isPreview) x-text="displayDate || 'FECHA POR DEFINIR'" @endif
-            class="uppercase font-bold tracking-[0.2em] text-right mt-4"
-            style="color: #9ba8b0; font-size: clamp(0.8rem, 2vw, 1rem);">
+            class="uppercase font-normal tracking-[0.2em] text-right mt-4"
+            style="color: #092d51; font-family: 'Poppins', sans-serif; font-size: clamp(0.8rem, 2vw, 1rem);">
             @unless ($isPreview)
                 {{ strtoupper($dateText) }}
             @endunless
@@ -79,37 +79,37 @@
     </div>
 
     <div class="relative z-20 text-center px-8 mt-6"
-        style="color: #9ca8b1; font-size: clamp(0.9rem, 2.8vw, 1.2rem); line-height: 1.5;">
+        style="color: #092d51; font-family: 'Poppins', sans-serif; font-size: clamp(0.9rem, 2.8vw, 1.2rem); line-height: 1.5;">
         <strong>Vive la Experiencia PAPILIA</strong> con mariposas y la canción del evento
     </div>
 
     <div class="relative z-20 px-6 mt-8 space-y-4 {{ $isPreview ? 'pointer-events-none' : '' }}">
-        <x-papilia.button icon="video-camera" bgColor="#e4e5ed" textColor="#738598"
+        <x-papilia.button icon="video-camera" bgColor="#092d51" textColor="#ffffff"
             href="{{ $isPreview ? '#' : route('events.camera', $event->id_hex ?? bin2hex($event->id)) }}"
-            hoverColor="#d5d7e0">
+            hoverColor="#092d51">
             Toma foto y video <br> con mariposas
         </x-papilia.button>
 
         <x-papilia.button
             icon="musical-note"
-            bgColor="#e4e5ed"
-            textColor="#738598"
+            bgColor="#092d51"
+            textColor="#ffffff"
             href="{{ $isPreview ? '#' : route('events.music', $event->id_hex ?? bin2hex($event->id ?? '')) }}"
-            hoverColor="#d5d7e0"
+            hoverColor="#092d51"
         >
             Escucha su canción
         </x-papilia.button>
 
         <x-papilia.button icon="share"
             href="{{ $isPreview ? '#' : route('events.share.create', $event->id_hex ?? bin2hex($event->id)) }}"
-            bgColor="#e4e5ed" textColor="#738598" hoverColor="#d5d7e0">
+            bgColor="#092d51" textColor="#ffffff" hoverColor="#092d51">
             Compartir
         </x-papilia.button>
     </div>
 
     <a href="https://papilia.net/papilia2021/" target="_blank"
         class="relative z-20 text-center mt-10 md:mt-14 lg:mt-16 italic block"
-        style="color: #4a4a4a; font-size: clamp(0.9rem, 1.8vw, 1.2rem); font-family: 'Playfair Display', serif;">
+        style="color: #4a4a4a; font-size: clamp(0.9rem, 1.8vw, 1.2rem); font-family: 'Poppins', sans-serif;">
         papilia.net
     </a>
 

@@ -17,7 +17,7 @@
         </div>
     @endif
 
-    <div class="text-center font-serif italic text-[16px] sm:text-[18px] font-medium leading-snug px-14">
+    <div class="text-center text-[16px] sm:text-[18px] font-medium leading-snug px-14" style="font-family: 'Poppins', sans-serif;">
         {{ $slot }}
     </div>
 
