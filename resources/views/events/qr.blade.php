@@ -103,7 +103,7 @@
                     bgPath = "{{ asset('images/fondosV/fondoV.png') }}";
                     break;
                 case 2:
-                    bgPath = "{{ asset('images/fondosA/fondoAQR.png') }}";
+                    bgPath = "{{ asset('images/fondosA/fondoAQr.png') }}";
                     break;
                 case 3:
                     bgPath = "{{ asset('images/fondosD/fondoDQr.png') }}";
