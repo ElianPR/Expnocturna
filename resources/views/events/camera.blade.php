@@ -89,11 +89,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body
-    style="
+<body style="
     --gold: {{ $theme['primary'] }};
     --primary: {{ $theme['primary'] }};
     --bg-image: url('{{ $theme['bg'] }}');
+    --shutter-fill: {{ $shutter['fill'] }};
+    --shutter-border: {{ $shutter['border'] }};
 ">
     <div class="app" id="app">
 
