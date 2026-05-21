@@ -38,9 +38,10 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de usuarios administradores
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('camera-animations', \App\Http\Controllers\CameraAnimationController::class)->except(['show']);
-    Route::get('camera-animations/{cameraAnimation}/stream', [\App\Http\Controllers\CameraAnimationController::class, 'stream'])->name('camera-animations.stream');
 
 });
+
+Route::get('camera-animations/{cameraAnimation}/stream', [\App\Http\Controllers\CameraAnimationController::class, 'stream'])->name('camera-animations.stream');
 
 Route::get('/event/{id_evento}', [EventController::class, 'show'])->name('events.show');
 

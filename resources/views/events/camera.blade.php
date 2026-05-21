@@ -41,6 +41,13 @@
         $theme = $themes[$template];
         $shutter = $shutterColors[$template];
         $eventFont = $event->typography ?? "'Playfair Display', serif";
+
+        $animations = $event->cameraAnimations->map(function($anim) {
+            return route('camera-animations.stream', $anim->id);
+        })->toArray();
+        if (empty($animations)) {
+            $animations = [asset('videos/T 3 B Arriba.mp4')];
+        }
     @endphp
 
     <style>
@@ -120,8 +127,7 @@
 
                 <canvas id="canvas"></canvas>
 
-                <video id="overlayVid" class="video-overlay" autoplay loop muted playsinline crossorigin="anonymous">
-                    <source src="{{ asset('videos/T 3 B Arriba.mp4') }}" type="video/mp4">
+                <video id="overlayVid" class="video-overlay" autoplay muted playsinline crossorigin="anonymous">
                 </video>
 
                 <div class="rec-badge" id="recBadge">
@@ -210,6 +216,21 @@
         vidEl.playsInline = true;
         vidEl.muted = true;
         const overlayVid = document.getElementById('overlayVid');
+        const animationsList = @json($animations);
+
+        function playRandomAnimation() {
+            if (animationsList.length === 0) return;
+            const randomIndex = Math.floor(Math.random() * animationsList.length);
+            overlayVid.src = animationsList[randomIndex];
+            overlayVid.load();
+            overlayVid.play().catch(() => {});
+        }
+
+        playRandomAnimation();
+
+        overlayVid.addEventListener('ended', () => {
+            playRandomAnimation();
+        });
 
         let animId, tick = 0;
         let facingMode = 'environment';
@@ -392,18 +413,17 @@
                 const cr = canvas.width / canvas.height;
                 let sw, sh, sx, sy;
 
-                // Usamos una lógica tipo "contain" para el overlay para asegurarnos
-                // de que la animación completa (el corazón) sea visible en el nuevo aspect ratio 3:4
+                // Lógica tipo "cover" para que el overlay ocupe TODA la pantalla de la cámara
                 if (vr > cr) {
-                    sw = canvas.width;
-                    sh = sw / vr;
-                    sx = 0;
-                    sy = (canvas.height - sh) / 2;
-                } else {
                     sh = canvas.height;
                     sw = sh * vr;
                     sy = 0;
                     sx = (canvas.width - sw) / 2;
+                } else {
+                    sw = canvas.width;
+                    sh = sw / vr;
+                    sx = 0;
+                    sy = (canvas.height - sh) / 2;
                 }
 
                 // Chroma key processing para eliminar el fondo verde

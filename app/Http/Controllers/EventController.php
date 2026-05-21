@@ -125,7 +125,7 @@ class EventController extends Controller
                 ]);
             }
 
-            return redirect()->route('events.qr', $event->id_hex);
+            return redirect()->route('events.qr', $event->id_hex)->with('success', '¡Evento creado exitosamente!');
         } catch (\Exception $e) {
         }
     }
@@ -150,7 +150,7 @@ class EventController extends Controller
             abort(404);
         }
 
-        $event = Event::where('id', hex2bin($id_evento))->firstOrFail();
+        $event = Event::with('cameraAnimations')->where('id', hex2bin($id_evento))->firstOrFail();
 
         return view('events.camera', compact('event'));
     }

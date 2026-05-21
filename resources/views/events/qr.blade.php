@@ -49,6 +49,21 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: '{{ session('success') }}',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            });
+        </script>
+    @endif
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const template = {{ $event->template ?? 1 }};

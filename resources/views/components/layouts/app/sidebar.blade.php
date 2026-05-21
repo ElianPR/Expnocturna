@@ -110,5 +110,41 @@
         {{ $slot }}
 
         @fluxScripts
+
+        <script>
+            // Prevenir doble envío de formularios (por doble clic o al presionar Enter repetidas veces)
+            document.addEventListener('submit', function (e) {
+                if (e.target.tagName === 'FORM') {
+                    if (e.target.dataset.submitting) {
+                        e.preventDefault();
+                        return;
+                    }
+                    e.target.dataset.submitting = 'true';
+                    
+                    const submitBtn = e.target.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        setTimeout(() => {
+                            submitBtn.disabled = true;
+                            submitBtn.style.opacity = '0.7';
+                            submitBtn.style.cursor = 'wait';
+                        }, 10);
+                    }
+                }
+            });
+
+            // Rehabilitar el botón si la validación HTML5 falla
+            document.addEventListener('invalid', function(e) {
+                if (e.target && e.target.form) {
+                    const form = e.target.form;
+                    form.removeAttribute('data-submitting');
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                        submitBtn.style.cursor = '';
+                    }
+                }
+            }, true);
+        </script>
     </body>
 </html>

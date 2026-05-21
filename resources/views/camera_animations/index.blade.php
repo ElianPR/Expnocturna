@@ -11,15 +11,6 @@
             </flux:button>
         </div>
 
-        @if(session('success'))
-            <div class="bg-transparent border border-green-500 text-green-600 dark:border-green-400 dark:text-green-400 px-4 py-3 rounded-xl relative" role="alert">
-                <div class="flex items-center gap-3">
-                    <flux:icon.check-circle class="size-5" />
-                    <span class="block sm:inline font-medium">{{ session('success') }}</span>
-                </div>
-            </div>
-        @endif
-
         <div class="w-full overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
             <table class="min-w-full text-sm whitespace-nowrap">
                 <thead class="bg-neutral-100 dark:bg-neutral-800">
@@ -67,6 +58,18 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        @if(session('success'))
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: '{{ session('success') }}',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            });
+        @endif
+
         function confirmAnimationDelete(url) {
             Swal.fire({
                 title: '¿Eliminar animación?',
