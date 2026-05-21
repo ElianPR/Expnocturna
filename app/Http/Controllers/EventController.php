@@ -432,27 +432,25 @@ class EventController extends Controller
             }
 
             // --- PORTADA DE CANCIÓN ---
-            if ($request->hasFile('song_cover')) {
-
-                // Detectar si el evento actual es audio o video
+            if ($request->boolean('remove_song_cover')) {
+                if ($event->song_cover) {
+                    Storage::disk('local')->delete($folderName . '/' . $event->song_cover);
+                }
+                $eventData['song_cover'] = null;
+            } elseif ($request->hasFile('song_cover')) {
                 $currentIsVideo = $event->song && preg_match('/\.(mp4|mov|webm)$/i', $event->song);
-
-                // Solo permitir portada si NO es video
                 if (!$currentIsVideo) {
-
-                    // Eliminar portada anterior si existe
                     if ($event->song_cover) {
                         Storage::disk('local')->delete($folderName . '/' . $event->song_cover);
                     }
-
                     $file = $request->file('song_cover');
                     $name = substr($file->getClientOriginalName(), -50);
+
                     $file->storeAs($folderName, $name, 'local');
 
                     $eventData['song_cover'] = $name;
                 }
             }
-
             // --- MARCA DE AGUA ---
             if ($request->hasFile('watermark')) {
                 $file = $request->file('watermark');
@@ -529,7 +527,7 @@ class EventController extends Controller
             $this->limpiarPapeleraCaducada();
             $events = Event::with('user')->onlyTrashed()->get();
         }
-        
+
         return view('events.trash', compact('events'));
     }
 

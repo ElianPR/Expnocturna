@@ -297,8 +297,8 @@ body {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    border: 1px solid rgba(201, 169, 110, 0.3);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.726);
+    background: rgba(0, 0, 0, 0.447);
     backdrop-filter: blur(8px);
     color: var(--cream);
     cursor: pointer;

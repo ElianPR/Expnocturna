@@ -55,20 +55,19 @@
                     {{-- Archivo actual con opción de quitar --}}
                     @if ($event->monogram)
                         <div x-data="{ remove: false }" class="mb-3">
-                            <div class="flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                            <div
+                                class="flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
                                 <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
                                 <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate flex-1">
                                     {{ $event->monogram }}
                                 </span>
                                 <label class="flex items-center gap-2 cursor-pointer shrink-0">
-                                    <input type="checkbox" name="remove_monogram" value="1"
-                                        x-model="remove"
+                                    <input type="checkbox" name="remove_monogram" value="1" x-model="remove"
                                         class="rounded border-neutral-300 text-red-500 focus:ring-red-500">
                                     <span class="text-sm text-red-600 dark:text-red-400 font-medium">Quitar</span>
                                 </label>
                             </div>
-                            <p x-show="remove" x-transition
-                                class="mt-2 text-xs text-red-500 dark:text-red-400">
+                            <p x-show="remove" x-transition class="mt-2 text-xs text-red-500 dark:text-red-400">
                                 El monograma se eliminará al guardar. Solo se usará el nombre del evento.
                             </p>
                         </div>
@@ -87,8 +86,10 @@
                             <flux:select.option value="Arial">Arial</flux:select.option>
                             <flux:select.option value="Times New Roman">Times New Roman</flux:select.option>
                             <flux:select.option value="'Cinzel', serif">Cinzel (Elegante)</flux:select.option>
-                            <flux:select.option value="'Great Vibes', cursive">Great Vibes (Cursiva)</flux:select.option>
-                            <flux:select.option value="'Playfair Display', serif">Playfair Display (Romántica)</flux:select.option>
+                            <flux:select.option value="'Great Vibes', cursive">Great Vibes (Cursiva)
+                            </flux:select.option>
+                            <flux:select.option value="'Playfair Display', serif">Playfair Display (Romántica)
+                            </flux:select.option>
                         </flux:select>
                         <flux:error name="typography" />
                     </flux:field>
@@ -136,24 +137,27 @@
 
                 <div class="space-y-3">
                     <flux:label>Animaciones de Cámara</flux:label>
-                    <p class="text-sm text-neutral-500">Selecciona las animaciones que estarán disponibles para este evento en la pantalla de la cámara.</p>
-                    
-                    @if($cameraAnimations->count() > 0)
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 border border-neutral-200 dark:border-neutral-700 p-4 rounded-xl">
+                    <p class="text-sm text-neutral-500">Selecciona las animaciones que estarán disponibles para este
+                        evento en la pantalla de la cámara.</p>
+
+                    @if ($cameraAnimations->count() > 0)
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 border border-neutral-200 dark:border-neutral-700 p-4 rounded-xl">
                             @php
-                                $selectedAnimations = old('camera_animations', $event->cameraAnimations->pluck('id')->toArray());
+                                $selectedAnimations = old(
+                                    'camera_animations',
+                                    $event->cameraAnimations->pluck('id')->toArray(),
+                                );
                             @endphp
-                            @foreach($cameraAnimations as $animation)
-                                <flux:checkbox 
-                                    name="camera_animations[]" 
-                                    value="{{ $animation->id }}" 
-                                    label="{{ $animation->title }}" 
-                                    :checked="is_array($selectedAnimations) && in_array($animation->id, $selectedAnimations)"
-                                />
+                            @foreach ($cameraAnimations as $animation)
+                                <flux:checkbox name="camera_animations[]" value="{{ $animation->id }}"
+                                    label="{{ $animation->title }}"
+                                    :checked="is_array($selectedAnimations) && in_array($animation->id, $selectedAnimations)" />
                             @endforeach
                         </div>
                     @else
-                        <div class="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 text-center">
+                        <div
+                            class="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 text-center">
                             <p class="text-sm text-neutral-500">No hay animaciones disponibles.</p>
                         </div>
                     @endif
@@ -167,7 +171,8 @@
                     <flux:label>Foto Principal (PNG, JPG, WebP)</flux:label>
 
                     @if ($photo)
-                        <div class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                        <div
+                            class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
                             <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
                             <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
                                 {{ $photo->url }}
@@ -181,14 +186,14 @@
                 </flux:field>
 
                 {{-- CANCIÓN / VIDEO --}}
-                <div x-data="{ mediaType: '{{ $event->song ? (Str::endsWith($event->song, ['mp4','mov','webm']) ? 'video' : 'audio') : '' }}' }"
-                    class="space-y-6">
+                <div x-data="{ mediaType: '{{ $event->song ? (Str::endsWith($event->song, ['mp4', 'mov', 'webm']) ? 'video' : 'audio') : '' }}' }" class="space-y-6">
 
                     <flux:field>
                         <flux:label>Canción o Video (MP3, MP4, WAV, MOV)</flux:label>
 
                         @if ($event->song)
-                            <div class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                            <div
+                                class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
                                 <flux:icon.musical-note class="size-5 text-neutral-400 shrink-0" />
                                 <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
                                     {{ $event->song }}
@@ -218,11 +223,32 @@
                             <flux:label>Portada de la canción (Opcional, PNG/JPG)</flux:label>
 
                             @if ($event->song_cover)
-                                <div class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
-                                    <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
-                                    <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
-                                        {{ $event->song_cover }}
-                                    </span>
+                                <div x-data="{ remove: false }" class="mb-3">
+
+                                    <div
+                                        class="flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+
+                                        <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
+
+                                        <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate flex-1">
+                                            {{ $event->song_cover }}
+                                        </span>
+
+                                        <label class="flex items-center gap-2 cursor-pointer shrink-0">
+                                            <input type="checkbox" name="remove_song_cover" value="1"
+                                                x-model="remove"
+                                                class="rounded border-neutral-300 text-red-500 focus:ring-red-500">
+
+                                            <span class="text-sm text-red-600 dark:text-red-400 font-medium">
+                                                Quitar
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <p x-show="remove" x-transition
+                                        class="mt-2 text-xs text-red-500 dark:text-red-400">
+                                        La portada de la canción se eliminará al guardar.
+                                    </p>
                                 </div>
                             @endif
 
@@ -239,7 +265,8 @@
                     <flux:label>Imagen para Marca de Agua (PNG, JPG)</flux:label>
 
                     @if ($event->watermark)
-                        <div class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                        <div
+                            class="mb-3 flex items-center gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
                             <flux:icon.photo class="size-5 text-neutral-400 shrink-0" />
                             <span class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
                                 {{ $event->watermark }}
@@ -302,11 +329,20 @@
                 typography: {!! json_encode(old('typography', $event->typography ?? "'Cinzel', serif")) !!},
                 template: '{{ old('template', $event->template ?? '1') }}',
                 imageUrl: '{{ $photo ? route('file.show', [$event->id_hex, $photo->url]) : 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' }}',
-
                 monogramFile: null,
 
+                monogramUrl: {!! json_encode($event->monogram ? route('file.show', [$event->id_hex, $event->monogram]) : null) !!},
+                
+                get monogramPreview() {
+                    if (this.monogramFile instanceof File) {
+                        return URL.createObjectURL(this.monogramFile);
+                    }
+
+                    return this.monogramUrl;
+                },
+
                 get displayTitle() {
-                    return this.name ? this.name : 'JUAN & MARÍA';
+                    return this.name ? this.name : 'Juan & María';
                 },
 
                 get displayDate() {
@@ -326,11 +362,6 @@
                         this.imageUrl = URL.createObjectURL(file);
                     }
                 },
-
-                get monogramPreview() {
-                    if (!this.monogramFile) return null;
-                    return URL.createObjectURL(this.monogramFile);
-                }
             };
         }
 
@@ -347,7 +378,11 @@
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            try { document.execCommand('copy'); } catch (err) { console.error('Error', err); }
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Error', err);
+            }
             document.body.removeChild(textArea);
         }
     </script>
