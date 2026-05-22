@@ -117,10 +117,9 @@
                     <flux:field>
                         <flux:label>Plantilla</flux:label>
                         <flux:select name="template" x-model="template">
-                            <flux:select.option value="1">Papilia (Bordes rasgados)</flux:select.option>
-                            <flux:select.option value="2">Acuarela (Hojas y Pincelada)</flux:select.option>
-                            <flux:select.option value="3">Elegante (Flores Doradas)</flux:select.option>
-                            <flux:select.option value="0">Plantilla Base</flux:select.option>
+                            <flux:select.option value="1">Colores naturales</flux:select.option>
+                            <flux:select.option value="2">Colores fríos</flux:select.option>
+                            <flux:select.option value="3">Colores calidos</flux:select.option>
                         </flux:select>
                         <flux:error name="template" />
                     </flux:field>

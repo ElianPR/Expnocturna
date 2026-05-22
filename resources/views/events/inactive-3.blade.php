@@ -11,15 +11,15 @@
     <div class="relative z-10 w-full flex flex-col items-center justify-center min-h-[80vh] px-6 py-12 text-center flex-1">
 
         <h1 class="text-3xl sm:text-4xl font-extrabold text-[#a8792b] mb-8 max-w-[90%] sm:max-w-lg mx-auto leading-tight" style="font-family: 'Poppins', sans-serif;">
-            Alistando<br>las alas.
+            ¡Gracias por ser<br>parte de la magia!
         </h1>
 
         <div class="w-full mx-auto mb-8 relative z-10 flex justify-center">
-            <img src="{{ asset('images/fondosD/Pantalla C1.png') }}" alt="Mariposa" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
+            <img src="{{ asset('images/fondosD/marD.png') }}" alt="Mariposa" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
         </div>
 
         <p class="text-lg sm:text-xl text-[#a8792b] font-bold max-w-[90%] sm:max-w-md mx-auto leading-snug" style="font-family: 'Poppins', sans-serif;">
-            Este evento se activará el {{ $dateText }}.<br>¡Te esperamos!
+            Podrás comenzar a capturar<br>momentos a partir del {{ $dateText }}.
         </p>
 
     </div>

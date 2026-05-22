@@ -18,7 +18,7 @@
             <img src="{{ asset('images/fondosA/Pantalla F1.png') }}" alt="Mariposa" class="w-72 sm:w-[24rem] md:w-[28rem] h-auto object-contain">
         </div>
 
-        <p class="text-lg sm:text-xl text-[#092d51] font-medium max-w-[90%] sm:max-w-md mx-auto leading-snug" style="font-family: 'Poppins', sans-serif;">
+        <p class="text-lg sm:text-xl text-[#092d51] font-bold max-w-[90%] sm:max-w-md mx-auto leading-snug" style="font-family: 'Poppins', sans-serif;">
             Podrás comenzar a capturar<br>momentos a partir del {{ $dateText }}.
         </p>
 
