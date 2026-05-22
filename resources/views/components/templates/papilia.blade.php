@@ -3,89 +3,111 @@
 @php
     $isPreview = filter_var($preview, FILTER_VALIDATE_BOOLEAN);
 
-    $dateAttr = $isPreview ? 'x-text="displayDate"' : '';
-    $dateText = $isPreview
-        ? ''
-        : ($event?->date
-            ? \Carbon\Carbon::parse($event->date)->translatedFormat('d \d\e F \d\e Y')
-            : 'FECHA POR DEFINIR');
+    $dateText = $event?->date
+        ? \Carbon\Carbon::parse($event->date)->translatedFormat('d \d\e F \d\e Y')
+        : 'FECHA POR DEFINIR';
 
     $fontFam = $event?->typography ?? 'Cinzel';
 
-    $fontAttr = $isPreview
-        ? ':style="\'font-family: \' + typography + \';\'"'
-        : 'style="font-family: ' . $fontFam . ';"';
-
     $imgUrlFinal = $imageUrl ?? asset('img/boda-ejemplo.jpg');
-    $imgAttr = $isPreview ? ':src="imageUrl"' : 'src="' . $imgUrlFinal . '"';
 @endphp
 
-<x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam"
-    bgStyle="background-image: url('{{ asset('images/fondosV/fondoV.png') }}');">
+<x-papilia.layout :preview="$isPreview" :fontFamily="$fontFam" bgStyle="background-image: url('{{ asset('images/fondosV/fondoV.png') }}');">
 
-    <div
-        class="text-center font-bold tracking-widest text-[#436c00] px-6 mb-5 uppercase leading-relaxed" style="font-family: 'Poppins', sans-serif;">
-        <span class="text-[12px] sm:text-[14px]">VIVE LA EXPERIENCIA PAPILIA</span><br>
-        <span class="text-[10px] sm:text-[11px]">CON MARIPOSAS Y LA CANCIÓN DEL EVENTO</span>
-    </div>
-
-    <div class="w-full mb-8 relative z-10">
-        <img {!! $imgAttr !!} alt="Foto del Evento" class="w-full h-auto object-contain block">
-    </div>
-
-    <div class="text-center mb-2 w-full px-8">
+    <div class="relative z-10 w-full px-6 pt-10" style="padding-left: 95px;">
 
         @if ($isPreview)
 
             <template x-if="monogramPreview">
-                <img :src="monogramPreview" class="mx-auto mb-4 max-h-32 object-contain">
+                <img :src="monogramPreview" class="ml-auto mb-4 max-h-32 object-contain">
             </template>
 
-            <h1 x-show="!monogramPreview" x-text="displayTitle || 'Juan & María'" {!! $fontAttr !!}
-                class="mb-3 break-words leading-none font-bold text-[#595959] text-[clamp(2.5rem,8vw,4.5rem)]"></h1>
+            <h1 x-show="!monogramPreview" x-text="displayTitle || 'Juan & María'"
+                :style="`
+                                    font-family: ${typography || '{{ $fontFam }}'};
+                                    color: #436c00;
+                                    font-size: ${
+                                        (displayTitle || '').length > 10
+                                            ? 'clamp(1.8rem, 6vw, 3rem)'
+                                            : 'clamp(2.4rem, 8vw, 4rem)'
+                                    };
+                                    line-height: 0.95;
+                                    word-break: break-word;
+                                    text-align: right;
+                                    width: 100%;
+                                    display: block;
+                                `"
+                class="font-black"></h1>
         @else
             @if ($event?->monogram)
                 <img src="{{ route('file.show', ['id_evento' => $event->id_hex, 'filename' => $event->monogram]) }}"
-                    class="mx-auto mb-4 max-h-32 object-contain">
+                    class="ml-auto mb-4 max-h-32 object-contain">
             @else
-                <h1 {!! $fontAttr !!} class="mb-3 break-words leading-none font-bold text-[#595959] text-[clamp(2.5rem,8vw,4.5rem)]">
+                <h1 style="
+                        font-family: {{ $fontFam }};
+                        color: #436c00;
+                        font-size: {{ mb_strlen($event->name ?? '') > 10 ? 'clamp(1.8rem, 6vw, 3rem)' : 'clamp(2.4rem, 8vw, 4rem)' }};
+                        line-height: 0.95;
+                        word-break: break-word;
+                        text-align: right;
+                        width: 100%;
+                        display: block;
+                    "
+                    class="font-black">
                     {{ $event->name ?? 'Juan & María' }}
                 </h1>
             @endif
 
         @endif
 
-        <p {!! $dateAttr !!} class="text-[11px] tracking-widest mt-3 uppercase font-normal text-[#595959]" style="font-family: 'Poppins', sans-serif;">
-            {{ $dateText }}
+        <p @if ($isPreview) x-text="displayDate || 'FECHA POR DEFINIR'" @endif
+            class="uppercase font-normal tracking-[0.2em] text-right mt-4"
+            style="color: #436c00; font-family: 'Poppins', sans-serif; font-size: clamp(0.8rem, 2vw, 1rem);">
+            @unless ($isPreview)
+                {{ strtoupper($dateText) }}
+            @endunless
         </p>
     </div>
 
-    <div class="px-8 w-full select-none pointer-events-none my-4">
-        <x-papilia.divider />
+    <div class="relative z-20 px-6 mt-8">
+        <img @if ($isPreview) :src="imageUrl || '{{ $imgUrlFinal }}'"
+            @else
+                src="{{ $imgUrlFinal }}" @endif
+            class="w-full h-auto object-cover shadow-md">
     </div>
 
-    <div class="w-full px-6 mt-3 {{ $isPreview ? 'pointer-events-none' : '' }}">
+    <div class="relative z-20 text-center text-[#436c00] px-8 mt-6"
+        style="font-family: 'Poppins', sans-serif; font-size: clamp(0.9rem, 2.8vw, 1.2rem); line-height: 1.5;">
+        <strong class="font-black">Vive la Experiencia PAPILIA</strong> con mariposas y la canción del evento
+    </div>
 
-        <x-papilia.button icon="video-camera" bgColor="#436c00" textColor="#ffffff" hoverColor="#436c00"
-            href="{{ $isPreview ? '#' : route('events.camera', $event->id_hex ?? bin2hex($event->id)) }}">
+    <div class="relative z-20 px-6 mt-8 space-y-4 {{ $isPreview ? 'pointer-events-none' : '' }}">
+        <x-papilia.button icon="video-camera" bgColor="#436c00" textColor="#ffffff"
+            href="{{ $isPreview ? '#' : route('events.camera', $event->id_hex ?? bin2hex($event->id)) }}"
+            hoverColor="#436c00">
             Toma foto y video <br> con mariposas
         </x-papilia.button>
 
-        <x-papilia.button icon="musical-note" bgColor="#436c00" textColor="#ffffff" hoverColor="#436c00"
-            href="{{ $isPreview ? '#' : route('events.music', $event->id_hex ?? bin2hex($event->id ?? '')) }}">
+        <x-papilia.button
+            icon="musical-note"
+            bgColor="#436c00"
+            textColor="#ffffff"
+            href="{{ $isPreview ? '#' : route('events.music', $event->id_hex ?? bin2hex($event->id ?? '')) }}"
+            hoverColor="#436c00"
+        >
             Escucha su canción
         </x-papilia.button>
 
-        <x-papilia.button icon="share" bgColor="#436c00" textColor="#ffffff" hoverColor="#436c00"
-            href="{{ $isPreview ? '#' : route('events.share.create', $event->id_hex ?? bin2hex($event->id)) }}">
+        <x-papilia.button icon="share"
+            href="{{ $isPreview ? '#' : route('events.share.create', $event->id_hex ?? bin2hex($event->id)) }}"
+            bgColor="#436c00" textColor="#ffffff" hoverColor="#436c00">
             Compartir
         </x-papilia.button>
-
     </div>
 
     <a href="https://papilia.net/papilia2021/" target="_blank"
         class="relative z-20 text-center mt-10 md:mt-14 lg:mt-16 block"
-        style="color: #4a4a4a; font-size: clamp(0.9rem, 1.8vw, 1.2rem); font-family: 'Poppins', sans-serif;">
+        style="color: #436c00; font-size: clamp(0.9rem, 1.8vw, 1.2rem); font-family: 'Poppins', sans-serif;">
         papilia.net
     </a>
 
