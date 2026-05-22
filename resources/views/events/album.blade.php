@@ -166,25 +166,21 @@
     $templates = [
         1 => [
             'bg' => asset('images/fondosV/fondoV.png'),
-            'textName' => '#000000',
-            'button' => '#4A720D',
+            'color' => '#436c00',
         ],
         2 => [
             'bg' => asset('images/fondosA/fondoA.png'),
-            'textName' => '#828189',
-            'button' => '#092D51',
+            'color' => '#092d51',
         ],
         3 => [
             'bg' => asset('images/fondosD/fondoD.png'),
-            'textName' => '#B4976E',
-            'button' => '#A8792B',
+            'color' => '#a8792b',
         ],
     ];
 
     $theme = $templates[$event->template] ?? [
-        'bg' => null,
-        'textName' => null,
-        'button' => '#000000',
+        'bg' => asset('images/fondosV/fondoV.png'),
+        'color' => '#436c00',
     ];
 @endphp
 
@@ -196,19 +192,19 @@
 
         <div class="text-center mb-2 -mt-4">
             <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-2"
-                style="{{ $theme['textName'] ? 'font-family: ' . ($event->typography ?? "'Cinzel', serif") . '; color: ' . $theme['textName'] . ';' : '' }}">
+                style="{{ $theme['color'] ? 'font-family: ' . ($event->typography ?? "'Cinzel', serif") . '; color: ' . $theme['color'] . ';' : '' }}">
                 {{ $event->name ?? ($event->monogram ?? 'Nuestro Evento') }}
             </h1>
 
             @if ($event->date)
-                <p class="text-sm text-neutral-400 dark:text-neutral-500 mt-2">
+                <p class="text-sm text-neutral-400 -neutral-500 mt-2" style="color: {{ $theme['color'] }};">
                     {{ $event->date->format('d/m/Y') }}
                 </p>
             @endif
         </div>
 
         <br>
-        <p class="text-center text-neutral-600 dark:text-neutral-400 mb-8 italic">
+        <p class="text-center mb-8 italic" style="color: {{ $theme['color'] }};">
             Galería de recuerdos
         </p>
 
@@ -262,7 +258,7 @@
             @empty
                 <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
                     <flux:icon.photo class="size-20 text-neutral-300 dark:text-neutral-700 mb-6" />
-                    <h3 class="text-xl font-semibold text-neutral-900 dark:text-neutral-200">Aún no hay recuerdos
+                    <h3 class="text-xl font-semibold" style="color: {{ $theme['color'] }};">Aún no hay recuerdos
                     </h3>
                 </div>
             @endforelse
@@ -273,11 +269,11 @@
         x-cloak>
 
         <div
-            class="max-w-3xl mx-auto bg-white dark:bg-neutral-800 shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-neutral-200 dark:border-neutral-700">
+            class="max-w-3xl mx-auto bg-white shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-neutral-200 dark:border-neutral-700">
 
             <div class="flex items-center gap-4 w-full justify-between sm:justify-start sm:w-auto">
                 <flux:button variant="subtle" icon="x-mark" @click="selected = []" class="!rounded-full" />
-                <span class="font-bold text-lg"><span x-text="selected.length"></span> seleccionados</span>
+                <span class="font-bold text-lg text-neutral-500"><span x-text="selected.length"></span> seleccionados</span>
             </div>
 
             <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -287,7 +283,7 @@
 
                 <flux:button icon="arrow-down-tray" @click="downloadSelected()" x-bind:disabled="isDownloading"
                     class="flex-1 sm:flex-none !text-white hover:opacity-90 transition-all duration-300"
-                    style="background-color: {{ $theme['button'] }} !important;">
+                    style="background-color: {{ $theme['color'] }} !important;">
                     <span x-text="isDownloading ? 'Descargando...' : 'Descargar'"></span>
                 </flux:button>
             </div>
