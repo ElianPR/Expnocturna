@@ -30,8 +30,8 @@
                                     color: #092d51;
                                     font-size: ${
                                         (displayTitle || '').length > 10
-                                            ? 'clamp(1.4rem, 5vw, 2.4rem)'
-                                            : 'clamp(1.8rem, 7vw, 3rem)'
+                                            ? 'clamp(1.8rem, 6vw, 3rem)'
+                                            : 'clamp(2.4rem, 8vw, 4rem)'
                                     };
                                     line-height: 0.95;
                                     word-break: break-word;
@@ -48,7 +48,7 @@
                 <h1 style="
                         font-family: {{ $fontFam }};
                         color: #092d51;
-                        font-size: {{ mb_strlen($event->name ?? '') > 10 ? 'clamp(1.4rem, 5vw, 2.4rem)' : 'clamp(1.8rem, 7vw, 3rem)' }};
+                        font-size: {{ mb_strlen($event->name ?? '') > 10 ? 'clamp(1.8rem, 6vw, 3rem)' : 'clamp(2.4rem, 8vw, 4rem)' }};
                         line-height: 0.95;
                         word-break: break-word;
                         text-align: right;
