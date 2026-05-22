@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventShareController;
+use App\Http\Controllers\TermsController;
 use App\Http\Controllers\UserController;
 use App\Models\Event;
 use Illuminate\Support\Facades\Route;
@@ -104,36 +105,7 @@ Route::delete('/album/{id_album}/force-delete', [EventShareController::class, 'f
     ->middleware('auth')
     ->name('album.force-delete');
 
-Route::get('/terms/{id_hex?}', function ($id_hex = null) {
-
-    $themes = [
-        1 => [
-            'sidebar' => '#B1CA80',
-            'title' => '#285519',
-        ],
-
-        2 => [
-            'sidebar' => '#D2D7EA',
-            'title' => '#142854',
-        ],
-
-        3 => [
-            'sidebar' => '#DCA752',
-            'title' => '#A26E15',
-        ],
-    ];
-
-    $event = null;
-
-    if ($id_hex) {
-        $event = Event::whereRaw('HEX(id) = ?', [strtoupper($id_hex)])
-            ->first();
-    }
-
-    $template = $event?->template ?? 2;
-    $theme = $themes[$template] ?? $themes[2];
-
-    return view('terms', compact('theme'));
-})->name('terms');
+Route::get('/terms/{id_hex?}', [TermsController::class, 'index'])
+    ->name('terms');
 
 require __DIR__ . '/auth.php';

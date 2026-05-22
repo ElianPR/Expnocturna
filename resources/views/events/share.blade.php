@@ -19,32 +19,25 @@
     $templates = [
         1 => [
             'bg' => asset('images/fondosV/fondoV.png'),
-            'button' => '#436C00',
+            'color' => '#436C00',
             'card' => '#CCD9B7',
-            'text' => '#426B00',
-            'textName' => '#000000',
         ],
         2 => [
             'bg' => asset('images/fondosA/fondoA.png'),
-            'button' => '#092D51',
+            'color' => '#092D51',
             'card' => '#BFC5DE',
-            'text' => '#092D51',
-            'textName' => '#092D51',
         ],
         3 => [
             'bg' => asset('images/fondosD/fondoD.png'),
-            'button' => '#A8792B',
+            'color' => '#A8792B',
             'card' => '#F5E9DB',
-            'text' => '#8F6827',
-            'textName' => '#B4976E',
         ],
     ];
 
     $theme = $templates[$event->template] ?? [
         'bg' => null,
-        'button' => '#000000',
+        'color' => '#000000',
         'card' => '#ffffff',
-        'text' => '#000000',
     ];
 @endphp
 
@@ -71,7 +64,7 @@
     <div id="loader" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
         <div class="bg-white px-6 py-5 rounded-2xl shadow text-center">
             <div class="animate-spin rounded-full h-10 w-10 border-4 border-t-transparent mx-auto"
-                style="border-color: {{ $theme['button'] }}; border-top-color: transparent;"></div>
+                style="border-color: {{ $theme['color'] }}; border-top-color: transparent;"></div>
             <p class="mt-3 text-sm text-neutral-700">Subiendo archivos...</p>
         </div>
     </div>
@@ -83,7 +76,7 @@
             <h1 class="text-[2.5rem] md:text-[2.8rem] leading-none text-center"
                 style="
                     font-family: {!! $event->typography ?? "'Cinzel', serif" !!};
-                    color: {{ $theme['textName'] }};
+                    color: {{ $theme['color'] }};
                     line-height: 1.1;
                     letter-spacing: 0.02em;
                     font-weight: 600;
@@ -91,13 +84,13 @@
                 {{ $event->name ?? ($event->monogram ?? 'Evento') }}
             </h1>
 
-            <flux:text class="text-xl" style="color: {{ $theme['text'] }};">
+            <flux:text class="text-xl" style="color: {{ $theme['color'] }};">
                 {{ \Carbon\Carbon::parse($event->date)->translatedFormat('j F Y') }}
             </flux:text>
         </div>
 
-        <flux:text class="text-xl font-extrabold" style="color: {{ $theme['text'] }};"> Compartir recuerdos</flux:text>
-        <flux:text class="text-sm" style="color: {{ $theme['text'] }};"> Sube fotos o videos de este evento.</flux:text>
+        <flux:text class="text-xl font-extrabold" style="color: {{ $theme['color'] }};"> Compartir recuerdos</flux:text>
+        <flux:text class="text-sm" style="color: {{ $theme['color'] }};"> Sube fotos o videos de este evento.</flux:text>
 
         <div id="formMessage" class="w-full"></div>
 
@@ -108,11 +101,11 @@
             <div class="rounded-2xl text-center px-5 py-5 space-y-3 shadow-md border border-white/40"
                 style="background-color: {{ $theme['card'] }};">
 
-                <flux:heading level="3" class="text-lg !font-black" style="color: {{ $theme['text'] }};">
+                <flux:heading level="3" class="text-lg !font-black" style="color: {{ $theme['color'] }};">
                     Selecciona archivos
                 </flux:heading>
 
-                <flux:text class="text-sm leading-5" style="color: {{ $theme['text'] }};">
+                <flux:text class="text-sm leading-5" style="color: {{ $theme['color'] }};">
                     Puedes subir fotos o videos de hasta 25 MB por archivo.
                 </flux:text>
 
@@ -126,7 +119,7 @@
             </div>
 
             <div class="rounded-2xl bg-white/40 px-5 py-3 shadow-sm">
-                <flux:text class="text-xs text-center leading-5" style="color: {{ $theme['text'] }};">
+                <flux:text class="text-xs text-center leading-5" style="color: {{ $theme['color'] }};">
                     Nota: Los archivos se guardan en una
                     carpeta privada del evento.
                 </flux:text>
@@ -134,21 +127,21 @@
 
             <flux:button id="submitBtn" type="submit" icon="arrow-up-tray"
                 class="w-full justify-center !text-white transition-all duration-300 hover:opacity-90"
-                style="background-color: {{ $theme['button'] }};">
+                style="background-color: {{ $theme['color'] }};">
                 Subir archivos
             </flux:button>
 
             <flux:button onclick="handleBack('{{ route('events.show', $event->id_hex) }}')"
                 icon="arrow-left-end-on-rectangle"
                 class="w-full justify-center !text-white transition-all duration-300 hover:opacity-90"
-                style="background-color: {{ $theme['button'] }};">
+                style="background-color: {{ $theme['color'] }};">
                 Regresar
             </flux:button>
 
         </form>
 
         <div class="mt-8 text-center px-6">
-            <p class="text-sm leading-5" style="color: {{ $theme['text'] }};">
+            <p class="text-sm leading-5" style="color: {{ $theme['color'] }};">
                 Esta experiencia estará disponible hasta el
 
                 <span class="font-semibold">

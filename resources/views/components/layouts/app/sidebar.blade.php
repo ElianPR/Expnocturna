@@ -1,150 +1,152 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
-    <head>
-        @include('partials.head')
-    </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('dashboard') }}" class="mr-5 flex items-center space-x-2" wire:navigate>
-                <x-app-logo class="size-8" href="#"></x-app-logo>
-            </a>
+<head>
+    @include('partials.head')
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
 
-            <flux:navlist variant="outline">
-                <flux:navlist.group heading="Menú" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Eventos</flux:navlist.item>
-                    <flux:navlist.item icon="trash" :href="route('events.trash')" :current="request()->routeIs('events.trash')" wire:navigate>Papelera</flux:navlist.item>
-                    <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>Usuarios</flux:navlist.item>
-                    <flux:navlist.item icon="video-camera" :href="route('camera-animations.index')" :current="request()->routeIs('camera-animations.*')" wire:navigate>Animaciones</flux:navlist.item>
-                </flux:navlist.group>
-            </flux:navlist>
+<body class="min-h-screen bg-white dark:bg-zinc-800">
+    <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <flux:spacer />
+        <a href="{{ route('dashboard') }}" class="mr-5 flex items-center space-x-2" wire:navigate>
+            <x-app-logo class="size-8" href="#"></x-app-logo>
+        </a>
+
+        <flux:navlist variant="outline">
+            <flux:navlist.group heading="Menú" class="grid">
+                <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+                    wire:navigate>Eventos</flux:navlist.item>
+                <flux:navlist.item icon="trash" :href="route('events.trash')"
+                    :current="request()->routeIs('events.trash')" wire:navigate>Papelera</flux:navlist.item>
+                <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')"
+                    wire:navigate>Usuarios</flux:navlist.item>
+                <flux:navlist.item icon="video-camera" :href="route('camera-animations.index')"
+                    :current="request()->routeIs('camera-animations.*')" wire:navigate>Animaciones</flux:navlist.item>
+            </flux:navlist.group>
+        </flux:navlist>
+
+        <flux:spacer />
 
 
-            <!-- Desktop User Menu -->
-            <flux:dropdown position="bottom" align="start">
-                <flux:profile
-                    :name="auth()->user()->name"
-                    :initials="auth()->user()->initials()"
-                    icon-trailing="chevrons-up-down"
-                />
+        <!-- Desktop User Menu -->
+        <flux:dropdown position="bottom" align="start">
+            <flux:profile :name="auth()->user()->name" :initials="auth()->user()->initials()"
+                icon-trailing="chevrons-up-down" />
 
-                <flux:menu class="w-[220px]">
-                    <flux:menu.radio.group>
-                        <div class="p-0 text-sm font-normal">
-                            <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                                    <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
-                                    >
-                                        {{ auth()->user()->initials() }}
-                                    </span>
+            <flux:menu class="w-[220px]">
+                <flux:menu.radio.group>
+                    <div class="p-0 text-sm font-normal">
+                        <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                            <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
+                                <span
+                                    class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                    {{ auth()->user()->initials() }}
                                 </span>
+                            </span>
 
-                                <div class="grid flex-1 text-left text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
-                                </div>
+                            <div class="grid flex-1 text-left text-sm leading-tight">
+                                <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
+                                <span class="truncate text-xs">{{ auth()->user()->email }}</span>
                             </div>
                         </div>
-                    </flux:menu.radio.group>
+                    </div>
+                </flux:menu.radio.group>
 
-                    <flux:menu.separator />
+                <flux:menu.separator />
 
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            Cerrar sesión
-                        </flux:menu.item>
-                    </form>
-                </flux:menu>
-            </flux:dropdown>
-        </flux:sidebar>
+                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                    @csrf
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                        Cerrar sesión
+                    </flux:menu.item>
+                </form>
+            </flux:menu>
+        </flux:dropdown>
+    </flux:sidebar>
 
-        <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+    <!-- Mobile User Menu -->
+    <flux:header class="lg:hidden">
+        <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
-            <flux:spacer />
+        <flux:spacer />
 
-            <flux:dropdown position="top" align="end">
-                <flux:profile
-                    :initials="auth()->user()->initials()"
-                    icon-trailing="chevron-down"
-                />
+        <flux:dropdown position="top" align="end">
+            <flux:profile :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
 
-                <flux:menu>
-                    <flux:menu.radio.group>
-                        <div class="p-0 text-sm font-normal">
-                            <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                                    <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
-                                    >
-                                        {{ auth()->user()->initials() }}
-                                    </span>
+            <flux:menu>
+                <flux:menu.radio.group>
+                    <div class="p-0 text-sm font-normal">
+                        <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                            <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
+                                <span
+                                    class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                    {{ auth()->user()->initials() }}
                                 </span>
+                            </span>
 
-                                <div class="grid flex-1 text-left text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
-                                </div>
+                            <div class="grid flex-1 text-left text-sm leading-tight">
+                                <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
+                                <span class="truncate text-xs">{{ auth()->user()->email }}</span>
                             </div>
                         </div>
-                    </flux:menu.radio.group>
+                    </div>
+                </flux:menu.radio.group>
 
-                    <flux:menu.separator />
+                <flux:menu.separator />
 
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            {{ __('Log Out') }}
-                        </flux:menu.item>
-                    </form>
-                </flux:menu>
-            </flux:dropdown>
-        </flux:header>
+                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                    @csrf
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                        {{ __('Log Out') }}
+                    </flux:menu.item>
+                </form>
+            </flux:menu>
+        </flux:dropdown>
+    </flux:header>
 
-        {{ $slot }}
+    {{ $slot }}
 
-        @fluxScripts
+    @fluxScripts
 
-        <script>
-            // Prevenir doble envío de formularios (por doble clic o al presionar Enter repetidas veces)
-            document.addEventListener('submit', function (e) {
-                if (e.target.tagName === 'FORM') {
-                    if (e.target.dataset.submitting) {
-                        e.preventDefault();
-                        return;
-                    }
-                    e.target.dataset.submitting = 'true';
-                    
-                    const submitBtn = e.target.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        setTimeout(() => {
-                            submitBtn.disabled = true;
-                            submitBtn.style.opacity = '0.7';
-                            submitBtn.style.cursor = 'wait';
-                        }, 10);
-                    }
+    <script>
+        // Prevenir doble envío de formularios (por doble clic o al presionar Enter repetidas veces)
+        document.addEventListener('submit', function(e) {
+            if (e.target.tagName === 'FORM') {
+                if (e.target.dataset.submitting) {
+                    e.preventDefault();
+                    return;
                 }
-            });
+                e.target.dataset.submitting = 'true';
 
-            // Rehabilitar el botón si la validación HTML5 falla
-            document.addEventListener('invalid', function(e) {
-                if (e.target && e.target.form) {
-                    const form = e.target.form;
-                    form.removeAttribute('data-submitting');
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.style.opacity = '1';
-                        submitBtn.style.cursor = '';
-                    }
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    setTimeout(() => {
+                        submitBtn.disabled = true;
+                        submitBtn.style.opacity = '0.7';
+                        submitBtn.style.cursor = 'wait';
+                    }, 10);
                 }
-            }, true);
-        </script>
-    </body>
+            }
+        });
+
+        // Rehabilitar el botón si la validación HTML5 falla
+        document.addEventListener('invalid', function(e) {
+            if (e.target && e.target.form) {
+                const form = e.target.form;
+                form.removeAttribute('data-submitting');
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = '';
+                }
+            }
+        }, true);
+    </script>
+</body>
+
 </html>

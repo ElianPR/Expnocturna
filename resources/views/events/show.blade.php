@@ -120,7 +120,7 @@
             line-height: 1;
             margin: 0;
             font-weight: 500;
-            color: {{ $event->template == 1 ? '#595959' : $themeColor }};
+            color: {{ $themeColor }};
             font-family: {!! $eventFont !!};
         }
 

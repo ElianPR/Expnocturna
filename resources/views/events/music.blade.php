@@ -66,19 +66,27 @@
                 background-size: cover !important;
             }
         }
+
+        .event-title {
+            font-family: {!! $eventFont !!};
+            color: {{ $buttonColor }};
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            line-height: 1.05;
+            letter-spacing: 0.02em;
+            font-weight: 550;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-wrap: balance;
+            max-width: 90%;
+            margin-inline: auto;
+            word-break: break-word;
+        }
+        
     </style>
 
     <div class="w-full max-w-sm md:max-w-md">
         <div class="rounded-[2.5rem] p-6 md:p-8 flex flex-col items-center">
-            <h1 class="text-[3.0rem] md:text-[3.4rem] text-center mb-2"
-                style="
-                        font-family: {!! $eventFont !!};
-                        color: {{ $event->template == 1 ? '#595959' : $buttonColor }};
-                        line-height: 1.1;
-                        letter-spacing: 0.02em;
-                        font-weight: 600;
-                        text-transform: none;
-                    ">
+            <h1 class="event-title">
                 {{ $event->name ?? ($event->monogram ?? 'Evento') }}
             </h1>
 
@@ -94,6 +102,7 @@
                     </video>
                 </div>
             @else
+                <br>
                 <div class="mb-8">
                     <div class="relative w-56 h-56 rounded-3xl overflow-hidden shadow-lg"
                         style="background-color: {{ $buttonColor }}">

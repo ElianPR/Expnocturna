@@ -97,19 +97,24 @@
             canvas.height = size + topPad + bottomPad;
 
             let bgPath = "";
+            let textColor = "";
 
             switch (template) {
                 case 1:
-                    bgPath = "{{ asset('images/fondosV/fondoV.png') }}";
+                    bgPath = "{{ asset('images/fondosV/fondoVQr.png') }}";
+                    textColor = "#436c00";
                     break;
                 case 2:
                     bgPath = "{{ asset('images/fondosA/fondoAQr.png') }}";
+                    textColor = "#092d51";
                     break;
                 case 3:
                     bgPath = "{{ asset('images/fondosD/fondoDQr.png') }}";
+                    textColor = "#a8792b";
                     break;
                 default:
-                    bgPath = "{{ asset('images/fondosV/fondoV.png') }}";
+                    bgPath = "{{ asset('images/fondosV/fondoVQr.png') }}";
+                    textColor = "#436c00";
             }
 
             const bg = await loadImage(bgPath);
@@ -118,20 +123,17 @@
 
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 2. ahora sí el papel con transparencia
             ctx.save();
-            ctx.globalAlpha = template === 1 ? 0.55 : 1;
             ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
             ctx.restore();
 
-            const fontFamily = "Georgia, serif";
-            const fontSize = 47;
+            const fontFamily = "'Poppins', sans-serif";
+            let fontSize = 47;
             const lineHeight = 44;
 
             ctx.save();
-            ctx.fillStyle = "#3b2f1e";
-            ctx.font = `${fontSize}px ${fontFamily}`;
+            ctx.fillStyle = textColor;
+            ctx.font = `600 ${fontSize}px ${fontFamily}`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             wrapText(ctx, titleText, size / 2, topPad / 2 + 70, size - 100, lineHeight);
@@ -152,8 +154,9 @@
             ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
 
             ctx.save();
-            ctx.fillStyle = "#3b2f1e";
-            ctx.font = `${fontSize}px ${fontFamily}`;
+            fontSize = 40;
+            ctx.fillStyle = textColor;
+            ctx.font = `600 ${fontSize}px ${fontFamily}`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             wrapText(ctx, subtitleText, size / 2, topPad + size + bottomPad / 2 - 70, size - 100, lineHeight);
