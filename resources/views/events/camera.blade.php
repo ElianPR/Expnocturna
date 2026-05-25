@@ -212,6 +212,13 @@
         const ctx = canvas.getContext('2d', {
             alpha: false
         });
+        const watermarkImg = new Image();
+        watermarkImg.crossOrigin = "anonymous";
+        let hasWatermark = false;
+        @if($event->watermark)
+            watermarkImg.src = "{{ route('file.show', ['id_evento' => $event->id_hex, 'filename' => $event->watermark]) }}";
+            watermarkImg.onload = () => { hasWatermark = true; };
+        @endif
         const vidEl = document.createElement('video');
         vidEl.autoplay = true;
         vidEl.playsInline = true;
@@ -329,23 +336,10 @@
             if (isRecording) stopRecording();
             if (camStream) camStream.getTracks().forEach(t => t.stop());
             try {
-                const screenIsLandscape = window.innerWidth > window.innerHeight;
-                const videoConstraints = screenIsLandscape ? {
-                    facingMode,
-                    width: {
-                        ideal: 1280
-                    },
-                    height: {
-                        ideal: 960
-                    }
-                } : {
-                    facingMode,
-                    width: {
-                        ideal: 960
-                    },
-                    height: {
-                        ideal: 1280
-                    }
+                const videoConstraints = {
+                    facingMode: 'environment',
+                    width: { ideal: 1440 },
+                    height: { ideal: 1080 }
                 };
 
                 camStream = await navigator.mediaDevices.getUserMedia({
@@ -489,6 +483,19 @@
 
             ctx.fillStyle = vig;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (hasWatermark) {
+                const wmWidth = canvas.width * 0.30; 
+                const wmHeight = (watermarkImg.height / watermarkImg.width) * wmWidth;
+                const margin = canvas.width * 0.05;
+                ctx.drawImage(
+                    watermarkImg,
+                    canvas.width - wmWidth - margin,
+                    canvas.height - wmHeight - margin,
+                    wmWidth,
+                    wmHeight
+                );
+            }
         }
 
         // ═══════════════════════════════════════════

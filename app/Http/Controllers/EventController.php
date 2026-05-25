@@ -53,7 +53,7 @@ class EventController extends Controller
             'main_image'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'song'               => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
             'song_cover'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'watermark'          => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'watermark'          => 'nullable|image|mimes:png|max:5120',
         ];
 
         $customMessages = [
@@ -369,7 +369,7 @@ class EventController extends Controller
             'main_image'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'song'               => 'nullable|file|mimes:mp3,wav,mp4,mov,webm|max:100200',
             'song_cover'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'watermark'          => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'watermark'          => 'nullable|image|mimes:png|max:5120',
         ];
 
         $customMessages = [

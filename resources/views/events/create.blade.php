@@ -223,8 +223,8 @@
                 </div>
 
                 <flux:field>
-                    <flux:label>Imagen para Marca de Agua (PNG, JPG)</flux:label>
-                    <flux:input type="file" name="watermark" accept="image/jpeg,image/png" />
+                    <flux:label>Imagen para Marca de Agua (Solo PNG)</flux:label>
+                    <flux:input type="file" name="watermark" accept="image/png" />
                     <flux:error name="watermark" />
                 </flux:field>
 
