@@ -4,8 +4,8 @@
     $isPreview = filter_var($preview, FILTER_VALIDATE_BOOLEAN);
 
     $dateText = $event?->date
-        ? \Carbon\Carbon::parse($event->date)->translatedFormat('d \d\e F \d\e Y')
-        : 'FECHA POR DEFINIR';
+        ? \Carbon\Carbon::parse($event->date)->translatedFormat('d F Y')
+        : 'fecha por definir';
 
     $fontFam = $event?->typography ?? 'Cinzel';
 
@@ -60,11 +60,11 @@
 
         @endif
 
-        <p @if ($isPreview) x-text="displayDate || 'FECHA POR DEFINIR'" @endif
-            class="uppercase font-normal tracking-[0.2em] text-right mt-4"
+        <p @if ($isPreview) x-text="(displayDate || 'fecha por definir').toLowerCase()" @endif
+            class="font-normal tracking-[0.2em] text-right mt-4"
             style="color: #436c00; font-family: 'Poppins', sans-serif; font-size: clamp(0.8rem, 2vw, 1rem);">
             @unless ($isPreview)
-                {{ strtoupper($dateText) }}
+                {{ strtolower($dateText) }}
             @endunless
         </p>
     </div>
