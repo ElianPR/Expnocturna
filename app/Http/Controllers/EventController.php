@@ -548,7 +548,12 @@ class EventController extends Controller
             // Esto vuelve a poner deleted_at en NULL
             $event->restore();
 
-            return redirect()->route('events.trash')->with('success', 'Evento restaurado exitosamente.');
+            // Activar automáticamente el evento y su álbum
+            $event->is_active = true;
+            $event->album_active = true;
+            $event->save();
+
+            return redirect()->route('events.trash')->with('swal_success', 'Evento restaurado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->route('events.trash')->with('swal_error', 'Error al restaurar.');
         }

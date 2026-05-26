@@ -3,8 +3,31 @@
         <h1 class="text-2xl font-semibold text-neutral-800 dark:text-neutral-200">Papelera de Reciclaje</h1>
     </div>
 
-    @if (session('success'))
-        @endif
+    @if (session('swal_success'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: '{{ session('swal_success') }}',
+                    confirmButtonColor: '#000',
+                });
+            });
+        </script>
+    @endif
+
+    @if (session('swal_error'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '{{ session('swal_error') }}',
+                    confirmButtonColor: '#000',
+                });
+            });
+        </script>
+    @endif
 
     @if(!auth()->user()->can_access_trash)
         <div class="flex flex-col items-center justify-center p-12 mt-4 text-center bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
@@ -54,13 +77,15 @@
                         </td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex justify-end gap-2">
-                                <form action="{{ route('events.restore', $event->id_hex) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <flux:button type="submit" size="sm" variant="primary" icon="arrow-path">
-                                        Restaurar
-                                    </flux:button>
-                                </form>
+                                <flux:button 
+                                    type="button"
+                                    size="sm" 
+                                    variant="primary" 
+                                    icon="arrow-path"
+                                    onclick="confirmRestore('{{ route('events.restore', $event->id_hex) }}')"
+                                >
+                                    Restaurar
+                                </flux:button>
 
                                 <flux:button 
                                     type="button"
@@ -104,6 +129,28 @@
                     form.method = 'POST';
                     form.action = url;
                     form.innerHTML = `@csrf @method('DELETE')`;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        function confirmRestore(url) {
+            Swal.fire({
+                title: '¿Restaurar evento?',
+                text: "El evento volverá a estar activo en tu lista principal.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#000',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, restaurar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.innerHTML = `@csrf @method('PATCH')`;
                     document.body.appendChild(form);
                     form.submit();
                 }
