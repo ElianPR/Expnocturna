@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>{{ $event->name }}</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=Great+Vibes&family=Montserrat:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:wght@400;600;700&family=Great+Vibes&family=Playfair+Display:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/camera-event.css') }}">
     @php
@@ -42,9 +42,11 @@
         $shutter = $shutterColors[$template];
         $eventFont = $event->typography ?? "'Playfair Display', serif";
 
-        $animations = $event->cameraAnimations->map(function($anim) {
-            return route('camera-animations.stream', $anim->id);
-        })->toArray();
+        $animations = $event->cameraAnimations
+            ->map(function ($anim) {
+                return route('camera-animations.stream', $anim->id);
+            })
+            ->toArray();
         if (empty($animations)) {
             $animations = [asset('videos/T 3 B Arriba.mp4')];
         }
@@ -89,7 +91,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body style="
+<body
+    style="
     --gold: {{ $theme['primary'] }};
     --primary: {{ $theme['primary'] }};
     --bg-image: url('{{ $theme['bg'] }}');
@@ -100,7 +103,14 @@
 
         <div class="header">
             <div class="title"
-                style="font-family: {{ $eventFont }}; color: {{ $event->template == 1 ? '#595959' : $theme['primary'] }};">
+                style="
+                    font-family: {!! $eventFont !!};
+                    color: {{ $theme['primary'] }};
+                    font-size: 1.8rem;
+                    line-height: 1.1;
+                    letter-spacing: 0.02em;
+                    font-weight: 800;
+                ">
                 {{ $event->name }}
             </div>
             <div class="mode-toggle" id="modeToggle">
@@ -189,8 +199,7 @@
 
             <flux:button id="btnClose" variant="primary" icon="arrow-uturn-left"
                 class="w-64 justify-center rounded-xl text-lg font-semibold"
-                style="background-color: {{ $theme['primary'] }}; color: white;"
-            >
+                style="background-color: {{ $theme['primary'] }}; color: white;">
                 Retomar
             </flux:button>
         </div>
@@ -215,9 +224,12 @@
         const watermarkImg = new Image();
         watermarkImg.crossOrigin = "anonymous";
         let hasWatermark = false;
-        @if($event->watermark)
-            watermarkImg.src = "{{ route('file.show', ['id_evento' => $event->id_hex, 'filename' => $event->watermark]) }}";
-            watermarkImg.onload = () => { hasWatermark = true; };
+        @if ($event->watermark)
+            watermarkImg.src =
+                "{{ route('file.show', ['id_evento' => $event->id_hex, 'filename' => $event->watermark]) }}";
+            watermarkImg.onload = () => {
+                hasWatermark = true;
+            };
         @endif
         const vidEl = document.createElement('video');
         vidEl.autoplay = true;
@@ -338,8 +350,12 @@
             try {
                 const videoConstraints = {
                     facingMode: 'environment',
-                    width: { ideal: 1440 },
-                    height: { ideal: 1080 }
+                    width: {
+                        ideal: 1440
+                    },
+                    height: {
+                        ideal: 1080
+                    }
                 };
 
                 camStream = await navigator.mediaDevices.getUserMedia({
@@ -485,7 +501,7 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if (hasWatermark) {
-                const wmWidth = canvas.width * 0.30; 
+                const wmWidth = canvas.width * 0.30;
                 const wmHeight = (watermarkImg.height / watermarkImg.width) * wmWidth;
                 const margin = canvas.width * 0.05;
                 ctx.drawImage(
