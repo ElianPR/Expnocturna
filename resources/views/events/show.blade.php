@@ -115,13 +115,18 @@
         }
 
         .event-title {
-            text-align: center;
-            font-size: 4.2rem;
-            line-height: 1;
-            margin: 0;
-            font-weight: 500;
-            color: {{ $themeColor }};
             font-family: {!! $eventFont !!};
+            color: {{ $themeColor }};
+            font-size: clamp(2.5rem, 7vw, 4.2rem);
+            line-height: 1.05;
+            letter-spacing: 0.02em;
+            font-weight: 550;
+            text-align: center;
+            text-wrap: balance;
+            max-width: 90%;
+            margin-inline: auto;
+            word-break: break-word;
+            margin: 0;
         }
 
         .event-date {
