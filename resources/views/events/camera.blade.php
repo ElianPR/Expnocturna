@@ -349,7 +349,7 @@
             if (camStream) camStream.getTracks().forEach(t => t.stop());
             try {
                 const videoConstraints = {
-                    facingMode: 'environment',
+                    facingMode: facingMode,
                     width: {
                         ideal: 1440
                     },
