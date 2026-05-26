@@ -1,16 +1,23 @@
 <x-layouts.app>
-    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-semibold text-neutral-800 dark:text-neutral-200">Animaciones de Cámara</h1>
 
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold">Animaciones de Cámara</h1>
-
+        @if(auth()->user()?->can_manage_animations)
             <flux:button href="{{ route('camera-animations.create') }}"
                 class="rounded-lg bg-black px-4 py-2 text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
                 icon="plus">
                 Agregar animación
             </flux:button>
-        </div>
+        @endif
+    </div>
 
+    @if(!auth()->user()?->can_manage_animations)
+        <div class="flex flex-col items-center justify-center p-12 mt-4 text-center bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <flux:icon.lock-closed class="size-12 text-neutral-400 mb-4" />
+            <h2 class="text-xl font-medium text-neutral-900 dark:text-neutral-100">Acceso Denegado</h2>
+            <p class="text-neutral-500 mt-2">No tienes permiso para acceder a las animaciones.</p>
+        </div>
+    @else
         <div class="w-full overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
             <table class="min-w-full text-sm whitespace-nowrap">
                 <thead class="bg-neutral-100 dark:bg-neutral-800">
@@ -54,7 +61,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    @endif
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

@@ -22,9 +22,12 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = collect();
-        if (auth()->user()->can_create_users) {
-            $users = User::all();
+        $user = auth()->user();
+        if ($user->can_create_users) {
+            $descendantIds = $user->getDescendantIds();
+            $users = User::whereIn('id', array_merge([$user->id], $descendantIds))->get();
+        } else {
+            $users = collect([$user]);
         }
         
         return view('users.index', compact('users'));
@@ -36,7 +39,7 @@ class UserController extends Controller
     public function create()
     {
         if (!auth()->user()->can_create_users) {
-            abort(403, 'No tienes permisos para administrar usuarios.');
+            return redirect()->route('users.index')->with('swal_error', 'No tienes permisos para crear usuarios.');
         }
 
         return view('users.create');
@@ -48,7 +51,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         if (!auth()->user()->can_create_users) {
-            abort(403, 'No tienes permisos para administrar usuarios.');
+            return redirect()->route('users.index')->with('swal_error', 'No tienes permisos para crear usuarios.');
         }
 
         $request->validate([
@@ -65,6 +68,7 @@ class UserController extends Controller
             'can_manage_events' => $request->boolean('can_manage_events'),
             'can_access_trash' => $request->boolean('can_access_trash'),
             'can_manage_animations' => $request->boolean('can_manage_animations'),
+            'parent_id' => auth()->id(),
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
@@ -75,8 +79,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        if (!auth()->user()->can_create_users) {
-            abort(403, 'No tienes permisos para administrar usuarios.');
+        if (!auth()->user()->canManageUser($user)) {
+            abort(403, 'No tienes permisos para administrar a este usuario.');
         }
 
         return view('users.edit', compact('user'));
@@ -87,8 +91,24 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        if (!auth()->user()->can_create_users) {
-            abort(403, 'No tienes permisos para administrar usuarios.');
+        if (!auth()->user()->canManageUser($user)) {
+            abort(403, 'No tienes permisos para administrar a este usuario.');
+        }
+
+        $isSelf = auth()->id() === $user->id;
+        $canManageUsers = auth()->user()->can_create_users;
+
+        if (!$canManageUsers && $isSelf) {
+            // Usuario sin permisos solo puede actualizar su contraseña
+            $rules = [];
+            if ($request->filled('password')) {
+                $rules['password'] = ['required', 'confirmed', Rules\Password::defaults()];
+                $request->validate($rules);
+                $user->password = Hash::make($request->password);
+                $user->save();
+                return redirect()->route('users.index')->with('success', 'Contraseña actualizada correctamente.');
+            }
+            return redirect()->route('users.index');
         }
 
         $rules = [
@@ -110,12 +130,12 @@ class UserController extends Controller
             $user->password = Hash::make($request->password);
         }
 
-        // Only allow changing permissions if the current user is not editing themselves and losing admin rights? 
-        // We assume trust, just apply permissions.
-        $user->can_create_users = $request->boolean('can_create_users');
-        $user->can_manage_events = $request->boolean('can_manage_events');
-        $user->can_access_trash = $request->boolean('can_access_trash');
-        $user->can_manage_animations = $request->boolean('can_manage_animations');
+        if ($canManageUsers) {
+            $user->can_create_users = $request->boolean('can_create_users');
+            $user->can_manage_events = $request->boolean('can_manage_events');
+            $user->can_access_trash = $request->boolean('can_access_trash');
+            $user->can_manage_animations = $request->boolean('can_manage_animations');
+        }
 
         $user->save();
 
@@ -127,8 +147,8 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if (!auth()->user()->can_create_users) {
-            abort(403, 'No tienes permisos para administrar usuarios.');
+        if (!auth()->user()->canManageUser($user)) {
+            abort(403, 'No tienes permisos para eliminar a este usuario.');
         }
 
         // Prevenir que el usuario se elimine a sí mismo

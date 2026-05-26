@@ -13,13 +13,7 @@
             @endif
         </div>
 
-        @if(!auth()->user()->can_create_users)
-            <div class="flex flex-col items-center justify-center p-12 mt-4 text-center bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <flux:icon.lock-closed class="size-12 text-neutral-400 mb-4" />
-                <h2 class="text-xl font-medium text-neutral-900 dark:text-neutral-100">Acceso Denegado</h2>
-                <p class="text-neutral-500 mt-2">No tienes permiso para administrar usuarios.</p>
-            </div>
-        @else
+
 
         <div class="w-full overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
             <table class="min-w-full text-sm whitespace-nowrap">
@@ -89,7 +83,7 @@
                 </tbody>
             </table>
         </div>
-        @endif
+
 
     </div>
 

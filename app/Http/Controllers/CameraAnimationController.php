@@ -14,11 +14,10 @@ class CameraAnimationController extends Controller
      */
     public function index()
     {
-        if (!auth()->user()->can_manage_animations) {
-            abort(403, 'No tienes permisos para administrar animaciones.');
-        }
+        $animations = auth()->user()?->can_manage_animations 
+            ? CameraAnimation::all() 
+            : collect([]);
 
-        $animations = CameraAnimation::all();
         return view('camera_animations.index', compact('animations'));
     }
 
