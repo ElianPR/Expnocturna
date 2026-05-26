@@ -553,11 +553,37 @@
             vid.style.display = 'none';
             vid.src = '';
 
-            document.getElementById('btnSave').onclick = () => {
-                const a = document.createElement('a');
-                a.href = dataUrl;
-                a.download = `butterfly-foto-${Date.now()}.jpg`;
-                a.click();
+            document.getElementById('btnSave').onclick = async () => {
+
+                if (!currentShareBlob) return;
+
+                const file = new File(
+                    [currentShareBlob],
+                    `butterfly-foto-${Date.now()}.jpg`, {
+                        type: 'image/jpeg'
+                    }
+                );
+
+                if (navigator.canShare && navigator.canShare({
+                        files: [file]
+                    })) {
+
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Foto del evento',
+                            text: 'Compartida desde Butterfly Lens'
+                        });
+                    } catch (e) {
+                        console.log('Compartir cancelado');
+                    }
+
+                } else {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(file);
+                    a.download = file.name;
+                    a.click();
+                }
             };
             document.getElementById('previewOverlay').classList.add('show');
         }
@@ -644,11 +670,38 @@
             vid.play();
             document.getElementById('previewLabel').textContent = 'Tu video';
 
-            document.getElementById('btnSave').onclick = () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `butterfly-video-${Date.now()}.${ext}`;
-                a.click();
+            document.getElementById('btnSave').onclick = async () => {
+
+                if (!currentShareBlob) return;
+
+                const file = new File(
+                    [currentShareBlob],
+                    `butterfly-video-${Date.now()}.${ext}`, {
+                        type: currentShareBlob.type
+                    }
+                );
+
+                if (navigator.canShare && navigator.canShare({
+                        files: [file]
+                    })) {
+
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Video del evento',
+                            text: 'Compartido desde Butterfly Lens'
+                        });
+                    } catch (e) {
+                        console.log('Compartir cancelado');
+                    }
+
+                } else {
+
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name;
+                    a.click();
+                }
             };
             document.getElementById('previewOverlay').classList.add('show');
         }
