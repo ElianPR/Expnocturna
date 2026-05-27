@@ -138,8 +138,8 @@
 
                 <canvas id="canvas"></canvas>
 
-                <video id="overlayVid" class="video-overlay" autoplay muted playsinline crossorigin="anonymous">
-                </video>
+                <video id="overlayVid1" class="video-overlay" muted playsinline crossorigin="anonymous" style="display:none;"></video>
+                <video id="overlayVid2" class="video-overlay" muted playsinline crossorigin="anonymous" style="display:none;"></video>
 
                 <div class="rec-badge" id="recBadge">
                     <div class="rec-dot"></div>
@@ -235,22 +235,50 @@
         vidEl.autoplay = true;
         vidEl.playsInline = true;
         vidEl.muted = true;
-        const overlayVid = document.getElementById('overlayVid');
+        const overlayVid1 = document.getElementById('overlayVid1');
+        const overlayVid2 = document.getElementById('overlayVid2');
+        
+        let activeOverlay = overlayVid1;
+        let nextOverlay = overlayVid2;
         const animationsList = @json($animations);
+
+        function preloadNextAnimation() {
+            if (animationsList.length === 0) return;
+            const randomIndex = Math.floor(Math.random() * animationsList.length);
+            nextOverlay.src = animationsList[randomIndex];
+            nextOverlay.load(); // Precarga el siguiente video en segundo plano
+        }
 
         function playRandomAnimation() {
             if (animationsList.length === 0) return;
-            const randomIndex = Math.floor(Math.random() * animationsList.length);
-            overlayVid.src = animationsList[randomIndex];
-            overlayVid.load();
-            overlayVid.play().catch(() => {});
+
+            // Si es la primera vez (no hay ruta asignada al activo)
+            if (!activeOverlay.src) {
+                const randomIndex = Math.floor(Math.random() * animationsList.length);
+                activeOverlay.src = animationsList[randomIndex];
+                activeOverlay.load();
+            }
+
+            activeOverlay.currentTime = 0;
+            activeOverlay.play().catch(() => {});
+            
+            // Inmediatamente después de reproducir el actual, precargamos el siguiente
+            preloadNextAnimation();
         }
 
-        playRandomAnimation();
+        function onAnimationEnded() {
+            // Intercambiar los roles: el que estaba en precarga ahora es el activo
+            let temp = activeOverlay;
+            activeOverlay = nextOverlay;
+            nextOverlay = temp;
 
-        overlayVid.addEventListener('ended', () => {
             playRandomAnimation();
-        });
+        }
+
+        overlayVid1.addEventListener('ended', onAnimationEnded);
+        overlayVid2.addEventListener('ended', onAnimationEnded);
+
+        playRandomAnimation();
 
         let animId, tick = 0;
         let facingMode = 'environment';
@@ -371,8 +399,8 @@
                 await new Promise(r => setTimeout(r, 150));
                 sizeViewport();
                 document.getElementById('startScreen').classList.add('hidden');
-                overlayVid.currentTime = 0;
-                overlayVid.play().catch(() => {});
+                activeOverlay.currentTime = 0;
+                activeOverlay.play().catch(() => {});
                 if (!animId) loop();
                 setControlsEnabled(true);
             } catch (e) {
@@ -419,12 +447,12 @@
                 ctx.restore();
             }
 
-            if (overlayVid && overlayVid.readyState >= 2) {
-                const vr = overlayVid.videoWidth / overlayVid.videoHeight;
+            if (activeOverlay && activeOverlay.readyState >= 2) {
+                const vr = activeOverlay.videoWidth / activeOverlay.videoHeight;
                 const cr = canvas.width / canvas.height;
                 let sw, sh, sx, sy;
 
-                // Lógica tipo "cover" para que el overlay ocupe TODA la pantalla de la cámara
+                // Lógica tipo "cover" para que el overlay ocupe TODA la pantalla
                 if (vr > cr) {
                     sh = canvas.height;
                     sw = sh * vr;
@@ -437,7 +465,7 @@
                     sy = (canvas.height - sh) / 2;
                 }
 
-                // Chroma key processing para eliminar el fondo verde
+                // Chroma key processing
                 if (!window.offscreenCanvas) {
                     window.offscreenCanvas = document.createElement('canvas');
                     window.offscreenCtx = window.offscreenCanvas.getContext('2d', {
@@ -453,8 +481,7 @@
                     window.offscreenCanvas.height = procH;
                 }
 
-                window.offscreenCtx.drawImage(overlayVid, 0, 0, overlayVid.videoWidth, overlayVid.videoHeight, 0, 0, procW,
-                    procH);
+                window.offscreenCtx.drawImage(activeOverlay, 0, 0, activeOverlay.videoWidth, activeOverlay.videoHeight, 0, 0, procW, procH);
 
                 try {
                     let frame = window.offscreenCtx.getImageData(0, 0, procW, procH);
@@ -465,22 +492,22 @@
                         let g = frame.data[i * 4 + 1];
                         let b = frame.data[i * 4 + 2];
 
-                        // Detectar fondo verde (rango ajustable según el video)
+                        // Detectar fondo verde
                         if (g > 100 && g > r * 1.3 && g > b * 1.3) {
-                            frame.data[i * 4 + 3] = 0; // Transparent
+                            frame.data[i * 4 + 3] = 0; // Transparente
                         } else if (g > 80 && g > r * 1.1 && g > b * 1.1) {
-                            // Suavizado de bordes (anti-aliasing)
+                            // Suavizado de bordes
                             let dif = g - Math.max(r, b);
                             frame.data[i * 4 + 3] = Math.max(0, 255 - dif * 4);
-                            frame.data[i * 4 + 1] = Math.min(g, Math.max(r, b)); // Reducir componente verde en el borde
+                            frame.data[i * 4 + 1] = Math.min(g, Math.max(r, b)); 
                         }
                     }
 
                     window.offscreenCtx.putImageData(frame, 0, 0);
                     ctx.drawImage(window.offscreenCanvas, 0, 0, procW, procH, sx, sy, sw, sh);
                 } catch (e) {
-                    // Fallback en caso de error de CORS o similar
-                    ctx.drawImage(overlayVid, 0, 0, overlayVid.videoWidth, overlayVid.videoHeight, sx, sy, sw, sh);
+                    // Fallback
+                    ctx.drawImage(activeOverlay, 0, 0, activeOverlay.videoWidth, activeOverlay.videoHeight, sx, sy, sw, sh);
                 }
             }
 
