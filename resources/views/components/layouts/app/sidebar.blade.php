@@ -60,7 +60,7 @@
 
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full" data-no-submit-lock>
                         Cerrar sesión
                     </flux:menu.item>
                 </form>
@@ -100,7 +100,7 @@
 
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full" data-no-submit-lock>
                         {{ __('Log Out') }}
                     </flux:menu.item>
                 </form>
@@ -116,6 +116,7 @@
         // Prevenir doble envío de formularios (por doble clic o al presionar Enter repetidas veces)
         document.addEventListener('submit', function(e) {
             if (e.target.tagName === 'FORM') {
+                if (e.target.dataset.noSubmitLock !== undefined) return;
                 if (e.target.dataset.submitting) {
                     e.preventDefault();
                     return;
