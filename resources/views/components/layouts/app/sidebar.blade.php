@@ -58,9 +58,9 @@
 
                 <flux:menu.separator />
 
-                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                <form method="POST" action="{{ route('logout') }}" class="w-full" data-no-submit-lock>
                     @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full" data-no-submit-lock>
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
                         Cerrar sesión
                     </flux:menu.item>
                 </form>
@@ -98,9 +98,9 @@
 
                 <flux:menu.separator />
 
-                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                <form method="POST" action="{{ route('logout') }}" class="w-full" data-no-submit-lock>
                     @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full" data-no-submit-lock>
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
                         {{ __('Log Out') }}
                     </flux:menu.item>
                 </form>
