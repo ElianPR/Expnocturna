@@ -24,25 +24,30 @@ class EventShareController extends Controller
         return view('events.share', compact('event'));
     }
 
+
     public function store(Request $request, string $id_evento)
     {
         $event = $this->findEvent($id_evento);
 
         if (!$request->hasFile('files')) {
-            return back()->withErrors(['Debes seleccionar al menos un archivo.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Debes seleccionar al menos un archivo.'
+            ], 422);
         }
 
-        $allowedMimes = [
-            'image/jpeg',
-            'image/png',
-            'image/webp',
-            'image/heic',
-            'image/heif',
-            'video/mp4',
-            'video/quicktime',
-            'video/x-msvideo',
-            'video/x-matroska',
-            'video/webm'
+        $allowedExtensions = [
+            'jpg',
+            'jpeg',
+            'png',
+            'webp',
+            'heic',
+            'heif',
+            'mp4',
+            'mov',
+            'avi',
+            'mkv',
+            'webm'
         ];
 
         $eventFolder = 'events/' . bin2hex($event->album);
@@ -52,48 +57,58 @@ class EventShareController extends Controller
 
         foreach ($request->file('files') as $file) {
 
-            if (!$file->isValid()) {
-                $errors[] = $file->getClientOriginalName() . ' está corrupto.';
-                continue;
-            }
-
-            if (!in_array($file->getMimeType(), $allowedMimes)) {
-                $errors[] = $file->getClientOriginalName() . ' no es compatible.';
-                continue;
-            }
-
-            if ($file->getSize() > 25 * 1024 * 1024) {
-                $errors[] = $file->getClientOriginalName() . ' supera 25MB.';
-                continue;
-            }
-
             try {
-                $extension = strtolower($file->getClientOriginalExtension());
-                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
-                $safeOriginalName = str($originalName)
-                    ->ascii()
-                    ->slug('_')
-                    ->limit(60, '')
-                    ->toString();
+                if (!$file->isValid()) {
+                    $errors[] =
+                        $file->getClientOriginalName() .
+                        ' está corrupto.';
+                    continue;
+                }
 
-                $filename = now()->format('Ymd_His') . '_' . uniqid() . '_' . $safeOriginalName . '.' . $extension;
+                $extension = strtolower(
+                    $file->getClientOriginalExtension()
+                );
 
-                Storage::disk('local')->putFileAs(
+                if (!in_array($extension, $allowedExtensions)) {
+                    $errors[] =
+                        $file->getClientOriginalName() .
+                        ' no es compatible.';
+                    continue;
+                }
+
+                if ($file->getSize() > 500 * 1024 * 1024) {
+                    $errors[] =
+                        $file->getClientOriginalName() .
+                        ' supera 500MB.';
+                    continue;
+                }
+
+                $filename =
+                    now()->format('Ymd_His') .
+                    '_' .
+                    bin2hex(random_bytes(6)) .
+                    '.' .
+                    $extension;
+                $file->storeAs(
                     $eventFolder,
-                    $file,
-                    $filename
+                    $filename,
+                    'local'
                 );
 
                 $uploaded++;
-            } catch (\Exception $e) {
-                $errors[] = $file->getClientOriginalName() . ' falló al subir.';
+            } catch (\Throwable $e) {
+                report($e);
+                $errors[] =
+                    $file->getClientOriginalName() .
+                    ' falló al subir.';
             }
         }
 
-        return back()->with([
-            'status' => "$uploaded archivo(s) subido(s).",
-            'upload_errors' => $errors
+        return response()->json([
+            'success' => true,
+            'uploaded' => $uploaded,
+            'errors' => $errors
         ]);
     }
 
@@ -275,7 +290,8 @@ class EventShareController extends Controller
         );
     }
 
-    public function restoreMedia(Request $request, string $id_album) {
+    public function restoreMedia(Request $request, string $id_album)
+    {
         if (!auth()->user()->can_access_trash) {
             abort(403, 'No tienes permisos para acceder a la papelera.');
         }

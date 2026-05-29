@@ -138,8 +138,10 @@
 
                 <canvas id="canvas"></canvas>
 
-                <video id="overlayVid1" class="video-overlay" muted playsinline crossorigin="anonymous" style="display:none;"></video>
-                <video id="overlayVid2" class="video-overlay" muted playsinline crossorigin="anonymous" style="display:none;"></video>
+                <video id="overlayVid1" class="video-overlay" muted playsinline crossorigin="anonymous"
+                    style="display:none;"></video>
+                <video id="overlayVid2" class="video-overlay" muted playsinline crossorigin="anonymous"
+                    style="display:none;"></video>
 
                 <div class="rec-badge" id="recBadge">
                     <div class="rec-dot"></div>
@@ -237,7 +239,7 @@
         vidEl.muted = true;
         const overlayVid1 = document.getElementById('overlayVid1');
         const overlayVid2 = document.getElementById('overlayVid2');
-        
+
         let activeOverlay = overlayVid1;
         let nextOverlay = overlayVid2;
         const animationsList = @json($animations);
@@ -261,7 +263,7 @@
 
             activeOverlay.currentTime = 0;
             activeOverlay.play().catch(() => {});
-            
+
             // Inmediatamente después de reproducir el actual, precargamos el siguiente
             preloadNextAnimation();
         }
@@ -297,6 +299,8 @@
         let recStartTime = 0;
         let currentShareBlob = null;
         let currentShareExt = 'jpg';
+        let isUploading = false;
+        let hasSharedCurrentMedia = false;
 
         function setControlsEnabled(enabled) {
             cameraReady = enabled;
@@ -481,7 +485,8 @@
                     window.offscreenCanvas.height = procH;
                 }
 
-                window.offscreenCtx.drawImage(activeOverlay, 0, 0, activeOverlay.videoWidth, activeOverlay.videoHeight, 0, 0, procW, procH);
+                window.offscreenCtx.drawImage(activeOverlay, 0, 0, activeOverlay.videoWidth, activeOverlay.videoHeight, 0,
+                    0, procW, procH);
 
                 try {
                     let frame = window.offscreenCtx.getImageData(0, 0, procW, procH);
@@ -499,7 +504,7 @@
                             // Suavizado de bordes
                             let dif = g - Math.max(r, b);
                             frame.data[i * 4 + 3] = Math.max(0, 255 - dif * 4);
-                            frame.data[i * 4 + 1] = Math.min(g, Math.max(r, b)); 
+                            frame.data[i * 4 + 1] = Math.min(g, Math.max(r, b));
                         }
                     }
 
@@ -753,29 +758,121 @@
         }
 
         async function shareMedia() {
-            if (!currentShareBlob) return;
+            if (isUploading || hasSharedCurrentMedia) return;
 
-            showToast('Subiendo al álbum...');
+            if (!currentShareBlob) {
+                showToast('No hay archivo para compartir.');
+                return;
+            }
 
-            const formData = new FormData();
-            const filename = `butterfly-lens-${Date.now()}.${currentShareExt}`;
-            formData.append('files[]', currentShareBlob, filename);
-            formData.append('_token', CSRF_TOKEN);
+            isUploading = true;
+
+            const btn = document.getElementById('btnShare');
+
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.pointerEvents = 'none';
 
             try {
-                const response = await fetch(UPLOAD_URL, {
-                    method: 'POST',
-                    body: formData,
-                });
+                const formData = new FormData();
 
-                if (response.ok) {
-                    showToast('¡Guardado en el álbum del evento!');
-                    closePreview();
-                } else {
-                    showToast('Error al subir. Intenta de nuevo.');
-                }
+                const filename =
+                    `butterfly-lens-${Date.now()}.${currentShareExt}`;
+
+                formData.append(
+                    'files[]',
+                    currentShareBlob,
+                    filename
+                );
+
+                formData.append('_token', CSRF_TOKEN);
+
+                const xhr = new XMLHttpRequest();
+
+                xhr.open('POST', UPLOAD_URL, true);
+
+                xhr.timeout = 600000;
+
+                xhr.upload.onprogress = function(e) {
+
+                    if (e.lengthComputable) {
+
+                        const percent = Math.round(
+                            (e.loaded / e.total) * 100
+                        );
+
+                        showToast(
+                            `Subiendo al álbum... ${percent}%`
+                        );
+                    }
+                };
+
+                xhr.onload = function() {
+                    isUploading = false;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const response =
+                                JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                hasSharedCurrentMedia = true;
+                                const btn = document.getElementById('btnShare');
+                                btn.disabled = true;
+                                btn.style.opacity = '0.5';
+                                btn.style.pointerEvents = 'none';
+                                btn.style.filter = 'grayscale(40%)';
+                                showToast('¡Guardado en el álbum del evento!');
+                            } else {
+                                showToast(
+                                    response.message ||
+                                    'Error al subir.'
+                                );
+                            }
+                        } catch (e) {
+
+                            showToast(
+                                'Respuesta inválida del servidor.'
+                            );
+                        }
+                    } else {
+                        showToast(
+                            'Error al subir el archivo.'
+                        );
+                    }
+                };
+
+                xhr.onerror = function() {
+                    isUploading = false;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    showToast(
+                        'Error de conexión.'
+                    );
+                };
+                xhr.ontimeout = function() {
+                    isUploading = false;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    showToast(
+                        'La subida tardó demasiado.'
+                    );
+                };
+
+                xhr.send(formData);
+
             } catch (e) {
-                showToast('Error de conexión. Intenta de nuevo.');
+                isUploading = false;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+
+                showToast(
+                    'Ocurrió un error inesperado.'
+                );
             }
         }
 
@@ -833,16 +930,27 @@
         document.getElementById('btnShare').addEventListener('click', shareMedia);
 
         document.getElementById('btnClose').addEventListener('click', () => {
+            if (isUploading) {
+                showToast('Espera a que termine la subida.');
+                return;
+            }
             closePreview();
         });
 
         function closePreview() {
+            hasSharedCurrentMedia = false;
+            const btn = document.getElementById('btnShare');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+            btn.style.filter = '';
+
             document.getElementById('previewOverlay').classList.remove('show');
             const v = document.getElementById('previewVid');
             v.pause();
             v.removeAttribute('src');
-            v.load(); // <- esto fuerza a WebKit a soltar el audio completamente
-            URL.revokeObjectURL(v.src); // liberar memoria del blob
+            v.load();
+            URL.revokeObjectURL(v.src);
         }
 
         // ═══════════════════════════════════════════
