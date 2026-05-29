@@ -67,32 +67,10 @@ class EventShareController extends Controller
 
                 // Generamos un nombre base seguro
                 $baseFilename = now()->format('Ymd_His') . '_' . bin2hex(random_bytes(6));
+                $finalFilename = $baseFilename . '.' . $extension;
                 
-                // Detectamos si es un video
-                $isVideo = in_array($extension, ['mp4', 'mov', 'avi', 'mkv', 'webm']);
-
-                if ($isVideo) {
-                    // Forzamos salida a mp4 para universalidad
-                    $finalFilename = $baseFilename . '.mp4';
-                    
-                    Storage::disk('local')->makeDirectory($eventFolder);
-                    $finalPath = Storage::disk('local')->path($eventFolder . '/' . $finalFilename);
-                    $tempPath = $file->getRealPath();
-
-                    // Comando FFmpeg con los códecs de audio y video corregidos
-                    $cmd = "ffmpeg -i " . escapeshellarg($tempPath) . " -c:v libx264 -preset veryfast -crf 28 -pix_fmt yuv420p -c:a aac -b:a 128k -ar 44100 -ac 2 -movflags +faststart " . escapeshellarg($finalPath) . " 2>&1";
-                    exec($cmd, $output, $returnCode);
-
-                    // Si FFmpeg falla (ej. no está instalado), usamos el guardado de respaldo nativo
-                    if ($returnCode !== 0) {
-                        $fallbackFilename = $baseFilename . '.' . $extension;
-                        $file->storeAs($eventFolder, $fallbackFilename, 'local');
-                    }
-                } else {
-                    // Si es una imagen, hacemos el guardado normal
-                    $finalFilename = $baseFilename . '.' . $extension;
-                    $file->storeAs($eventFolder, $finalFilename, 'local');
-                }
+                // Guardamos el archivo directamente (El frontend ya se encargó de que sea un MP4 perfecto)
+                $file->storeAs($eventFolder, $finalFilename, 'local');
 
                 $uploaded++;
             } catch (\Throwable $e) {
