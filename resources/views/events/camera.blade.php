@@ -209,7 +209,7 @@
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
-
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <script>
         const EVENT_ID = "{{ $event->id_hex }}";
         const UPLOAD_URL = "{{ route('events.share.store', $event->id_hex) }}";
@@ -218,7 +218,11 @@
 
     <script>
         let cameraReady = false;
-
+        const { createFFmpeg, fetchFile } = FFmpeg;
+        const ffmpeg = createFFmpeg({ 
+            log: false, // Ponlo en true si quieres ver el proceso en consola
+            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
+        });
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d', {
             alpha: false
@@ -676,7 +680,7 @@
             document.getElementById('recTimer').textContent = '0:00';
         }
 
-        function finalizeVideo() {
+        async function finalizeVideo() {
             if (isRecording) {
                 isRecording = false;
                 clearInterval(timerInterval);
@@ -686,11 +690,46 @@
             }
 
             const mime = mediaRecorder.mimeType || 'video/webm';
-            const blob = new Blob(recordedChunks, {
-                type: mime
-            });
+            let blob = new Blob(recordedChunks, { type: mime });
+            let ext = mime.includes('mp4') ? 'mp4' : 'webm';
+
+            // AQUÍ EMPIEZA LA MAGIA DE FFMPEG EN EL CELULAR
+            if (ext === 'webm') {
+                try {
+                    showToast("Procesando video... no cierres la pantalla ⏳");
+                    document.getElementById('btnShutter').disabled = true;
+
+                    // Cargar el motor en la memoria del celular si no está cargado
+                    if (!ffmpeg.isLoaded()) {
+                        await ffmpeg.load();
+                    }
+
+                    const inputName = 'input.webm';
+                    const outputName = 'output.mp4';
+
+                    // Escribir el archivo crudo en la memoria virtual
+                    ffmpeg.FS('writeFile', inputName, await fetchFile(blob));
+
+                    // Ejecutar la conversión (rápida, forzando formato de audio AAC estéreo para Windows)
+                    await ffmpeg.run('-i', inputName, '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-ac', '2', outputName);
+
+                    // Leer el archivo resultante
+                    const data = ffmpeg.FS('readFile', outputName);
+                    
+                    // Sobrescribir el blob original con el nuevo MP4 perfecto
+                    blob = new Blob([data.buffer], { type: 'video/mp4' });
+                    ext = 'mp4';
+
+                    showToast("¡Video listo! ✅");
+                } catch (e) {
+                    console.error("Error convirtiendo en el cliente:", e);
+                    showToast("No se pudo procesar el formato, se guardará el original.");
+                } finally {
+                    document.getElementById('btnShutter').disabled = false;
+                }
+            }
+
             const url = URL.createObjectURL(blob);
-            const ext = mime.includes('mp4') ? 'mp4' : 'webm';
             currentShareBlob = blob;
             currentShareExt = ext;
 
@@ -703,32 +742,16 @@
             document.getElementById('previewLabel').textContent = 'Tu video';
 
             document.getElementById('btnSave').onclick = async () => {
-
                 if (!currentShareBlob) return;
+                const file = new File([currentShareBlob], `butterfly-video-${Date.now()}.${ext}`, { type: currentShareBlob.type });
 
-                const file = new File(
-                    [currentShareBlob],
-                    `butterfly-video-${Date.now()}.${ext}`, {
-                        type: currentShareBlob.type
-                    }
-                );
-
-                if (navigator.canShare && navigator.canShare({
-                        files: [file]
-                    })) {
-
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
-                        await navigator.share({
-                            files: [file],
-                            title: 'Video del evento',
-                            text: 'Compartido desde Butterfly Lens'
-                        });
+                        await navigator.share({ files: [file], title: 'Video del evento', text: 'Compartido desde Butterfly Lens' });
                     } catch (e) {
                         console.log('Compartir cancelado');
                     }
-
                 } else {
-
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = file.name;
