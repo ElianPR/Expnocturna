@@ -198,7 +198,7 @@
 
             @if ($event->date)
                 <p class="text-sm text-neutral-400 -neutral-500 mt-2" style="color: {{ $theme['color'] }};">
-                    {{ $event->date->format('d/m/Y') }}
+                    {{ \Carbon\Carbon::parse($event->date)->translatedFormat('j F Y') }}
                 </p>
             @endif
         </div>

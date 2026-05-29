@@ -106,7 +106,7 @@
                 </flux:heading>
 
                 <flux:text class="text-sm leading-5" style="color: {{ $theme['color'] }};">
-                    Puedes subir fotos o videos de hasta 25 MB por archivo.
+                    Puedes subir fotos o videos de hasta 500 mb.
                 </flux:text>
 
                 <label

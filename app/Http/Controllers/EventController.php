@@ -106,6 +106,13 @@ class EventController extends Controller
                 $eventData['song_cover'] = $coverName;
             }
 
+            if ($request->hasFile('watermark')) {
+                $watermarkFile = $request->file('watermark');
+                $watermarkName = substr($watermarkFile->getClientOriginalName(), -50);
+                $watermarkFile->storeAs($folderName, $watermarkName, 'local');
+                $eventData['watermark'] = $watermarkName;
+            }
+
             $event = Event::create($eventData);
 
             if ($request->has('camera_animations')) {

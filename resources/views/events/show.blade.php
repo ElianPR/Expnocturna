@@ -122,11 +122,13 @@
             letter-spacing: 0.02em;
             font-weight: 550;
             text-align: center;
-            text-wrap: balance;
             max-width: 90%;
             margin-inline: auto;
-            word-break: break-word;
             margin: 0;
+            word-break: normal;
+            overflow-wrap: normal;
+            hyphens: none;
+            text-wrap: balance;
         }
 
         .event-date {
