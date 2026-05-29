@@ -267,7 +267,7 @@
         const content = document.getElementById('mainContent');
         const modal = document.getElementById('termsModal');
 
-        const storageKey = "papilia_terms_event_{{ $event->id }}";
+        const storageKey = "papilia_terms_event_{{ $event->id_hex }}";
 
         function showModal() {
             modal.style.display = "flex";
