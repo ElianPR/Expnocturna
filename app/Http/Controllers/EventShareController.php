@@ -37,17 +37,8 @@ class EventShareController extends Controller
         }
 
         $allowedExtensions = [
-            'jpg',
-            'jpeg',
-            'png',
-            'webp',
-            'heic',
-            'heif',
-            'mp4',
-            'mov',
-            'avi',
-            'mkv',
-            'webm'
+            'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif',
+            'mp4', 'mov', 'avi', 'mkv', 'webm'
         ];
 
         $eventFolder = 'events/' . bin2hex($event->album);
@@ -56,52 +47,57 @@ class EventShareController extends Controller
         $errors = [];
 
         foreach ($request->file('files') as $file) {
-
             try {
-
                 if (!$file->isValid()) {
-                    $errors[] =
-                        $file->getClientOriginalName() .
-                        ' está corrupto.';
+                    $errors[] = $file->getClientOriginalName() . ' está corrupto.';
                     continue;
                 }
 
-                $extension = strtolower(
-                    $file->getClientOriginalExtension()
-                );
+                $extension = strtolower($file->getClientOriginalExtension());
 
                 if (!in_array($extension, $allowedExtensions)) {
-                    $errors[] =
-                        $file->getClientOriginalName() .
-                        ' no es compatible.';
+                    $errors[] = $file->getClientOriginalName() . ' no es compatible.';
                     continue;
                 }
 
                 if ($file->getSize() > 500 * 1024 * 1024) {
-                    $errors[] =
-                        $file->getClientOriginalName() .
-                        ' supera 500MB.';
+                    $errors[] = $file->getClientOriginalName() . ' supera 500MB.';
                     continue;
                 }
 
-                $filename =
-                    now()->format('Ymd_His') .
-                    '_' .
-                    bin2hex(random_bytes(6)) .
-                    '.' .
-                    $extension;
-                $file->storeAs(
-                    $eventFolder,
-                    $filename,
-                    'local'
-                );
+                // Generamos un nombre base seguro
+                $baseFilename = now()->format('Ymd_His') . '_' . bin2hex(random_bytes(6));
+                
+                // Detectamos si es un video
+                $isVideo = in_array($extension, ['mp4', 'mov', 'avi', 'mkv', 'webm']);
+
+                if ($isVideo) {
+                    // Forzamos salida a mp4 para universalidad
+                    $finalFilename = $baseFilename . '.mp4';
+                    
+                    Storage::disk('local')->makeDirectory($eventFolder);
+                    $finalPath = Storage::disk('local')->path($eventFolder . '/' . $finalFilename);
+                    $tempPath = $file->getRealPath();
+
+                    // Comando FFmpeg con los códecs de audio y video corregidos
+                    $cmd = "ffmpeg -i " . escapeshellarg($tempPath) . " -c:v libx264 -preset veryfast -crf 28 -pix_fmt yuv420p -c:a aac -b:a 128k -ar 44100 -ac 2 -movflags +faststart " . escapeshellarg($finalPath) . " 2>&1";
+                    exec($cmd, $output, $returnCode);
+
+                    // Si FFmpeg falla (ej. no está instalado), usamos el guardado de respaldo nativo
+                    if ($returnCode !== 0) {
+                        $fallbackFilename = $baseFilename . '.' . $extension;
+                        $file->storeAs($eventFolder, $fallbackFilename, 'local');
+                    }
+                } else {
+                    // Si es una imagen, hacemos el guardado normal
+                    $finalFilename = $baseFilename . '.' . $extension;
+                    $file->storeAs($eventFolder, $finalFilename, 'local');
+                }
 
                 $uploaded++;
             } catch (\Throwable $e) {
                 report($e);
-                $errors[] =
-                    $file->getClientOriginalName() .
-                    ' falló al subir.';
+                $errors[] = $file->getClientOriginalName() . ' falló al subir.';
             }
         }
 

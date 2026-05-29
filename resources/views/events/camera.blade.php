@@ -657,7 +657,7 @@
                 if (e.data?.size > 0) recordedChunks.push(e.data);
             };
             mediaRecorder.onstop = finalizeVideo;
-            mediaRecorder.start(1000); // Chunks de 1 segundo para evitar sobrecarga
+            mediaRecorder.start(); // Chunks de 1 segundo para evitar sobrecarga
             isRecording = true;
             document.getElementById('btnShutter').classList.add('recording');
             document.getElementById('recBadge').classList.add('show');
@@ -967,9 +967,16 @@
 
                 if (nowOrientation !== lastOrientation) {
                     lastOrientation = nowOrientation;
-                    if (camStream) startCamera();
+                    
+                    // Si NO está grabando, reiniciamos la cámara.
+                    // Si SÍ está grabando, solo ajustamos la vista para no cortar el video.
+                    if (camStream && !isRecording) {
+                        startCamera();
+                    } else {
+                        sizeViewport();
+                    }
                 } else {
-                    // Same orientation, just a resize — re-fit the viewport
+                    // Misma orientación, solo fue un reajuste de interfaz
                     sizeViewport();
                 }
             }, 150);
